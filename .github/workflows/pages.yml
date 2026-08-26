@@ -32,9 +32,12 @@ jobs:
 
       - name: Проверить, что собралось всё
         run: |
+          # сколько материалов ожидать — берём из списка в build-site.sh,
+          # чтобы число не разъезжалось при добавлении нового
+          want=$(sed -n "/^MAP=\"$/,/^\"$/p" tools/build-site.sh | grep -c "|")
           n=$(find docs -mindepth 2 -name index.html | wc -l)
-          echo "страниц материалов: $n"
-          test "$n" -eq 8 || { echo "ожидалось 8"; exit 1; }
+          echo "страниц материалов: $n, ожидалось: $want"
+          test "$n" -eq "$want" || { echo "часть материалов не собралась"; exit 1; }
           test -f docs/index.html || { echo "нет титульной"; exit 1; }
           test -f docs/.nojekyll  || { echo "нет .nojekyll"; exit 1; }
 

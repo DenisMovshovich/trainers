@@ -21,6 +21,7 @@ sql|sql|sql-offline.html
 kafka|kafka|kafka-offline.html
 testing|testing|testing-offline.html
 csharp|csharp|csharp-offline.html
+git|git|git-offline.html
 dotnet|dotnet|dotnet-offline.html
 anatomy|anatomy|anatomy-offline.html
 "

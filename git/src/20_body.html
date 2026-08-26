@@ -1,0 +1,97 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">gi<i>t</i></span>
+      <span class="tag">Контроль версий</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 98</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Репозиторий</span><span class="n" id="rctx"></span></div>
+    <div class="rbox grow" id="graph"></div>
+    <div class="rbox" id="tree"></div>
+    <p class="hint"><b>↑ ↓</b> — история команд, <b>Tab</b> — дополнение. Файл открывается щелчком по имени: конфликты правят руками.</p>
+    <button class="btn" id="reset" type="button">Сбросить сценарий</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Терминал">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Терминал</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="term" aria-selected="true">Команды</button>
+        <button role="tab" data-d="file" aria-selected="false">Файл</button>
+        <button role="tab" data-d="todo" aria-selected="false" hidden>План rebase</button>
+      </div>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn" id="clear" type="button">Очистить</button>
+    </div>
+
+    <div class="tool" id="t-term">
+      <div class="term">
+        <div class="tout" id="out"></div>
+        <div class="tin">
+          <span class="p" id="prompt">~/webapp $</span>
+          <input id="cmd" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+            aria-label="Команда" placeholder="git status">
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="tool fed" id="t-file" hidden>
+      <div class="fbar">
+        <label class="fl" for="fpick">Файл</label>
+        <select id="fpick" aria-label="Какой файл открыть"></select>
+        <span class="sp"></span>
+        <span class="fname" id="fname">файл не выбран</span>
+        <button class="btn pri" id="fsave" type="button">Сохранить</button>
+      </div>
+      <textarea id="ftext" spellcheck="false" aria-label="Содержимое файла"></textarea>
+    </div>
+
+    <div class="tool todo" id="t-todo" hidden>
+      <p class="note" id="tnote"></p>
+      <div id="tlist"></div>
+      <div class="fbar">
+        <button class="btn pri" id="tapply" type="button">Применить</button>
+        <button class="btn" id="tcancel" type="button">Отменить</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>Git</b> — интерактивный курс контроля версий: 12 разделов теории, 72 вопроса, 26 заданий со 112 автоматическими проверками и 21 разбор вопросов с собеседований. Команды выполняет встроенный git на JavaScript: адресуемое содержимым хранилище объектов, индекс, ветки и метки, трёхстороннее слияние с настоящими конфликтами, перебазирование с интерактивным планом, reflog, stash, двоичный поиск и отдельный репозиторий на роли сервера.</p>
+  <p>Реализация учебная и намеренно упрощена: нет подмодулей, worktree, хуков, подписей, разреженной выгрузки и упаковки объектов, а хеш — не SHA-1, хотя ведёт себя так же. Поведение воспроизводит настоящий git там, где это важно: индекс отдельно от рабочей копии, игнорирование не действует на отслеживаемые файлы, перемотка против коммита слияния, смена хешей при перебазировании, отказ push при расхождении и проверка <code>--force-with-lease</code>. Прогресс хранится в браузере.</p>
+</footer>

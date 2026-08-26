@@ -10,7 +10,7 @@ set -u
 cd "$(dirname "$0")/.."
 fail=0
 
-for d in docker rest bash sql kafka testing csharp dotnet anatomy; do
+for d in docker rest bash sql kafka testing csharp git dotnet anatomy; do
   [ -d "$d" ] || continue
   printf "\n\033[1m═══ %s\033[0m\n" "$d"
   ran=0

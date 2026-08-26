@@ -1,0 +1,68 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">C<i>#</i></span>
+      <span class="tag">Язык на практике</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 100</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Что понимает движок</span><span class="n" id="rn"></span></div>
+    <div class="ref" id="ref"></div>
+    <p class="hint"><b>Ctrl+Enter</b> — выполнить код. Программа пишется без <code>Main</code> и <code>using</code>: операторы верхнего уровня работают сразу.</p>
+    <button class="btn" id="clear" type="button">Очистить вывод</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Редактор кода">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Редактор</span>
+      <span class="st" id="ctx"></span>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn pri" id="run" type="button">Выполнить</button>
+    </div>
+    <div class="ed">
+      <div class="edwrap">
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+          aria-label="Код на C#" placeholder="Console.WriteLine(&quot;привет&quot;);"></textarea>
+      </div>
+      <div class="out" id="out"><p class="empty">вывод появится здесь</p></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>C#</b> — интерактивный курс языка: 12 разделов теории, 74 вопроса, 26 заданий со 104 автоматическими проверками и 26 разборов вопросов с собеседований. Код исполняет встроенный интерпретатор: классы и структуры, свойства, наследование и виртуальные методы, интерфейсы, обобщённые коллекции, LINQ с отложенным выполнением, исключения, <code>using</code> и <code>IDisposable</code>, <code>async</code>/<code>await</code> с собственным планировщиком.</p>
+  <p>Интерпретатор учебный и намеренно упрощён: нет пространств имён, атрибутов, событий, делегатов с несколькими подписчиками, рефлексии и настоящей многопоточности. Семантика воспроизводит C# там, где это важно для понимания: копирование значимых типов, неизменяемость строк, отложенность LINQ, порядок <code>finally</code> и <code>Dispose</code>, захват переменной цикла, различие <code>override</code> и <code>new</code>. Прогресс хранится в браузере.</p>
+</footer>

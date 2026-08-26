@@ -1,0 +1,26 @@
+# Служебное от macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Зависимости и сборочный мусор
+node_modules/
+*.log
+*.zip
+
+# Снимки экрана, которые делают скрипты проверки
+**/src/*.png
+**/src/n[0-9].png
+**/src/_s[0-9].png
+
+# Устаревшие дубликаты сборки внутри src — собранные файлы лежат в корне материала
+portal-anatomy/src/portal-anatomy.html
+portal-anatomy/src/portal-anatomy-offline.html
+
+# Сайт собирается из исходников скриптом tools/build-site.sh и публикуется
+# через GitHub Actions. В репозитории не хранится, чтобы не плодить дубликаты.
+docs/
+
+# Тренажёр по git — отдельный репозиторий со своей историей
+git-trainer/

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Мастерская</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F0EEEA; --surf:#FAF9F7; --surf2:#E4E1DB;
+  --ink:#191714; --ink2:#4B463F; --ink3:#7D766C;
+  --line:#CFCAC1; --line2:#B2ABA0; --acc:#1F5E4B; --acc-s:#E0EBE6;
+  --fd:'Fraunces',Georgia,serif; --fs:'Inter','Helvetica Neue',Arial,sans-serif; --fm:'IBM Plex Mono',Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#131412; --surf:#1B1D1A; --surf2:#262825;
+  --ink:#EAE7E1; --ink2:#ADA79D; --ink3:#7C766C;
+  --line:#2E312D; --line2:#414540; --acc:#7FBFA6; --acc-s:#182420;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fs);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1020px;margin:0 auto;padding:56px 24px 72px}
+header{border-bottom:2px solid var(--acc);padding-bottom:18px;margin-bottom:34px}
+h1{font-family:var(--fd);font-size:44px;font-weight:700;letter-spacing:-.026em;margin:0 0 8px;line-height:1.02}
+.sub{margin:0;color:var(--ink2);font-size:16.5px;max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px}
+a.card{display:flex;flex-direction:column;gap:7px;padding:18px 19px 17px;background:var(--surf);
+  border:1px solid var(--line);border-radius:3px;text-decoration:none;color:inherit;transition:border-color .14s,transform .14s}
+a.card:hover{border-color:var(--acc);transform:translateY(-2px)}
+a.card:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.card .n{font-family:var(--fm);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)}
+.card h2{font-family:var(--fd);font-size:22px;font-weight:500;margin:0;letter-spacing:-.014em;line-height:1.18}
+.card p{margin:0;font-size:14px;color:var(--ink2);line-height:1.5}
+.card .meta{margin-top:auto;padding-top:9px;font-family:var(--fm);font-size:11px;color:var(--ink3);
+  border-top:1px solid var(--line);display:flex;gap:12px;flex-wrap:wrap}
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink3);line-height:1.6}
+footer b{color:var(--ink2)}
+footer code{font-family:var(--fm);font-size:12.5px;background:var(--surf2);padding:.1em .35em;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Мастерская</h1>
+  <p class="sub">Восемь интерактивных материалов с настоящими эмуляторами внутри: команды выполняются,
+  задания проверяются автоматически, ничего не отправляется на сервер.</p>
+</header>
+
+<div class="grid">
+  <a class="card" href="docker/">
+    <span class="n">01 · контейнеры</span>
+    <h2>Docker Yard</h2>
+    <p>Образы, слои, тома, сети и Dockerfile на эмуляторе движка Docker.</p>
+    <span class="meta"><span>12 модулей</span><span>72 вопроса</span><span>26 заданий</span></span>
+  </a>
+  <a class="card" href="rest/">
+    <span class="n">02 · протокол</span>
+    <h2>Проволока REST</h2>
+    <p>HTTP, ресурсы, коды ответов, идемпотентность и версионирование на эмуляторе сервера.</p>
+    <span class="meta"><span>12 модулей</span><span>72 вопроса</span><span>17 заданий</span></span>
+  </a>
+  <a class="card" href="bash/">
+    <span class="n">03 · оболочка</span>
+    <h2>Оболочка на ладони</h2>
+    <p>Bash с настоящим интерпретатором: конвейеры, перенаправления, циклы, sed и grep.</p>
+    <span class="meta"><span>12 модулей</span><span>72 вопроса</span><span>23 задания</span></span>
+  </a>
+  <a class="card" href="sql/">
+    <span class="n">04 · данные</span>
+    <h2>Гроссбух</h2>
+    <p>SQL на диалекте PostgreSQL со встроенным движком: соединения, окна, транзакции, план запроса.</p>
+    <span class="meta"><span>12 модулей</span><span>72 вопроса</span><span>24 задания</span></span>
+  </a>
+  <a class="card" href="kafka/">
+    <span class="n">05 · очереди</span>
+    <h2>Диспетчерская</h2>
+    <p>Kafka на эмуляторе кластера: партиции, ISR, группы потребителей, смещения и лаг.</p>
+    <span class="meta"><span>12 модулей</span><span>72 вопроса</span><span>24 задания</span></span>
+  </a>
+  <a class="card" href="testing/">
+    <span class="n">06 · ремесло</span>
+    <h2>Протокол проверки</h2>
+    <p>Основы тестирования, техники тест-дизайна и разборы вопросов с собеседований.</p>
+    <span class="meta"><span>12 разделов</span><span>72 вопроса</span><span>26 заданий</span></span>
+  </a>
+  <a class="card" href="dotnet/">
+    <span class="n">07 · платформа</span>
+    <h2>Сборочный лист .NET</h2>
+    <p>Как устроены .NET-проекты — и подготовка к собеседованию на Automation QA.</p>
+    <span class="meta"><span>20 разделов</span><span>111 вопросов</span><span>28 разборов</span></span>
+  </a>
+  <a class="card" href="anatomy/">
+    <span class="n">08 · архитектура</span>
+    <h2>Анатомия Portal</h2>
+    <p>Разбор набора UI-автотестов: каждый файл, класс и метод с объяснением.</p>
+    <span class="meta"><span>52 файла</span><span>наследование</span><span>page object</span></span>
+  </a>
+</div>
+
+<footer>
+  <p>Каждая страница самодостаточна: весь код, содержание и эмуляторы внутри одного HTML-файла.
+  Из сети подгружаются только шрифты — без интернета всё работает, просто другой гарнитурой.</p>
+  <p>Прогресс хранится в браузере (<code>localStorage</code>) и не покидает устройство.
+  У каждого инструмента свой ключ, поэтому они не мешают друг другу.
+  Очистка данных сайта сбрасывает прогресс во всех.</p>
+</footer>
+</div>
+</body>
+</html>

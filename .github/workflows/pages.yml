@@ -1,0 +1,54 @@
+name: Публикация сайта
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Каталог docs/ в репозитории не хранится: он собирается из исходников
+      # каждого материала. Так дубликаты не попадают в историю, а сайт
+      # физически не может разойтись с содержимым src/.
+      - name: Собрать сайт из исходников
+        run: ./tools/build-site.sh
+
+      - name: Проверить, что собралось всё
+        run: |
+          n=$(find docs -mindepth 2 -name index.html | wc -l)
+          echo "страниц материалов: $n"
+          test "$n" -eq 8 || { echo "ожидалось 8"; exit 1; }
+          test -f docs/index.html || { echo "нет титульной"; exit 1; }
+          test -f docs/.nojekyll  || { echo "нет .nojekyll"; exit 1; }
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

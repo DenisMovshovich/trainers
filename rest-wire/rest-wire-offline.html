@@ -1,0 +1,2211 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Интерактивный тренажёр по REST: теория, тесты и практика на эмуляторе HTTP-сервера.">
+<title>Проволока REST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Roboto+Mono:wght@400;500;700&family=Zilla+Slab:wght@600;700&display=swap">
+<style>
+:root{
+  --paper:#E9EAEE; --surf:#FBFBFD; --surf2:#DDDEE6; --surf3:#F2F2F6;
+  --line:#C0C3D0; --line2:#DBDCE5;
+  --ink:#12141C; --ink2:#3E4250; --ink3:#6E7383;
+  --acc:#22459B; --acc2:#163075; --acc-s:#DBE2F5; --acc-l:#8CA3DC;
+  --s2:#1C7A4B; --s2s:#D6EBDF; --s3:#8A6212; --s3s:#F1E7CC;
+  --s4:#B4531B; --s4s:#F6E2D3; --s5:#A62430; --s5s:#F5D9DC;
+  --wire:#141726; --wire-ink:#DDE1EE; --wire-dim:#6C7590; --wire-line:#252A40;
+  --w-m:#8FB4FF; --w-h:#9BD3B0; --w-s:#E2B071; --w-c:#6C7590;
+  --r:3px;
+  --fd:"Zilla Slab",Georgia,serif;
+  --fs:"Karla",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --fm:"Roboto Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0D0F17; --surf:#161927; --surf2:#1F2333; --surf3:#1A1E2C;
+  --line:#2E3346; --line2:#242939;
+  --ink:#E4E7F2; --ink2:#AFB5C7; --ink3:#7C8397;
+  --acc:#7BA0F0; --acc2:#A5BEF7; --acc-s:#172343; --acc-l:#3A4E86;
+  --s2:#4FC088; --s2s:#11301F; --s3:#D9A73F; --s3s:#302511;
+  --s4:#E8843F; --s4s:#331E10; --s5:#E86A72; --s5s:#331519;
+  --wire:#070911; --wire-ink:#DDE1EE; --wire-dim:#69718C; --wire-line:#1B2033;
+}}
+:root[data-theme="dark"]{
+  --paper:#0D0F17; --surf:#161927; --surf2:#1F2333; --surf3:#1A1E2C;
+  --line:#2E3346; --line2:#242939;
+  --ink:#E4E7F2; --ink2:#AFB5C7; --ink3:#7C8397;
+  --acc:#7BA0F0; --acc2:#A5BEF7; --acc-s:#172343; --acc-l:#3A4E86;
+  --s2:#4FC088; --s2s:#11301F; --s3:#D9A73F; --s3s:#302511;
+  --s4:#E8843F; --s4s:#331E10; --s5:#E86A72; --s5s:#331519;
+  --wire:#070911; --wire-ink:#DDE1EE; --wire-dim:#69718C; --wire-line:#1B2033;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fs);font-size:15px;line-height:1.5}
+::selection{background:var(--acc-s);color:var(--ink)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button{font:inherit;color:inherit}
+input{font:inherit}
+
+/* ---------- шапка ---------- */
+.top{position:sticky;top:0;z-index:80;display:flex;align-items:center;gap:16px;height:54px;
+  padding:0 18px;background:var(--surf);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.brand b{font-family:var(--fd);font-weight:700;font-size:16px;white-space:nowrap}
+.brand i{font-family:var(--fm);font-style:normal;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink3);display:block;margin-top:-3px}
+.gap{flex:1}
+.prog{display:flex;align-items:center;gap:10px}
+.prog span{font-family:var(--fm);font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ptr{width:130px;height:6px;background:var(--surf2);border:1px solid var(--line2);position:relative;overflow:hidden}
+.pfl{position:absolute;inset:0 auto 0 0;width:0;background:var(--acc);transition:width .4s ease}
+.gb{background:none;border:1px solid var(--line);color:var(--ink2);font-size:12px;padding:6px 11px;
+  border-radius:var(--r);cursor:pointer;white-space:nowrap}
+.gb:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ---------- каркас ---------- */
+.wrap{display:grid;grid-template-columns:262px minmax(0,1fr);min-height:calc(100vh - 54px)}
+.rail{border-right:1px solid var(--line);background:var(--surf);position:sticky;top:54px;align-self:start;
+  max-height:calc(100vh - 54px);overflow-y:auto;padding:16px 0 40px}
+.rail-h{font-family:var(--fm);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);padding:0 18px 10px}
+.mb{display:grid;grid-template-columns:24px 1fr auto;gap:9px;width:100%;text-align:left;background:none;border:0;
+  cursor:pointer;padding:8px 14px 8px 18px;border-left:2px solid transparent;color:var(--ink2);transition:.13s}
+.mb:hover{background:var(--surf3);color:var(--ink)}
+.mb[aria-current="true"]{background:var(--acc-s);border-left-color:var(--acc);color:var(--ink)}
+.mb .n{font-family:var(--fm);font-size:10.5px;color:var(--ink3);padding-top:2px;font-variant-numeric:tabular-nums}
+.mb[aria-current="true"] .n{color:var(--acc)}
+.mb .t{display:block;font-weight:600;font-size:13.5px;line-height:1.28}
+.mb .s{display:block;font-size:11px;color:var(--ink3);line-height:1.3;margin-top:1px}
+.mb .d{display:flex;gap:3px;padding-top:5px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--s2)}
+.rail-f{padding:14px 18px 0;margin-top:12px;border-top:1px solid var(--line2)}
+
+.stage{padding:0 0 80px;min-width:0}
+.head{padding:30px 34px 0;max-width:1180px}
+.kick{font-family:var(--fm);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+h1{font-family:var(--fd);font-size:clamp(26px,3.2vw,36px);font-weight:700;margin:0 0 8px;line-height:1.1;text-wrap:balance}
+.lede{font-size:16px;color:var(--ink2);max-width:64ch;margin:0}
+
+.tabs{display:flex;padding:0 34px;margin-top:24px;border-bottom:1px solid var(--line);max-width:1180px}
+.tab{background:none;border:0;border-bottom:2px solid transparent;cursor:pointer;padding:11px 2px;margin-right:26px;
+  font-size:13.5px;font-weight:600;color:var(--ink3);display:flex;align-items:center;gap:7px;transition:.14s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.tab .bg{font-family:var(--fm);font-size:10px;font-weight:700;padding:1px 5px;background:var(--surf2);color:var(--ink3);border-radius:2px}
+.tab[aria-selected="true"] .bg{background:var(--acc-s);color:var(--acc)}
+.tab .bg.ok{background:var(--s2s);color:var(--s2)}
+.pane{padding:28px 34px 0;max-width:1180px}
+.pane[hidden]{display:none}
+
+/* ---------- теория ---------- */
+.prose{font-size:16px;line-height:1.66;max-width:70ch;color:var(--ink)}
+.prose p{margin:0 0 1.05em}
+.prose h2{font-family:var(--fd);font-size:21px;font-weight:700;margin:2.1em 0 .65em;padding-top:.6em;
+  border-top:1px solid var(--line);text-wrap:balance}
+.prose h2:first-child{margin-top:0;border-top:0;padding-top:0}
+.prose h3{font-family:var(--fd);font-size:16.5px;font-weight:600;margin:1.7em 0 .5em}
+.prose ul,.prose ol{margin:0 0 1.05em;padding-left:1.35em}
+.prose li{margin-bottom:.4em}
+.prose li::marker{color:var(--acc)}
+.prose strong{font-weight:700}
+.prose em{font-style:italic;color:var(--ink2)}
+code{font-family:var(--fm);font-size:.85em;background:var(--surf2);padding:.1em .34em;border-radius:2px;
+  border:1px solid var(--line2);overflow-wrap:anywhere}
+td code,th code{white-space:nowrap}
+pre{font-family:var(--fm);font-size:12.5px;line-height:1.6;background:var(--wire);color:var(--wire-ink);
+  padding:13px 15px;overflow-x:auto;margin:0 0 1.25em;border-radius:var(--r);border:1px solid var(--wire-line)}
+pre code{background:none;border:0;padding:0;color:inherit;white-space:pre;font-size:inherit}
+.m{color:var(--w-m)} .h{color:var(--w-h)} .s{color:var(--w-s)} .c{color:var(--w-c)}
+
+.note{font-size:14px;line-height:1.55;background:var(--surf);border:1px solid var(--line2);
+  border-left:3px solid var(--acc);padding:13px 16px;margin:0 0 1.3em;max-width:70ch;border-radius:0 var(--r) var(--r) 0}
+.note b.hd{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:5px}
+.note.warn{border-left-color:var(--s3)} .note.warn b.hd{color:var(--s3)}
+.note.trap{border-left-color:var(--s4)} .note.trap b.hd{color:var(--s4)}
+.note.ok{border-left-color:var(--s2)} .note.ok b.hd{color:var(--s2)}
+.note p:last-child{margin:0}
+.note ul{margin:.4em 0 0;padding-left:1.2em}
+
+.tw{overflow-x:auto;margin:0 0 1.5em;border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th{text-align:left;font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);
+  padding:9px 13px;background:var(--surf3);border-bottom:1px solid var(--line)}
+td{padding:9px 13px;border-bottom:1px solid var(--line2);vertical-align:top;line-height:1.45}
+tr:last-child td{border-bottom:0}
+
+.fig{margin:0 0 1.6em}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-family:var(--fm);font-size:10.5px;color:var(--ink3);margin-top:8px;line-height:1.5}
+
+/* статусы */
+.st{font-family:var(--fm);font-size:11px;font-weight:700;padding:1.5px 6px;border-radius:2px;white-space:nowrap}
+.st.c2{background:var(--s2s);color:var(--s2)} .st.c3{background:var(--s3s);color:var(--s3)}
+.st.c4{background:var(--s4s);color:var(--s4)} .st.c5{background:var(--s5s);color:var(--s5)}
+.st.c1{background:var(--surf2);color:var(--ink3)}
+.mth{font-family:var(--fm);font-size:11px;font-weight:700;padding:1.5px 6px;border-radius:2px;
+  background:var(--acc-s);color:var(--acc);white-space:nowrap}
+
+/* ---------- тест ---------- */
+.quiz{max-width:760px}
+.qc{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:19px 21px;margin-bottom:13px}
+.qn{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);
+  margin-bottom:8px;display:flex;justify-content:space-between}
+.qt{font-size:15.5px;font-weight:600;line-height:1.45;margin:0 0 13px}
+.qt code{font-weight:400}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;background:var(--surf3);
+  border:1px solid var(--line2);border-radius:var(--r);padding:10px 13px;cursor:pointer;font-size:14px;line-height:1.45;transition:.12s}
+.opt:hover:not(:disabled){border-color:var(--acc-l);background:var(--surf)}
+.opt:disabled{cursor:default}
+.opt .mk{font-family:var(--fm);font-size:10.5px;color:var(--ink3);border:1px solid var(--line);width:19px;height:19px;
+  display:grid;place-items:center;flex:0 0 auto;margin-top:1px;border-radius:2px}
+.opt.right{border-color:var(--s2);background:var(--s2s)} .opt.right .mk{border-color:var(--s2);color:var(--s2)}
+.opt.wrong{border-color:var(--s5);background:var(--s5s)} .opt.wrong .mk{border-color:var(--s5);color:var(--s5)}
+.why{margin-top:12px;font-size:13.5px;line-height:1.55;color:var(--ink2);border-left:2px solid var(--line);padding-left:12px}
+.why b{color:var(--ink)}
+.why.g{border-left-color:var(--s2)} .why.b{border-left-color:var(--s5)}
+.score{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--line);background:var(--surf);
+  border-radius:var(--r);padding:15px 18px;margin-bottom:18px}
+.score .big{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;font-family:var(--fd)}
+.score p{margin:0;font-size:13px;color:var(--ink2)}
+
+/* ---------- практика ---------- */
+.picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:7px 12px;font-size:12.5px;
+  font-weight:600;cursor:pointer;color:var(--ink2);display:flex;align-items:center;gap:7px;transition:.14s}
+.chip:hover{border-color:var(--acc-l);color:var(--ink)}
+.chip[aria-current="true"]{background:var(--acc-s);border-color:var(--acc);color:var(--ink)}
+.chip .tk{width:13px;height:13px;flex:0 0 auto}
+.chip .tk circle{fill:none;stroke:var(--line);stroke-width:1.6}
+.chip.done .tk circle{fill:var(--s2);stroke:var(--s2)}
+.chip.done .tk path{stroke:var(--surf);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.lab{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px;align-items:start}
+.lab>*{min-width:0}
+.brief{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:14px}
+.brief h3{font-family:var(--fd);margin:0 0 9px;font-size:17px;font-weight:700}
+.brief p{margin:0 0 .8em;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+.brief ul,.brief ol{margin:0 0 .8em;padding-left:1.25em;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+.brief li{margin-bottom:.3em} .brief li::marker{color:var(--acc)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line2)}
+.mini{background:var(--surf3);border:1px solid var(--line);color:var(--ink2);border-radius:var(--r);
+  padding:6px 11px;font-size:12px;cursor:pointer}
+.mini:hover{border-color:var(--acc);color:var(--acc)}
+.hintbox{font-size:13.5px;line-height:1.55;color:var(--ink2);background:var(--surf3);border:1px dashed var(--line);
+  border-radius:var(--r);padding:12px 14px;margin-top:12px}
+
+.wirebox{background:var(--wire);border:1px solid var(--wire-line);border-radius:var(--r);overflow:hidden;
+  display:flex;flex-direction:column;min-height:430px}
+.wirebar{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid var(--wire-line)}
+.wirebar .ttl{font-family:var(--fm);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--wire-dim)}
+.wirebar .rt{margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--wire-dim)}
+.tape{flex:1;overflow-y:auto;overflow-x:auto;padding:12px;max-height:56vh;min-height:320px;min-width:0}
+.ex{margin-bottom:14px;border-left:2px solid var(--wire-line);padding-left:11px}
+.ex:last-child{margin-bottom:0}
+.ex .lbl{font-family:var(--fm);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--wire-dim);margin-bottom:3px}
+.ex pre{background:none;border:0;padding:0;margin:0 0 9px;font-size:12px;line-height:1.55;color:var(--wire-ink)}
+.ex .rl{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ex .rl .code{font-family:var(--fm);font-size:12.5px;font-weight:700}
+.ex.c2 .rl .code{color:var(--s2)} .ex.c3 .rl .code{color:var(--s3)}
+.ex.c4 .rl .code{color:var(--s4)} .ex.c5 .rl .code{color:var(--s5)}
+.ex .ph{font-family:var(--fm);font-size:11.5px;color:var(--wire-dim)}
+.wirein{display:flex;align-items:center;gap:8px;border-top:1px solid var(--wire-line);padding:9px 13px}
+.wirein .pfx{font-family:var(--fm);font-size:12.5px;color:var(--w-m);flex:0 0 auto}
+.wirein input{flex:1;background:none;border:0;outline:none;color:var(--wire-ink);font-family:var(--fm);
+  font-size:12.5px;padding:0;min-width:0}
+.wirein input::placeholder{color:var(--wire-dim)}
+.empty{color:var(--wire-dim);font-family:var(--fm);font-size:11.5px;line-height:1.7}
+
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:70px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.card-h{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line2);
+  font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.card-h .ct{margin-left:auto;font-variant-numeric:tabular-nums}
+.card-b{padding:13px 14px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.checks li{display:grid;grid-template-columns:17px 1fr;gap:10px;font-size:13px;line-height:1.42;color:var(--ink2)}
+.checks li.on{color:var(--ink)}
+.checks .bx{width:15px;height:15px;border:1.5px solid var(--line);border-radius:2px;margin-top:1px;display:grid;place-items:center}
+.checks li.on .bx{background:var(--s2);border-color:var(--s2)}
+.checks .bx svg{opacity:0} .checks li.on .bx svg{opacity:1}
+.done{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--s2s);border-top:1px solid var(--s2);
+  color:var(--s2);font-size:13px;font-weight:600}
+.done[hidden]{display:none}
+.state{font-family:var(--fm);font-size:11.5px;line-height:1.65;max-height:280px;overflow:auto}
+.state .g{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--acc);font-weight:700;margin:10px 0 3px}
+.state .g:first-child{margin-top:0}
+.state .row{display:flex;gap:8px;padding:2px 0;border-bottom:1px solid var(--line2)}
+.state .row:last-child{border-bottom:0}
+.state .row b{font-weight:500;color:var(--ink3);flex:0 0 58px}
+
+.navf{display:flex;justify-content:space-between;gap:14px;padding:26px 34px 0;max-width:1180px;margin-top:32px;border-top:1px solid var(--line)}
+.navf button{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:10px 16px;cursor:pointer;
+  font-size:13.5px;font-weight:600;text-align:left}
+.navf button:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.navf button:disabled{opacity:.35;cursor:default}
+.navf .sub{display:block;font-size:11px;font-weight:400;color:var(--ink3);font-family:var(--fm)}
+
+@media (max-width:1080px){ .lab{grid-template-columns:minmax(0,1fr)} .side{position:static} }
+@media (max-width:880px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow-x:auto;padding:10px 12px;gap:7px}
+  .rail-h,.rail-f{display:none}
+  .mb{grid-template-columns:auto;width:auto;flex:0 0 auto;border-left:0;background:var(--surf3);border-radius:var(--r);padding:7px 11px}
+  .mb .s,.mb .d{display:none}
+  .mb .t{white-space:nowrap;font-size:12.5px}
+  .head,.tabs,.pane,.navf{padding-left:16px;padding-right:16px}
+  .top{gap:11px;padding:0 13px} .brand i{display:none} .ptr{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 8h13l-3-3M21 16H8l3 3" fill="none" stroke="var(--acc)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="8" r="1.6" fill="var(--s2)"/><circle cx="4" cy="16" r="1.6" fill="var(--s4)"/>
+    </svg>
+    <span><b>Проволока REST</b><i>тренажёр по HTTP-интерфейсам</i></span>
+  </span>
+  <div class="gap"></div>
+  <div class="prog">
+    <span id="pl">0 / 0</span>
+    <div class="ptr" role="progressbar" aria-label="Прогресс" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pb"><div class="pfl" id="pf"></div></div>
+  </div>
+  <button class="gb" id="reset">Сброс</button>
+</header>
+
+<div class="wrap">
+  <nav class="rail" id="rail" aria-label="Модули">
+    <div class="rail-h">Программа</div>
+    <div id="modList"></div>
+    <div class="rail-f"><button class="gb" id="cheat" style="width:100%">Справочник</button></div>
+  </nav>
+
+  <main class="stage">
+    <div class="head">
+      <div class="kick" id="kick">—</div>
+      <h1 id="mtitle">—</h1>
+      <p class="lede" id="mlede">—</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="t-th" aria-selected="true">Теория</button>
+      <button class="tab" role="tab" id="t-qz" aria-selected="false">Тест <span class="bg" id="bqz">0/0</span></button>
+      <button class="tab" role="tab" id="t-lb" aria-selected="false">Практика <span class="bg" id="blb">0/0</span></button>
+    </div>
+
+    <section class="pane" id="p-th"><article class="prose" id="theory"></article></section>
+    <section class="pane" id="p-qz" hidden><div class="quiz" id="quiz"></div></section>
+    <section class="pane" id="p-lb" hidden>
+      <div class="picker" id="picker"></div>
+      <div class="lab">
+        <div>
+          <div class="brief" id="brief"></div>
+          <div class="wirebox">
+            <div class="wirebar">
+              <span class="ttl">HTTP-клиент</span>
+              <span class="rt" id="host">https://api.example.com</span>
+            </div>
+            <div class="tape" id="tape" tabindex="0" aria-live="polite" aria-label="Обмен запросами"></div>
+            <form class="wirein" id="form">
+              <span class="pfx">›</span>
+              <input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false"
+                placeholder="GET /users?limit=2  ·  Tab — дополнить  ·  ↑↓ — история" aria-label="Запрос">
+            </form>
+          </div>
+        </div>
+        <aside class="side">
+          <div class="card">
+            <div class="card-h">Задание <span class="ct" id="cct"></span></div>
+            <div class="card-b"><ul class="checks" id="clist"></ul></div>
+            <div class="done" id="cdone" hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Задание выполнено
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Состояние сервера</div>
+            <div class="card-b state" id="srv"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <div class="navf">
+      <button id="prev"><span>◀ Назад<span class="sub" id="psub"></span></span></button>
+      <button id="next" style="text-align:right"><span>Далее ▶<span class="sub" id="nsub"></span></span></button>
+    </div>
+  </main>
+</div>
+<script>
+"use strict";
+/* ============================================================
+   Эмулятор REST-сервера api.example.com
+   ============================================================ */
+const HOST = "https://api.example.com";
+const hex = n => Array.from({length:n},()=>"0123456789abcdef"[Math.floor(Math.random()*16)]).join("");
+
+const REASON = {
+ 200:"OK",201:"Created",202:"Accepted",204:"No Content",301:"Moved Permanently",302:"Found",
+ 304:"Not Modified",400:"Bad Request",401:"Unauthorized",403:"Forbidden",404:"Not Found",
+ 405:"Method Not Allowed",406:"Not Acceptable",409:"Conflict",410:"Gone",412:"Precondition Failed",
+ 415:"Unsupported Media Type",422:"Unprocessable Content",429:"Too Many Requests",
+ 500:"Internal Server Error",503:"Service Unavailable"
+};
+
+function newServer(){
+  return {
+    users:[
+      {id:1,name:"Ada Lovelace",email:"ada@example.com",role:"admin",createdAt:"2026-01-04"},
+      {id:2,name:"Grace Hopper",email:"grace@example.com",role:"admin",createdAt:"2026-02-11"},
+      {id:3,name:"Alan Turing",email:"alan@example.com",role:"user",createdAt:"2026-03-02"},
+      {id:4,name:"Barbara Liskov",email:"barbara@example.com",role:"user",createdAt:"2026-04-19"}
+    ],
+    posts:[
+      {id:1,userId:1,title:"On analytical engines",published:true},
+      {id:2,userId:2,title:"Compilers are possible",published:true},
+      {id:3,userId:3,title:"Computable numbers",published:false}
+    ],
+    orders:[],
+    seq:{users:4,posts:3,orders:0},
+    ver:{}, tokens:{}, idem:{},
+    rate:{n:0,limit:0,reset:0},
+    creds:{"demo":"secret"},
+    log:[]
+  };
+}
+const verKey = (kind,id) => kind+":"+id;
+function bump(s,kind,id){ const k=verKey(kind,id); s.ver[k]=(s.ver[k]||1)+1; return s.ver[k]; }
+function etagOf(s,kind,id){ const k=verKey(kind,id); s.ver[k]=s.ver[k]||1; return '"'+kind.slice(0,1)+id+"-v"+s.ver[k]+'"'; }
+
+/* ---------------- разбор строки запроса ---------------- */
+function tokenizeCmd(line){
+  const t=[]; let cur="", q=null;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(q){ if(c===q) q=null; else cur+=c; continue; }
+    if(c==='"'||c==="'"){ q=c; if(cur==="") cur=""; continue; }
+    if(c===" "||c==="\t"){ if(cur!==""){t.push(cur);cur="";} continue; }
+    cur+=c;
+  }
+  if(cur!=="") t.push(cur);
+  return t;
+}
+const METHODS = ["GET","POST","PUT","PATCH","DELETE","HEAD","OPTIONS"];
+
+function parseRequest(line){
+  const t = tokenizeCmd(line.trim());
+  if(!t.length) return {error:"пустой запрос"};
+  let i = 0;
+  if(t[0].toLowerCase()==="curl") i = 1;
+  const req = {method:null, path:null, headers:{}, body:null, showHeaders:false};
+  const setH = (k,v)=>{ req.headers[k.trim()] = String(v).trim(); };
+
+  for(; i<t.length; i++){
+    const a = t[i];
+    if(a==="-X"||a==="--request"){ req.method = (t[++i]||"").toUpperCase(); continue; }
+    if(a==="-H"||a==="--header"){ const h=t[++i]||""; const c=h.indexOf(":"); if(c>0) setH(h.slice(0,c), h.slice(c+1)); continue; }
+    if(a==="-d"||a==="--data"||a==="--data-raw"||a==="--json"){
+      req.body = t[++i];
+      if(a==="--json" && !req.headers["Content-Type"]) setH("Content-Type","application/json");
+      if(!req.method) req.method = "POST";
+      continue;
+    }
+    if(a==="-u"||a==="--user"){ req.headers["Authorization"] = "Basic "+btoa(t[++i]||""); continue; }
+    if(a==="-i"||a==="--include"){ req.showHeaders = true; continue; }
+    if(a==="-I"||a==="--head"){ req.method = "HEAD"; continue; }
+    if(a==="-s"||a==="-v"||a==="-L") continue;
+    if(a.startsWith("-")) return {error:"неизвестный флаг "+a};
+    const up = a.toUpperCase();
+    if(METHODS.includes(up) && !req.path && !req.method){ req.method = up; continue; }
+    if(!req.path){ req.path = a; continue; }
+    if(req.body===null){ req.body = a; continue; }
+  }
+  if(!req.path) return {error:"не указан путь, например /users"};
+  if(!req.method) req.method = req.body!==null ? "POST" : "GET";
+  req.path = req.path.replace(/^https?:\/\/[^/]+/,"");
+  if(!req.path.startsWith("/")) req.path = "/"+req.path;
+  const qi = req.path.indexOf("?");
+  req.query = {};
+  if(qi>-1){
+    req.path.slice(qi+1).split("&").forEach(p=>{
+      if(!p) return; const [k,v] = p.split("=");
+      req.query[decodeURIComponent(k)] = decodeURIComponent((v||"").replace(/\+/g," "));
+    });
+    req.path = req.path.slice(0,qi);
+  }
+  if(req.path.length>1) req.path = req.path.replace(/\/+$/,"");
+  return req;
+}
+
+/* ---------------- помощники ответа ---------------- */
+function res(status, body, headers){
+  const h = Object.assign({}, headers||{});
+  const out = {status, headers:h, body:body===undefined?null:body};
+  if(out.body!==null && !h["Content-Type"]) h["Content-Type"] = "application/json";
+  return out;
+}
+function problem(status, title, detail, extra){
+  return res(status, Object.assign({type:"https://api.example.com/probs/"+title.toLowerCase().replace(/\s+/g,"-"),
+    title, status, detail}, extra||{}), {"Content-Type":"application/problem+json"});
+}
+function wantsJson(req){
+  const a = req.headers["Accept"] || req.headers["accept"];
+  if(!a) return true;
+  return /application\/json|application\/\*|\*\/\*|\+json/i.test(a);
+}
+function jsonBody(req){
+  if(req.body===null) return {ok:true, value:null};
+  try{ return {ok:true, value: JSON.parse(req.body)}; }
+  catch(e){ return {ok:false}; }
+}
+function auth(s, req){
+  const a = req.headers["Authorization"] || req.headers["authorization"];
+  if(!a) return {ok:false, why:"missing"};
+  const m = a.match(/^Bearer\s+(\S+)$/i);
+  if(!m) return {ok:false, why:"scheme"};
+  const t = s.tokens[m[1]];
+  if(!t) return {ok:false, why:"invalid"};
+  return {ok:true, token:t};
+}
+const isWrite = m => ["POST","PUT","PATCH","DELETE"].includes(m);
+
+/* ---------------- маршрутизация ---------------- */
+function handle(s, req){
+  const r = route(s, req);
+  if(!r.headers["Date"]) r.headers["Date"] = new Date().toUTCString();
+  if(r.body!==null && r.body!==undefined && r.status!==304 && req.method!=="HEAD"){
+    r.headers["Content-Length"] = String(JSON.stringify(r.body,null,2).length);
+  }
+  s.log.push({req, res:r});
+  return r;
+}
+
+function route(s, req){
+  const p = req.path, m = req.method;
+
+  /* ограничение частоты — включается заданием */
+  if(s.rate.limit>0){
+    const now = Date.now();
+    if(now > s.rate.reset){ s.rate.n = 0; s.rate.reset = now + 60000; }
+    s.rate.n++;
+    if(s.rate.n > s.rate.limit){
+      const wait = Math.max(1, Math.ceil((s.rate.reset-now)/1000));
+      return res(429, {error:"rate_limit_exceeded", detail:"Слишком много запросов. Повторите позже."},
+        {"Retry-After":String(wait),"X-RateLimit-Limit":String(s.rate.limit),
+         "X-RateLimit-Remaining":"0","X-RateLimit-Reset":String(Math.ceil(s.rate.reset/1000)),
+         "Content-Type":"application/json"});
+    }
+  }
+
+  if(!wantsJson(req))
+    return problem(406,"Not Acceptable","Сервер отдаёт только application/json, а в Accept запрошено другое.",
+      {supported:["application/json"]});
+
+  /* устаревший путь в единственном числе — учебный редирект */
+  const legacy = p.match(/^\/user\/(\d+)$/);
+  if(legacy) return res(301, null, {"Location":"/users/"+legacy[1]});
+
+  if(p==="/") return res(200, {users:HOST+"/users", posts:HOST+"/posts", orders:HOST+"/orders", token:HOST+"/auth/token"});
+
+  if(p==="/auth/token"){
+    if(m==="OPTIONS") return res(204,null,{"Allow":"POST, OPTIONS"});
+    if(m!=="POST") return res(405,{error:"method_not_allowed"},{"Allow":"POST, OPTIONS"});
+    const b = jsonBody(req);
+    if(!b.ok) return problem(400,"Malformed JSON","Тело запроса не является корректным JSON.");
+    const {username,password,scope} = b.value||{};
+    if(!username||!password) return problem(422,"Validation Failed","Нужны поля username и password.",
+      {errors:[{field:"username",code:"required"},{field:"password",code:"required"}]});
+    if(s.creds[username]!==password)
+      return res(401,{error:"invalid_credentials"},{"WWW-Authenticate":'Bearer realm="api", error="invalid_credentials"',"Content-Type":"application/json"});
+    const tok = "tok_"+hex(16);
+    s.tokens[tok] = {sub:username, scopes:(scope||"read write").split(/[ ,]+/)};
+    return res(200,{access_token:tok, token_type:"Bearer", expires_in:3600, scope:(scope||"read write")});
+  }
+
+  const mUsers = p==="/users";
+  const mUser = p.match(/^\/users\/(\d+)$/);
+  const mUserPosts = p.match(/^\/users\/(\d+)\/posts$/);
+  const mPosts = p==="/posts";
+  const mPost = p.match(/^\/posts\/(\d+)$/);
+  const mOrders = p==="/orders";
+  const mOrder = p.match(/^\/orders\/(\d+)$/);
+
+  if(!(mUsers||mUser||mUserPosts||mPosts||mPost||mOrders||mOrder))
+    return problem(404,"Not Found","Ресурс "+p+" не существует.");
+
+  /* допустимость метода — свойство ресурса, а не вызывающего: 405 проверяется до 401 */
+  let allow = null, whyNot = null;
+  if(mUsers||mPosts||mOrders){ allow = "GET, POST, HEAD, OPTIONS"; whyNot = "Метод "+m+" неприменим к коллекции целиком."; }
+  else if(mUser||mPost||mOrder){
+    allow = "GET, PUT, PATCH, DELETE, HEAD, OPTIONS";
+    whyNot = m==="POST"
+      ? "POST создаёт ресурс в коллекции, а не поверх существующего. Используйте PUT или PATCH."
+      : "Метод "+m+" здесь не поддерживается.";
+  }
+  else if(mUserPosts){ allow = "GET, HEAD, OPTIONS"; whyNot = "Вложенная коллекция доступна только для чтения."; }
+  if(allow && !allow.split(", ").includes(m))
+    return res(405, {error:"method_not_allowed", detail:whyNot}, {"Allow":allow, "Content-Type":"application/json"});
+
+  /* авторизация нужна только для изменяющих методов */
+  if(isWrite(m)){
+    const a = auth(s,req);
+    if(!a.ok)
+      return res(401,{error:"unauthorized", detail:"Изменяющие методы требуют токен. Получите его: POST /auth/token"},
+        {"WWW-Authenticate":'Bearer realm="api"',"Content-Type":"application/json"});
+    if(!a.token.scopes.includes("write"))
+      return problem(403,"Forbidden","Токен выдан только на чтение: в нём нет области write.",{required_scope:"write"});
+  }
+
+  /* тело обязано быть JSON и объявлено правильным типом */
+  if(["POST","PUT","PATCH"].includes(m)){
+    const ct = req.headers["Content-Type"] || req.headers["content-type"] || "";
+    if(req.body===null) return problem(400,"Missing Body","Метод "+m+" требует тело запроса.");
+    if(!/^application\/(json|merge-patch\+json)/.test(ct))
+      return problem(415,"Unsupported Media Type",
+        "Ожидается Content-Type: application/json, получено «"+(ct||"ничего")+"».",{supported:["application/json"]});
+    const b = jsonBody(req);
+    if(!b.ok) return problem(400,"Malformed JSON","Тело запроса не является корректным JSON.");
+  }
+
+  if(mUsers) return collection(s, req, "users");
+  if(mUser) return item(s, req, "users", +mUser[1]);
+  if(mUserPosts){
+    const uid = +mUserPosts[1];
+    if(!s.users.some(u=>u.id===uid)) return problem(404,"Not Found","Пользователь "+uid+" не существует.");
+    if(m!=="GET"&&m!=="HEAD"&&m!=="OPTIONS") return res(405,{error:"method_not_allowed"},{"Allow":"GET, HEAD, OPTIONS"});
+    if(m==="OPTIONS") return res(204,null,{"Allow":"GET, HEAD, OPTIONS"});
+    return res(200, s.posts.filter(x=>x.userId===uid));
+  }
+  if(mPosts) return collection(s, req, "posts");
+  if(mPost) return item(s, req, "posts", +mPost[1]);
+  if(mOrders) return orders(s, req);
+  if(mOrder) return item(s, req, "orders", +mOrder[1]);
+  return problem(404,"Not Found","Ресурс "+p+" не существует.");
+}
+
+/* ---------------- коллекции ---------------- */
+const ALLOW_COLL = "GET, POST, HEAD, OPTIONS";
+function collection(s, req, kind){
+  const m = req.method;
+  if(m==="OPTIONS") return res(204,null,{"Allow":ALLOW_COLL});
+  if(m==="PUT"||m==="PATCH"||m==="DELETE")
+    return res(405,{error:"method_not_allowed", detail:"Метод "+m+" неприменим к коллекции целиком."},{"Allow":ALLOW_COLL,"Content-Type":"application/json"});
+
+  if(m==="GET"||m==="HEAD"){
+    let list = s[kind].slice();
+    const q = req.query;
+    if(q.role) list = list.filter(x=>x.role===q.role);
+    if(q.published!==undefined) list = list.filter(x=>String(x.published)===q.published);
+    if(q.userId) list = list.filter(x=>String(x.userId)===q.userId);
+    if(q.q) list = list.filter(x=>JSON.stringify(x).toLowerCase().includes(q.q.toLowerCase()));
+    if(q.sort){
+      const desc = q.sort.startsWith("-"), f = q.sort.replace(/^-/,"");
+      list.sort((a,b)=>{ const A=a[f], B=b[f]; if(A===B) return 0; return (A>B?1:-1)*(desc?-1:1); });
+    }
+    const total = list.length;
+    let limit = q.limit!==undefined ? parseInt(q.limit,10) : 20;
+    let page = q.page!==undefined ? parseInt(q.page,10) : 1;
+    if(Number.isNaN(limit)||limit<1) return problem(400,"Invalid Parameter","Параметр limit должен быть целым числом больше нуля.",{parameter:"limit"});
+    if(limit>100) return problem(400,"Invalid Parameter","Параметр limit не может превышать 100.",{parameter:"limit",max:100});
+    if(Number.isNaN(page)||page<1) return problem(400,"Invalid Parameter","Параметр page должен быть целым числом больше нуля.",{parameter:"page"});
+    const pages = Math.max(1, Math.ceil(total/limit));
+    const slice = list.slice((page-1)*limit, page*limit);
+    const h = {"X-Total-Count":String(total),"Cache-Control":"public, max-age=60"};
+    const base = HOST+"/"+kind;
+    const qs = n => { const c = Object.assign({}, q, {page:String(n), limit:String(limit)});
+      return base+"?"+Object.keys(c).map(k=>k+"="+encodeURIComponent(c[k])).join("&"); };
+    const links = [];
+    if(page<pages) links.push('<'+qs(page+1)+'>; rel="next"');
+    if(page>1) links.push('<'+qs(page-1)+'>; rel="prev"');
+    links.push('<'+qs(1)+'>; rel="first"', '<'+qs(pages)+'>; rel="last"');
+    h["Link"] = links.join(", ");
+    return res(200, m==="HEAD"?null:slice, h);
+  }
+
+  /* POST — создание */
+  const b = JSON.parse(req.body);
+  if(kind==="users"){
+    const errs = [];
+    if(!b.name) errs.push({field:"name",code:"required",detail:"Имя обязательно."});
+    if(!b.email) errs.push({field:"email",code:"required",detail:"Почта обязательна."});
+    else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) errs.push({field:"email",code:"invalid_format",detail:"Не похоже на адрес почты."});
+    if(b.role && !["admin","user"].includes(b.role)) errs.push({field:"role",code:"invalid_value",detail:"Допустимо admin или user."});
+    if(errs.length) return problem(422,"Validation Failed","Тело запроса не прошло проверку.",{errors:errs});
+    if(s.users.some(u=>u.email.toLowerCase()===String(b.email).toLowerCase()))
+      return problem(409,"Conflict","Пользователь с такой почтой уже существует.",{field:"email",value:b.email});
+    const id = ++s.seq.users;
+    const u = {id, name:b.name, email:b.email, role:b.role||"user", createdAt:new Date().toISOString().slice(0,10)};
+    s.users.push(u);
+    return res(201, u, {"Location":HOST+"/users/"+id, "ETag":etagOf(s,"users",id)});
+  }
+  if(kind==="posts"){
+    const errs = [];
+    if(!b.title) errs.push({field:"title",code:"required"});
+    if(b.userId===undefined) errs.push({field:"userId",code:"required"});
+    else if(!s.users.some(u=>u.id===b.userId)) errs.push({field:"userId",code:"not_found",detail:"Такого пользователя нет."});
+    if(errs.length) return problem(422,"Validation Failed","Тело запроса не прошло проверку.",{errors:errs});
+    const id = ++s.seq.posts;
+    const post = {id, userId:b.userId, title:b.title, published:!!b.published};
+    s.posts.push(post);
+    return res(201, post, {"Location":HOST+"/posts/"+id, "ETag":etagOf(s,"posts",id)});
+  }
+  return problem(404,"Not Found","Неизвестная коллекция.");
+}
+
+/* ---------------- заказы: идемпотентность ---------------- */
+function orders(s, req){
+  const m = req.method;
+  if(m==="OPTIONS") return res(204,null,{"Allow":ALLOW_COLL});
+  if(m==="GET"||m==="HEAD") return res(200, m==="HEAD"?null:s.orders, {"X-Total-Count":String(s.orders.length)});
+  if(m!=="POST") return res(405,{error:"method_not_allowed"},{"Allow":ALLOW_COLL,"Content-Type":"application/json"});
+
+  const key = req.headers["Idempotency-Key"] || req.headers["idempotency-key"];
+  if(key && s.idem[key]){
+    const saved = s.idem[key];
+    return res(saved.status, saved.body, Object.assign({}, saved.headers, {"Idempotency-Replayed":"true"}));
+  }
+  const b = JSON.parse(req.body);
+  const errs = [];
+  if(!b.item) errs.push({field:"item",code:"required"});
+  if(b.amount===undefined) errs.push({field:"amount",code:"required"});
+  else if(typeof b.amount!=="number"||b.amount<=0) errs.push({field:"amount",code:"invalid_value",detail:"Должно быть положительным числом."});
+  if(errs.length) return problem(422,"Validation Failed","Тело запроса не прошло проверку.",{errors:errs});
+  const id = ++s.seq.orders;
+  const order = {id, item:b.item, amount:b.amount, status:"created"};
+  s.orders.push(order);
+  const out = res(201, order, {"Location":HOST+"/orders/"+id, "ETag":etagOf(s,"orders",id)});
+  if(key) s.idem[key] = {status:out.status, body:out.body, headers:Object.assign({},out.headers)};
+  return out;
+}
+
+/* ---------------- отдельный ресурс ---------------- */
+function item(s, req, kind, id){
+  const m = req.method;
+  const list = s[kind];
+  const idx = list.findIndex(x=>x.id===id);
+  const ALLOW = "GET, PUT, PATCH, DELETE, HEAD, OPTIONS";
+  if(m==="OPTIONS") return res(204,null,{"Allow":ALLOW});
+  if(m==="POST") return res(405,{error:"method_not_allowed",
+    detail:"POST создаёт ресурс в коллекции, а не поверх существующего. Используйте PUT или PATCH."},
+    {"Allow":ALLOW,"Content-Type":"application/json"});
+  if(idx<0) return problem(404,"Not Found","Ресурс /"+kind+"/"+id+" не найден.");
+
+  const obj = list[idx];
+  const etag = etagOf(s,kind,id);
+
+  if(m==="GET"||m==="HEAD"){
+    const inm = req.headers["If-None-Match"] || req.headers["if-none-match"];
+    if(inm && inm.split(",").map(x=>x.trim()).includes(etag))
+      return res(304, null, {"ETag":etag,"Cache-Control":"private, max-age=30"});
+    return res(200, m==="HEAD"?null:obj, {"ETag":etag,"Cache-Control":"private, max-age=30"});
+  }
+
+  const im = req.headers["If-Match"] || req.headers["if-match"];
+  if(im && !im.split(",").map(x=>x.trim()).includes(etag) && im.trim()!=="*")
+    return problem(412,"Precondition Failed","Ресурс изменился с момента чтения: ETag теперь "+etag+".",{current_etag:etag});
+
+  if(m==="DELETE"){
+    list.splice(idx,1);
+    return res(204, null, {});
+  }
+
+  const b = JSON.parse(req.body);
+  if(m==="PUT"){
+    if(kind==="users"){
+      const errs=[];
+      if(!b.name) errs.push({field:"name",code:"required",detail:"PUT заменяет ресурс целиком — обязательны все поля."});
+      if(!b.email) errs.push({field:"email",code:"required",detail:"PUT заменяет ресурс целиком — обязательны все поля."});
+      else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) errs.push({field:"email",code:"invalid_format"});
+      if(errs.length) return problem(422,"Validation Failed","Тело запроса не прошло проверку.",{errors:errs});
+      if(s.users.some(u=>u.id!==id && u.email.toLowerCase()===String(b.email).toLowerCase()))
+        return problem(409,"Conflict","Пользователь с такой почтой уже существует.",{field:"email"});
+      list[idx] = {id, name:b.name, email:b.email, role:b.role||"user", createdAt:obj.createdAt};
+    } else {
+      list[idx] = Object.assign({}, b, {id});
+    }
+    bump(s,kind,id);
+    return res(200, list[idx], {"ETag":etagOf(s,kind,id)});
+  }
+  if(m==="PATCH"){
+    if(b.email!==undefined && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email))
+      return problem(422,"Validation Failed","Тело запроса не прошло проверку.",{errors:[{field:"email",code:"invalid_format"}]});
+    if(b.email!==undefined && s.users.some(u=>u.id!==id && u.email && u.email.toLowerCase()===String(b.email).toLowerCase()))
+      return problem(409,"Conflict","Пользователь с такой почтой уже существует.",{field:"email"});
+    Object.keys(b).forEach(k=>{ if(k==="id") return; if(b[k]===null) delete obj[k]; else obj[k]=b[k]; });
+    bump(s,kind,id);
+    return res(200, obj, {"ETag":etagOf(s,kind,id)});
+  }
+  return res(405,{error:"method_not_allowed"},{"Allow":ALLOW,"Content-Type":"application/json"});
+}
+/* ============================================================
+   Клиент: отрисовка обмена в сыром виде HTTP
+   ============================================================ */
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const cls = st => st>=500?"c5":st>=400?"c4":st>=300?"c3":st>=200?"c2":"c1";
+
+function hiJson(v){
+  if(v===null||v===undefined) return "";
+  const s = esc(JSON.stringify(v,null,2));
+  return s.replace(/&quot;([^&]*?)&quot;(\s*:)/g,'<span class="h">&quot;$1&quot;</span>$2')
+          .replace(/:\s*(&quot;[^&]*?&quot;)/g,': <span class="s">$1</span>')
+          .replace(/:\s*(true|false|null|-?\d+(?:\.\d+)?)/g,': <span class="m">$1</span>');
+}
+const HDR_ORDER = ["Host","Accept","Content-Type","Authorization","If-None-Match","If-Match","Idempotency-Key","Content-Length"];
+function hdrLines(h, order){
+  const keys = Object.keys(h);
+  keys.sort((a,b)=>{
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    if(ia>-1&&ib>-1) return ia-ib;
+    if(ia>-1) return -1; if(ib>-1) return 1;
+    return a.localeCompare(b);
+  });
+  return keys.map(k=>'<span class="h">'+esc(k)+'</span>: '+esc(h[k])).join("\n");
+}
+function renderExchange(req, r){
+  const q = Object.keys(req.query||{}).length
+    ? "?"+Object.entries(req.query).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&") : "";
+  const reqH = Object.assign({Host:"api.example.com"}, req.headers);
+  if(req.body!==null && req.body!==undefined && !reqH["Content-Length"]) reqH["Content-Length"] = String(req.body.length);
+  let out = '<div class="ex '+cls(r.status)+'">';
+  out += '<div class="lbl">запрос</div><pre><span class="m">'+esc(req.method)+'</span> '+esc(req.path+q)+' HTTP/1.1\n'+
+         hdrLines(reqH, HDR_ORDER);
+  if(req.body!==null && req.body!==undefined){
+    let b = req.body;
+    try{ b = JSON.stringify(JSON.parse(req.body),null,2); }catch(e){}
+    out += '\n\n'+ (()=>{ try{ return hiJson(JSON.parse(req.body)); }catch(e){ return esc(b); } })();
+  }
+  out += '</pre>';
+  out += '<div class="rl"><span class="lbl" style="margin:0">ответ</span>'+
+         '<span class="code">HTTP/1.1 '+r.status+' '+esc(REASON[r.status]||"")+'</span></div>';
+  out += '<pre>'+hdrLines(r.headers, ["Content-Type","Location","ETag","Allow","WWW-Authenticate","Retry-After","Link","X-Total-Count","Cache-Control"]);
+  if(r.body!==null && r.body!==undefined && r.status!==304 && req.method!=="HEAD") out += '\n\n'+hiJson(r.body);
+  else out += '\n\n<span class="c">(тело пустое)</span>';
+  out += '</pre></div>';
+  return out;
+}
+
+/* ---------------- состояние сервера ---------------- */
+function renderState(s){
+  let h = "";
+  const grp = (title, rows) => {
+    h += '<div class="g">'+esc(title)+' ('+rows.length+')</div>';
+    if(!rows.length){ h += '<div class="row" style="color:var(--ink3)">—</div>'; return; }
+    rows.forEach(([a,b])=>{ h += '<div class="row"><b>'+esc(a)+'</b><span>'+esc(b)+'</span></div>'; });
+  };
+  grp("Пользователи", s.users.map(u=>["#"+u.id, u.name+" · "+u.email+" · "+u.role]));
+  grp("Посты", s.posts.map(p=>["#"+p.id, p.title+" · автор "+p.userId+(p.published?"":" · черновик")]));
+  grp("Заказы", s.orders.map(o=>["#"+o.id, o.item+" × "+o.amount]));
+  const toks = Object.entries(s.tokens);
+  grp("Токены", toks.map(([t,v])=>[t.slice(0,10)+"…", v.sub+" · "+v.scopes.join(" ")]));
+  if(s.rate.limit>0) grp("Лимит", [["частота", s.rate.n+" / "+s.rate.limit+" в минуту"]]);
+  return h;
+}
+
+/* ---------------- автодополнение ---------------- */
+const SUGGEST = [
+ "GET /","GET /users","GET /users?limit=2","GET /users?limit=2&page=2","GET /users?role=admin",
+ "GET /users?sort=-name","GET /users?q=ada","GET /users/1","GET /users/1/posts","GET /posts","GET /orders",
+ "HEAD /users/1","OPTIONS /users",
+ "POST /auth/token -H 'Content-Type: application/json' -d '{\"username\":\"demo\",\"password\":\"secret\"}'",
+ "POST /users -H 'Content-Type: application/json' -H 'Authorization: Bearer TOKEN' -d '{\"name\":\"Ann\",\"email\":\"ann@example.com\"}'",
+ "PUT /users/1 -H 'Content-Type: application/json' -H 'Authorization: Bearer TOKEN' -d '{\"name\":\"Ada\",\"email\":\"ada@example.com\",\"role\":\"admin\"}'",
+ "PATCH /users/1 -H 'Content-Type: application/json' -H 'Authorization: Bearer TOKEN' -d '{\"role\":\"user\"}'",
+ "DELETE /users/4 -H 'Authorization: Bearer TOKEN'",
+ "POST /orders -H 'Content-Type: application/json' -H 'Authorization: Bearer TOKEN' -H 'Idempotency-Key: k1' -d '{\"item\":\"desk\",\"amount\":2}'",
+ "GET /users/1 -H 'If-None-Match: \"u1-v1\"'",
+ "GET /users -H 'Accept: application/xml'",
+ "help","clear","reset"
+];
+
+/* ---------------- помощники для проверок заданий ---------------- */
+const L = s => s.log;
+const last = s => s.log[s.log.length-1];
+function did(s, pred){ return s.log.some(e=>pred(e.req, e.res)); }
+function didStatus(s, method, rx, status){
+  return did(s,(q,r)=> q.method===method && rx.test(q.path) && r.status===status);
+}
+function hasHeader(q, name){
+  const k = Object.keys(q.headers).find(x=>x.toLowerCase()===name.toLowerCase());
+  return k ? q.headers[k] : null;
+}
+/* ============================================================
+   Содержание курса
+   ============================================================ */
+const MODULES = [
+
+/* ------------------------------------------------ 1 */
+{
+n:1, id:"http", title:"Анатомия HTTP", sub:"Запрос, ответ, заголовки",
+lede:"REST построен поверх HTTP, поэтому начинать надо с самого протокола: что именно уходит по проводу и что приходит обратно.",
+theory:`
+<p>HTTP — текстовый протокол «запрос — ответ». Клиент отправляет запрос, сервер отвечает ровно один раз. Никакого состояния между запросами протокол не хранит.</p>
+
+<h2>Из чего состоит запрос</h2>
+<pre><code><span class="m">GET</span> /users?role=admin HTTP/1.1     <span class="c">← стартовая строка: метод, цель, версия</span>
+<span class="h">Host</span>: api.example.com               <span class="c">← заголовки: метаданные запроса</span>
+<span class="h">Accept</span>: application/json
+<span class="h">Authorization</span>: Bearer tok_9f2c…
+                                    <span class="c">← пустая строка отделяет заголовки от тела</span>
+<span class="c">(у GET тела обычно нет)</span></code></pre>
+
+<h2>Из чего состоит ответ</h2>
+<pre><code>HTTP/1.1 <span class="m">200</span> OK                       <span class="c">← статусная строка: код и пояснение</span>
+<span class="h">Content-Type</span>: application/json
+<span class="h">ETag</span>: <span class="s">"u1-v1"</span>
+<span class="h">X-Total-Count</span>: 4
+
+[
+  { <span class="h">"id"</span>: <span class="m">1</span>, <span class="h">"name"</span>: <span class="s">"Ada Lovelace"</span> }
+]</code></pre>
+
+<div class="note"><b class="hd">Четыре части, и все важны</b><p><b>Метод</b> говорит, что вы хотите сделать. <b>Путь</b> — с чем. <b>Заголовки</b> — на каких условиях. <b>Тело</b> — какими данными. Ответ устроен зеркально: <b>код</b> — что произошло, <b>заголовки</b> — подробности, <b>тело</b> — результат.</p></div>
+
+<h2>Заголовки, которые встречаются постоянно</h2>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Сторона</th><th>Смысл</th></tr>
+<tr><td><code>Host</code></td><td>запрос</td><td>Какому домену адресован запрос. Обязателен в HTTP/1.1</td></tr>
+<tr><td><code>Accept</code></td><td>запрос</td><td>Какие форматы ответа клиент готов принять</td></tr>
+<tr><td><code>Content-Type</code></td><td>обе</td><td>В каком формате <em>это</em> тело. У запроса — про отправляемое, у ответа — про возвращаемое</td></tr>
+<tr><td><code>Authorization</code></td><td>запрос</td><td>Кто спрашивает</td></tr>
+<tr><td><code>Content-Length</code></td><td>обе</td><td>Длина тела в байтах</td></tr>
+<tr><td><code>Location</code></td><td>ответ</td><td>Адрес созданного или перемещённого ресурса</td></tr>
+<tr><td><code>ETag</code></td><td>ответ</td><td>Версия представления — основа кэширования и защиты от гонок</td></tr>
+<tr><td><code>Allow</code></td><td>ответ</td><td>Какие методы ресурс поддерживает. Приходит вместе с 405</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Имена заголовков нечувствительны к регистру</b><p><code>Content-Type</code>, <code>content-type</code> и <code>CONTENT-TYPE</code> — один и тот же заголовок. А вот <b>значения</b> регистр обычно учитывают, и пути в URL — тоже. Это частый источник «у меня работает, а на сервере нет».</p></div>
+
+<h2>Методы: полный список того, что придётся встретить</h2>
+<div class="tw"><table>
+<tr><th>Метод</th><th>Что делает</th></tr>
+<tr><td><span class="mth">GET</span></td><td>Получить представление ресурса. Ничего не меняет</td></tr>
+<tr><td><span class="mth">POST</span></td><td>Создать подчинённый ресурс или запустить обработку</td></tr>
+<tr><td><span class="mth">PUT</span></td><td>Поместить представление по указанному адресу — целиком</td></tr>
+<tr><td><span class="mth">PATCH</span></td><td>Изменить часть ресурса</td></tr>
+<tr><td><span class="mth">DELETE</span></td><td>Удалить ресурс</td></tr>
+<tr><td><span class="mth">HEAD</span></td><td>Как GET, но без тела. Только заголовки — узнать размер, тип, ETag</td></tr>
+<tr><td><span class="mth">OPTIONS</span></td><td>Узнать возможности ресурса. Ответ несёт <code>Allow</code></td></tr>
+</table></div>
+
+<h2>Как читать URL</h2>
+<pre><code>https://api.example.com/users/1/posts?published=true&amp;sort=-id
+└─┬──┘ └──────┬───────┘└──────┬─────┘└──────────┬──────────────┘
+ схема      хост            путь           строка запроса</code></pre>
+<p><b>Путь</b> адресует ресурс — что именно вам нужно. <b>Строка запроса</b> уточняет, как его отдать: отфильтровать, отсортировать, разбить на страницы. Граница между ними не формальная: если параметр меняет <em>какой</em> ресурс, ему место в пути; если <em>как показать</em> — в строке запроса.</p>
+
+<div class="note ok"><b class="hd">В практике этого модуля</b><p>Вы будете отправлять настоящие запросы к эмулятору <code>api.example.com</code> и видеть их в сыром виде — ровно так, как они уходят по проводу. Набирать можно в стиле curl или коротко: <code>GET /users</code>.</p></div>
+`,
+quiz:[
+ {q:"Что отделяет заголовки от тела в HTTP-сообщении?",
+  opts:["Символ точки с запятой","Пустая строка","Заголовок Content-Length","Ничего, тело идёт сразу за последним заголовком"],
+  a:1, why:"После последнего заголовка идёт пустая строка, и всё, что после неё, — тело. <code>Content-Length</code> лишь сообщает его длину."},
+ {q:"Чем <code>HEAD</code> отличается от <code>GET</code>?",
+  opts:["HEAD быстрее, но возвращает урезанное тело","HEAD возвращает те же заголовки, но без тела","HEAD работает только с коллекциями","HEAD изменяет ресурс"],
+  a:1, why:"Заголовки те же самые, тела нет вовсе. Удобно, чтобы узнать размер, тип или ETag, не скачивая содержимое."},
+ {q:"В <code>GET /users?role=admin</code> что такое <code>role=admin</code>?",
+  opts:["Часть пути, адресующая ресурс","Параметр строки запроса, уточняющий выдачу","Заголовок","Тело запроса"],
+  a:1, why:"Всё после <code>?</code> — строка запроса. Путь адресует <em>какой</em> ресурс, строка запроса — <em>как</em> его отдать."},
+ {q:"Заголовок <code>Content-Type</code> в запросе описывает:",
+  opts:["Формат, который клиент хочет получить","Формат тела, которое клиент отправляет","Кодировку URL","Версию API"],
+  a:1, why:"Тип отправляемого тела. То, что клиент готов принять, описывает <code>Accept</code>. Их постоянно путают."},
+ {q:"Имена HTTP-заголовков чувствительны к регистру?",
+  opts:["Да, всегда","Нет, имена нечувствительны","Только в HTTP/2","Зависит от сервера"],
+  a:1, why:"Имена нечувствительны к регистру по спецификации. Значения — как правило, чувствительны, и пути в URL тоже."},
+ {q:"Какой заголовок ответа сообщает, какие методы поддерживает ресурс?",
+  opts:["<code>Accept</code>","<code>Allow</code>","<code>Access-Control-Allow-Methods</code>","<code>Support</code>"],
+  a:1, why:"<code>Allow</code>. Приходит в ответе на <code>OPTIONS</code> и обязателен в ответе <code>405 Method Not Allowed</code>."}
+],
+labs:[
+ {id:"1a", title:"Первый обмен",
+  brief:"<h3>Первый обмен</h3><p>Освойте формат ввода и посмотрите, как выглядит настоящий HTTP.</p><ul><li>Получите список пользователей: <code>GET /users</code></li><li>Получите одного: <code>GET /users/1</code> — обратите внимание на заголовок <code>ETag</code></li><li>Запросите только заголовки: <code>HEAD /users/1</code> — тела не будет</li><li>Узнайте возможности коллекции: <code>OPTIONS /users</code> — придёт <code>Allow</code></li></ul><p>Набирать можно и в стиле curl: <code>curl -i /users</code>.</p>",
+  hint:"Формат: МЕТОД /путь. Метод можно опустить — по умолчанию GET. Заголовки добавляются флагом -H 'Имя: значение'.",
+  setup(){},
+  checks:[
+   {label:"Получен список пользователей (<span class='st c2'>200</span>)", test:s=>didStatus(s,"GET",/^\/users$/,200)},
+   {label:"Получен один пользователь", test:s=>didStatus(s,"GET",/^\/users\/\d+$/,200)},
+   {label:"Выполнен <code>HEAD</code> — ответ без тела", test:s=>did(s,(q,r)=>q.method==="HEAD"&&r.body===null)},
+   {label:"Выполнен <code>OPTIONS</code> и получен <code>Allow</code>", test:s=>did(s,(q,r)=>q.method==="OPTIONS"&&!!r.headers["Allow"])}
+  ]},
+ {id:"1b", title:"Когда ресурса нет",
+  brief:"<h3>Когда ресурса нет</h3><p>Ошибки — такая же часть интерфейса, как и успехи.</p><ul><li>Загляните в корень API: <code>GET /</code> — многие API отдают там карту ссылок</li><li>Запросите несуществующего пользователя: <code>GET /users/999</code></li><li>Запросите несуществующий путь: <code>GET /widgets</code></li></ul><p>Сравните два последних ответа: код одинаковый, но текст объясняет разное.</p>",
+  hint:"Оба случая дают 404, но тело ответа приходит с типом application/problem+json и содержит объяснение.",
+  setup(){},
+  checks:[
+   {label:"Прочитан корень API", test:s=>didStatus(s,"GET",/^\/$/,200)},
+   {label:"Получен <span class='st c4'>404</span> на несуществующий элемент", test:s=>didStatus(s,"GET",/^\/users\/\d+$/,404)},
+   {label:"Получен <span class='st c4'>404</span> на несуществующий путь", test:s=>did(s,(q,r)=>q.method==="GET"&&!/^\/(users|posts|orders|auth|$)/.test(q.path)&&r.status===404)}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 2 */
+{
+n:2, id:"rest", title:"Что такое REST", sub:"Ресурсы и единообразие",
+lede:"REST — не формат и не библиотека, а набор ограничений на архитектуру. Разберём, какие именно и что они дают на практике.",
+theory:`
+<p>REST описал Рой Филдинг в 2000 году как стиль архитектуры для распределённых систем. Ключевая идея: сервер отдаёт <b>представления ресурсов</b>, а взаимодействие идёт через <b>единообразный интерфейс</b> — те самые методы HTTP, одинаковые для всех ресурсов.</p>
+
+<h2>Ресурс, представление, идентификатор</h2>
+<div class="tw"><table>
+<tr><th>Понятие</th><th>Что это</th><th>Пример</th></tr>
+<tr><td>Ресурс</td><td>Любая сущность, о которой можно говорить</td><td>Пользователь номер 1</td></tr>
+<tr><td>Идентификатор</td><td>URI, по которому к нему обращаются</td><td><code>/users/1</code></td></tr>
+<tr><td>Представление</td><td>Конкретная форма, в которой ресурс отдан</td><td>JSON-объект с полями</td></tr>
+</table></div>
+<p>Один ресурс может иметь несколько представлений — JSON, XML, HTML. Какое отдать, договариваются через <code>Accept</code>. Ресурс — это идея, представление — байты.</p>
+
+<h2>Ограничения REST</h2>
+<div class="tw"><table>
+<tr><th>Ограничение</th><th>Что означает на практике</th></tr>
+<tr><td><b>Клиент — сервер</b></td><td>Разделение ответственности: интерфейс отдельно, хранение отдельно</td></tr>
+<tr><td><b>Отсутствие состояния</b></td><td>Каждый запрос самодостаточен. Сервер не помнит предыдущий — токен и все параметры приходят заново</td></tr>
+<tr><td><b>Кэшируемость</b></td><td>Ответ явно сообщает, можно ли его переиспользовать</td></tr>
+<tr><td><b>Единообразный интерфейс</b></td><td>Одни и те же методы и коды для всех ресурсов. Зная API одного ресурса, вы угадываете API другого</td></tr>
+<tr><td><b>Слоистость</b></td><td>Между клиентом и сервером могут стоять прокси и кэши, и клиент об этом не знает</td></tr>
+<tr><td><b>Код по требованию</b></td><td>Необязательное: сервер может прислать исполняемый код. На практике почти не используется</td></tr>
+</table></div>
+
+<div class="note warn"><b class="hd">Отсутствие состояния — не то же самое, что отсутствие данных</b><p>Сервер, конечно, хранит пользователей в базе. Ограничение о другом: он не хранит <em>состояние диалога</em>. Нельзя сказать «а теперь удали того, кого я смотрел в прошлом запросе» — каждый запрос несёт всё нужное сам. Именно это позволяет поставить десять серверов за балансировщиком и не думать, на какой попадёт следующий запрос.</p></div>
+
+<h2>Уровни зрелости Ричардсона</h2>
+<p>Удобная шкала, чтобы честно оценить, насколько API вообще REST.</p>
+<figure class="fig">
+<svg viewBox="0 0 620 240" role="img" aria-label="Уровни зрелости Ричардсона">
+ <g font-family="var(--fm)" font-size="10">
+  <rect x="0" y="6" width="620" height="50" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="12" y="25" font-weight="700" fill="var(--ink)">Уровень 0 · один адрес, всё через POST</text>
+  <text x="12" y="42" font-size="9" fill="var(--ink2)">POST /api  {"action":"getUser","id":1} — HTTP используется как транспорт, не более</text>
+
+  <rect x="0" y="62" width="620" height="50" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="12" y="81" font-weight="700" fill="var(--ink)">Уровень 1 · появились ресурсы</text>
+  <text x="12" y="98" font-size="9" fill="var(--ink2)">POST /users/1/get, POST /users/create — адреса разные, но глаголы всё ещё в пути</text>
+
+  <rect x="0" y="118" width="620" height="50" rx="3" fill="var(--acc-s)" stroke="var(--acc)"/>
+  <text x="12" y="137" font-weight="700" fill="var(--ink)">Уровень 2 · методы и коды по назначению</text>
+  <text x="12" y="154" font-size="9" fill="var(--ink2)">GET /users/1 · POST /users · DELETE /users/1 — здесь живёт подавляющее большинство реальных API</text>
+
+  <rect x="0" y="174" width="620" height="50" rx="3" fill="var(--surf3)" stroke="var(--line)" stroke-dasharray="4 3"/>
+  <text x="12" y="193" font-weight="700" fill="var(--ink)">Уровень 3 · HATEOAS — ответы несут ссылки</text>
+  <text x="12" y="210" font-size="9" fill="var(--ink2)">в ответе приходят _links на возможные следующие действия. Встречается редко</text>
+  <text x="0" y="234" font-size="9" fill="var(--ink3)">Формально REST начинается с третьего уровня. На практике «REST API» почти всегда означает второй — и это нормально.</text>
+ </g>
+</svg>
+<figcaption>Шкала полезна не для оценок, а для разговора: она даёт словарь, чтобы объяснить, чего именно не хватает в конкретном API.</figcaption>
+</figure>
+
+<h2>Признаки, что интерфейс не REST</h2>
+<ul>
+<li><b>Глаголы в пути:</b> <code>/getUser</code>, <code>/createOrder</code>, <code>/user/delete</code>. Глагол уже есть — это метод HTTP.</li>
+<li><b>Всё через POST,</b> включая чтение.</li>
+<li><b>Всегда 200,</b> а настоящая ошибка спрятана в теле: <code>{"success":false}</code>. Тогда ни кэш, ни балансировщик, ни клиентская библиотека не понимают, что произошло.</li>
+<li><b>Диалог с состоянием:</b> «сначала вызовите /select, потом /confirm».</li>
+</ul>
+<div class="note trap"><b class="hd">Самое дорогое из перечисленного</b><p>Ответ <span class="st c2">200</span> на ошибку. Он ломает всё, что построено на кодах: повторные попытки, оповещения, кэширование, обработку ошибок в клиенте. Если запрос не удался — код должен быть из класса 4xx или 5xx.</p></div>
+`,
+quiz:[
+ {q:"Что означает ограничение «отсутствие состояния»?",
+  opts:["Сервер не хранит данные в базе","Сервер не хранит состояние диалога: каждый запрос самодостаточен","Клиент не хранит куки","Ответы нельзя кэшировать"],
+  a:1, why:"Данные, разумеется, хранятся. Не хранится контекст между запросами — поэтому любой запрос можно отправить на любой из серверов за балансировщиком."},
+ {q:"Чем ресурс отличается от представления?",
+  opts:["Ничем, это синонимы","Ресурс — сущность, представление — конкретная форма её выдачи (JSON, XML)","Ресурс — запись в базе, представление — строка URL","Представление — это заголовки ответа"],
+  a:1, why:"У одного ресурса может быть несколько представлений. Какое отдать, решает согласование содержимого через <code>Accept</code>."},
+ {q:"API отвечает <code>POST /getUserById</code> и всегда возвращает 200. Какой это уровень по Ричардсону?",
+  opts:["Нулевой или первый","Второй","Третий","Шкала здесь неприменима"],
+  a:0, why:"Глагол в пути и единственный метод — признаки нулевого-первого уровня. Второй начинается там, где методы и коды используются по назначению."},
+ {q:"Что даёт единообразный интерфейс?",
+  opts:["Ускоряет ответы сервера","Зная поведение одного ресурса, вы предсказываете поведение остальных","Уменьшает размер тела ответа","Позволяет отказаться от документации"],
+  a:1, why:"Предсказуемость. Одинаковый смысл методов и кодов для всех ресурсов — то, ради чего REST и придуман."},
+ {q:"Почему возвращать 200 с телом <code>{\"success\":false}</code> — плохо?",
+  opts:["Тело становится больше","Ломается всё, что опирается на коды: повторы, кэш, оповещения, обработка ошибок","Так нельзя по спецификации HTTP","Клиент не сможет разобрать JSON"],
+  a:1, why:"Инфраструктура смотрит на код состояния, а не в тело. Успешный код на неуспешный результат делает ошибку невидимой для всего, кроме вашего собственного кода."},
+ {q:"Что такое HATEOAS?",
+  opts:["Формат аутентификации","Ответы содержат ссылки на возможные следующие действия","Способ версионирования","Протокол кэширования"],
+  a:1, why:"Третий уровень зрелости: клиент переходит по ссылкам из ответов, а не собирает адреса сам. Встречается редко, но именно с него формально начинается REST."}
+],
+labs:[
+ {id:"2a", title:"Ресурсы и адреса",
+  brief:"<h3>Ресурсы и адреса</h3><p>Пройдите по иерархии ресурсов и убедитесь, что глагол всегда в методе, а не в пути.</p><ul><li>Коллекция: <code>GET /users</code></li><li>Элемент коллекции: <code>GET /users/2</code></li><li>Вложенная коллекция: <code>GET /users/1/posts</code></li><li>Другая коллекция: <code>GET /posts</code></li><li>Попробуйте путь с глаголом: <code>GET /getUsers</code> — такого ресурса нет</li></ul>",
+  hint:"Вложенная коллекция читается как «посты, принадлежащие пользователю 1». Адрес отражает связь.",
+  setup(){},
+  checks:[
+   {label:"Прочитана коллекция <code>/users</code>", test:s=>didStatus(s,"GET",/^\/users$/,200)},
+   {label:"Прочитан элемент коллекции", test:s=>didStatus(s,"GET",/^\/users\/\d+$/,200)},
+   {label:"Прочитана вложенная коллекция <code>/users/1/posts</code>", test:s=>didStatus(s,"GET",/^\/users\/\d+\/posts$/,200)},
+   {label:"Прочитана коллекция <code>/posts</code>", test:s=>didStatus(s,"GET",/^\/posts$/,200)},
+   {label:"Путь с глаголом ожидаемо не найден", test:s=>did(s,(q,r)=>/get|create|delete/i.test(q.path)&&r.status===404)}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 3 */
+{
+n:3, id:"methods", title:"Методы", sub:"Безопасность и идемпотентность",
+lede:"Два свойства, по которым методы делятся на классы, и почему от них зависит, можно ли безопасно повторить запрос.",
+theory:`
+<p>У каждого метода HTTP есть два формальных свойства. Они определяют, что имеют право делать с запросом кэши, прокси, браузеры и механизмы повторных попыток.</p>
+
+<h2>Безопасность и идемпотентность</h2>
+<div class="tw"><table>
+<tr><th>Метод</th><th>Безопасный</th><th>Идемпотентный</th><th>Тело запроса</th></tr>
+<tr><td><span class="mth">GET</span></td><td>да</td><td>да</td><td>нет</td></tr>
+<tr><td><span class="mth">HEAD</span></td><td>да</td><td>да</td><td>нет</td></tr>
+<tr><td><span class="mth">OPTIONS</span></td><td>да</td><td>да</td><td>нет</td></tr>
+<tr><td><span class="mth">PUT</span></td><td>нет</td><td><b>да</b></td><td>да</td></tr>
+<tr><td><span class="mth">DELETE</span></td><td>нет</td><td><b>да</b></td><td>нет</td></tr>
+<tr><td><span class="mth">POST</span></td><td>нет</td><td><b>нет</b></td><td>да</td></tr>
+<tr><td><span class="mth">PATCH</span></td><td>нет</td><td>не обязан</td><td>да</td></tr>
+</table></div>
+<ul>
+<li><b>Безопасный</b> — не меняет состояние на сервере. Такой запрос можно отправить когда угодно и сколько угодно раз.</li>
+<li><b>Идемпотентный</b> — повторное выполнение <em>того же</em> запроса оставляет систему в том же состоянии, что и однократное.</li>
+</ul>
+
+<div class="note"><b class="hd">Идемпотентность — про состояние, а не про ответ</b><p>Повторный <code>DELETE /users/5</code> вернёт <span class="st c4">404</span> вместо <span class="st c2">204</span> — <b>ответы разные, а состояние одинаковое</b>: пользователя нет ни там, ни там. Это по-прежнему идемпотентно. Путать эти две вещи — самая частая ошибка на собеседованиях.</p></div>
+
+<h2>Зачем это знать на практике</h2>
+<p>Сеть ненадёжна. Запрос ушёл, ответ потерялся — клиент не знает, выполнилась ли операция. Повторять можно только идемпотентный запрос. Именно поэтому:</p>
+<ul>
+<li>Библиотеки HTTP по умолчанию повторяют <code>GET</code> и <code>PUT</code>, но не <code>POST</code>.</li>
+<li>Для неидемпотентного создания придумали <code>Idempotency-Key</code> — ему посвящён отдельный модуль.</li>
+<li>Браузер спокойно предзагружает <code>GET</code>-ссылки, а перед повторной отправкой формы (<code>POST</code>) спрашивает подтверждение.</li>
+</ul>
+
+<h2>POST, PUT и PATCH — в чём разница</h2>
+<div class="tw"><table>
+<tr><th></th><th>POST</th><th>PUT</th><th>PATCH</th></tr>
+<tr><td>Куда</td><td>в коллекцию: <code>POST /users</code></td><td>по адресу ресурса: <code>PUT /users/5</code></td><td>по адресу ресурса</td></tr>
+<tr><td>Что делает</td><td>создаёт новый, адрес назначает сервер</td><td>помещает представление целиком</td><td>меняет часть полей</td></tr>
+<tr><td>Тело</td><td>данные нового ресурса</td><td><b>все</b> поля — отсутствующие затираются</td><td>только изменяемые поля</td></tr>
+<tr><td>Повтор</td><td>создаст ещё один</td><td>ничего не изменит</td><td>зависит от содержимого</td></tr>
+<tr><td>Обычный ответ</td><td><span class="st c2">201</span> + <code>Location</code></td><td><span class="st c2">200</span> или <span class="st c2">204</span></td><td><span class="st c2">200</span></td></tr>
+</table></div>
+<div class="note trap"><b class="hd">PUT затирает то, чего вы не прислали</b><p>Это его смысл: «пусть по этому адресу лежит вот это». Прислали <code>{"name":"Ann"}</code> вместо полного объекта — почта и роль исчезнут либо запрос будет отклонён. Хотите поменять одно поле — это <code>PATCH</code>.</p></div>
+
+<h2>Когда PATCH не идемпотентен</h2>
+<p>Замена поля — идемпотентна: <code>{"role":"admin"}</code> сколько ни повторяй, роль останется admin. А вот операция вида «увеличить счётчик на единицу» — нет. Поэтому спецификация и говорит, что PATCH идемпотентным <em>быть не обязан</em>: всё зависит от того, что вы в него положили.</p>
+`,
+quiz:[
+ {q:"Повторный <code>DELETE /users/5</code> вернул 404 вместо 204. DELETE всё ещё идемпотентен?",
+  opts:["Нет, ответы разные — значит не идемпотентен","Да: идемпотентность про состояние системы, а не про код ответа","Только если сервер вернёт 204 повторно","Зависит от реализации"],
+  a:1, why:"После обоих запросов ресурса нет — состояние одинаковое. Коды ответов при этом вполне могут отличаться."},
+ {q:"Какой метод безопасный, но при этом изменяющий?",
+  opts:["POST","PUT","Такого не бывает: безопасный по определению ничего не меняет","PATCH"],
+  a:2, why:"Безопасность и означает отсутствие изменений. Если метод что-то меняет, он не безопасен — обратное определение невозможно."},
+ {q:"Вы отправили <code>PUT /users/5</code> с телом <code>{\"name\":\"Ann\"}</code>, а у пользователя были ещё email и role. Что произойдёт?",
+  opts:["Изменится только name","Ресурс заменится целиком: остальные поля будут потеряны либо запрос отклонён","Сервер объединит поля автоматически","Вернётся 400"],
+  a:1, why:"PUT помещает представление целиком. Для изменения отдельных полей существует PATCH."},
+ {q:"Почему HTTP-библиотеки повторяют GET и PUT, но не POST?",
+  opts:["POST медленнее","GET и PUT идемпотентны, а повтор POST создаст лишний ресурс","POST запрещает повторы спецификацией","Из-за размера тела"],
+  a:1, why:"Повтор идемпотентного запроса безопасен. Повтор POST после потерянного ответа даёт второй заказ, второй платёж, второго пользователя."},
+ {q:"Куда отправляют <code>POST</code> при создании ресурса?",
+  opts:["На адрес будущего ресурса: <code>POST /users/5</code>","На адрес коллекции: <code>POST /users</code>","На корень API","Куда угодно, адрес не важен"],
+  a:1, why:"POST адресуется коллекции, а адрес созданного ресурса назначает сервер и возвращает в заголовке <code>Location</code>."},
+ {q:"В каком случае PATCH не идемпотентен?",
+  opts:["Когда меняет несколько полей","Когда тело описывает операцию вида «увеличить на 1», а не «установить значение»","PATCH всегда идемпотентен","Когда возвращает 200"],
+  a:1, why:"Присваивание идемпотентно, приращение — нет. Поэтому спецификация не требует идемпотентности от PATCH."}
+],
+labs:[
+ {id:"3a", title:"Повтор запроса",
+  brief:"<h3>Повтор запроса</h3><p>Проверьте свойства методов руками. Сначала получите токен — изменяющие запросы требуют авторизации.</p><ul><li><code>POST /auth/token -H 'Content-Type: application/json' -d '{\"username\":\"demo\",\"password\":\"secret\"}'</code></li><li>Дважды подряд отправьте один и тот же <code>PUT /users/3</code> с полным телом — состояние после обоих одинаково</li><li>Дважды подряд отправьте <code>POST /users</code> с <b>разной</b> почтой — появятся два пользователя</li><li>Сравните счётчик пользователей в панели справа</li></ul>",
+  hint:"Токен из ответа подставляйте в заголовок: -H 'Authorization: Bearer tok_…'. Полное тело для PUT: name, email, role.",
+  setup(){},
+  checks:[
+   {label:"Получен токен", test:s=>didStatus(s,"POST",/^\/auth\/token$/,200)},
+   {label:"<code>PUT</code> выполнен дважды и оба раза успешно", test:s=>s.log.filter(e=>e.req.method==="PUT"&&e.res.status===200).length>=2},
+   {label:"<code>POST /users</code> выполнен дважды успешно", test:s=>s.log.filter(e=>e.req.method==="POST"&&/^\/users$/.test(e.req.path)&&e.res.status===201).length>=2},
+   {label:"Пользователей стало больше исходных четырёх", test:s=>s.users.length>=6}
+  ]},
+ {id:"3b", title:"Метод не тот",
+  brief:"<h3>Метод не тот</h3><p>Ресурс сам сообщает, что с ним можно делать.</p><ul><li>Попробуйте <code>PUT /users</code> — заменить коллекцию целиком нельзя</li><li>Попробуйте <code>POST /users/1</code> — создавать поверх существующего ресурса тоже нельзя</li><li>В обоих ответах найдите заголовок <code>Allow</code></li><li>Спросите напрямую: <code>OPTIONS /users/1</code></li></ul><p>Обратите внимание: <span class='st c4'>405</span> приходит даже без токена — допустимость метода не зависит от того, кто спрашивает.</p>",
+  hint:"Для 405 не нужны ни тело, ни авторизация. Заголовок Allow перечисляет поддерживаемые методы.",
+  setup(){},
+  checks:[
+   {label:"<code>PUT</code> на коллекцию дал <span class='st c4'>405</span>", test:s=>did(s,(q,r)=>q.method==="PUT"&&/^\/(users|posts|orders)$/.test(q.path)&&r.status===405)},
+   {label:"<code>POST</code> на элемент дал <span class='st c4'>405</span>", test:s=>did(s,(q,r)=>q.method==="POST"&&/^\/users\/\d+$/.test(q.path)&&r.status===405)},
+   {label:"В ответе пришёл заголовок <code>Allow</code>", test:s=>did(s,(q,r)=>r.status===405&&!!r.headers["Allow"])},
+   {label:"Выполнен <code>OPTIONS</code> на элементе", test:s=>did(s,(q,r)=>q.method==="OPTIONS"&&/^\/users\/\d+$/.test(q.path))}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 4 */
+{
+n:4, id:"status", title:"Коды состояния", sub:"Пять классов и когда что",
+lede:"Код ответа — самая важная часть: на него смотрят кэши, балансировщики, механизмы повторов и ваш клиент.",
+theory:`
+<p>Первая цифра задаёт класс, и по ней уже понятно, что делать дальше.</p>
+<div class="tw"><table>
+<tr><th>Класс</th><th>Смысл</th><th>Что делает клиент</th></tr>
+<tr><td><span class="st c1">1xx</span></td><td>Информационный</td><td>Ждёт продолжения. В обычных API не встречается</td></tr>
+<tr><td><span class="st c2">2xx</span></td><td>Успех</td><td>Работает с результатом</td></tr>
+<tr><td><span class="st c3">3xx</span></td><td>Перенаправление</td><td>Идёт по адресу из <code>Location</code> или берёт из кэша</td></tr>
+<tr><td><span class="st c4">4xx</span></td><td>Ошибка клиента</td><td><b>Не повторяет</b> — надо исправить запрос</td></tr>
+<tr><td><span class="st c5">5xx</span></td><td>Ошибка сервера</td><td>Можно повторить, желательно с задержкой</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Граница 4xx / 5xx — главное решение</b><p>4xx означает «виноват запрос, повторять бессмысленно». 5xx — «виноват сервер, попробуйте ещё раз». Ошибка в классе стоит дорого: клиент либо будет долбить сервер повторами бессмысленного запроса, либо сдастся там, где хватило бы одной повторной попытки.</p></div>
+
+<h2>Успех</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Когда</th></tr>
+<tr><td><span class="st c2">200</span> OK</td><td>Обычный успех с телом: GET, PUT, PATCH</td></tr>
+<tr><td><span class="st c2">201</span> Created</td><td>Ресурс создан. <b>Обязателен</b> заголовок <code>Location</code> с его адресом</td></tr>
+<tr><td><span class="st c2">202</span> Accepted</td><td>Запрос принят, но ещё не выполнен — асинхронная обработка</td></tr>
+<tr><td><span class="st c2">204</span> No Content</td><td>Успех без тела. Типичный ответ на DELETE</td></tr>
+</table></div>
+
+<h2>Ошибки клиента — те, что встречаются каждый день</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Когда</th><th>Чем отличается от соседнего</th></tr>
+<tr><td><span class="st c4">400</span> Bad Request</td><td>Запрос синтаксически неверен: битый JSON, неразбираемый параметр</td><td>Сервер не смог даже разобрать</td></tr>
+<tr><td><span class="st c4">401</span> Unauthorized</td><td>Не представились или токен недействителен</td><td>«Кто вы?» Обязателен <code>WWW-Authenticate</code></td></tr>
+<tr><td><span class="st c4">403</span> Forbidden</td><td>Личность известна, прав не хватает</td><td>«Знаю вас, но нельзя». Повторять с тем же токеном бессмысленно</td></tr>
+<tr><td><span class="st c4">404</span> Not Found</td><td>Ресурса нет</td><td>Иногда используют вместо 403, чтобы не раскрывать существование</td></tr>
+<tr><td><span class="st c4">405</span> Method Not Allowed</td><td>Ресурс есть, метод к нему неприменим</td><td>Обязателен <code>Allow</code></td></tr>
+<tr><td><span class="st c4">406</span> Not Acceptable</td><td>Сервер не умеет формат из <code>Accept</code></td><td>Про формат <em>ответа</em></td></tr>
+<tr><td><span class="st c4">409</span> Conflict</td><td>Конфликт с текущим состоянием: дубликат, гонка версий</td><td>Данные корректны, но противоречат состоянию</td></tr>
+<tr><td><span class="st c4">412</span> Precondition Failed</td><td>Не выполнилось условие из <code>If-Match</code></td><td>Ресурс изменился с момента чтения</td></tr>
+<tr><td><span class="st c4">415</span> Unsupported Media Type</td><td>Сервер не умеет формат из <code>Content-Type</code></td><td>Про формат <em>запроса</em></td></tr>
+<tr><td><span class="st c4">422</span> Unprocessable Content</td><td>Синтаксис верен, смысл — нет: почта без собаки</td><td>Разобрать смог, принять не может</td></tr>
+<tr><td><span class="st c4">429</span> Too Many Requests</td><td>Превышена частота</td><td>Обычно с <code>Retry-After</code></td></tr>
+</table></div>
+
+<div class="note trap"><b class="hd">Три пары, которые путают чаще всего</b><ul>
+<li><b>401 против 403.</b> «Не знаю вас» против «знаю, но нельзя». Если после повторного входа ничего не изменится — это 403.</li>
+<li><b>400 против 422.</b> Битый JSON — 400. Корректный JSON с недопустимым значением — 422.</li>
+<li><b>406 против 415.</b> 406 — не устраивает <code>Accept</code> (ответ). 415 — не устраивает <code>Content-Type</code> (запрос).</li>
+</ul></div>
+
+<h2>Перенаправления</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Смысл</th></tr>
+<tr><td><span class="st c3">301</span></td><td>Переехало навсегда. Клиентам стоит запомнить новый адрес</td></tr>
+<tr><td><span class="st c3">302</span> / <span class="st c3">307</span></td><td>Временно. 307 гарантирует сохранение метода, 302 исторически мог превратить POST в GET</td></tr>
+<tr><td><span class="st c3">304</span></td><td>Не изменилось — используйте кэш. Тела нет. Формально это не перенаправление</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Клиент прислал корректный JSON, но почта в нём без символа @. Какой код правильнее?",
+  opts:["400","422","409","415"],
+  a:1, why:"Синтаксис верен, сервер разобрал тело — проблема в смысле значения. Это 422. Код 400 уместен, когда JSON вообще не разбирается."},
+ {q:"Токен валиден, но у пользователя нет прав на операцию. Какой код?",
+  opts:["401","403","404","405"],
+  a:1, why:"Личность установлена, прав не хватает — 403. Код 401 означает «не представились или токен недействителен» и обязан нести <code>WWW-Authenticate</code>."},
+ {q:"Какой заголовок обязателен в ответе <span class='st c2'>201</span> Created?",
+  opts:["<code>ETag</code>","<code>Location</code> с адресом созданного ресурса","<code>Allow</code>","<code>Content-Length</code>"],
+  a:1, why:"Клиент должен узнать, где теперь лежит созданное. Без <code>Location</code> ему придётся угадывать адрес."},
+ {q:"Сервер не поддерживает формат, указанный клиентом в <code>Content-Type</code>. Какой код?",
+  opts:["406","415","400","422"],
+  a:1, why:"415 — про формат <b>запроса</b>. 406 — про формат <b>ответа</b>, когда сервер не умеет то, что просят в <code>Accept</code>."},
+ {q:"Клиент получил 5xx. Что разумно сделать?",
+  opts:["Ничего, запрос неверен","Повторить с задержкой — проблема на стороне сервера","Немедленно повторить в цикле","Сменить метод"],
+  a:1, why:"5xx означает сбой на сервере, повтор осмыслен. Повторять надо с растущей задержкой, чтобы не добить сервер. Класс 4xx повторять бессмысленно."},
+ {q:"Какой ответ у DELETE, если тело возвращать нечего?",
+  opts:["200 с пустым телом","204 No Content","202 Accepted","304 Not Modified"],
+  a:1, why:"204 прямо означает «успех, тела нет». Возвращать 200 с пустым телом можно, но 204 точнее выражает намерение."}
+],
+labs:[
+ {id:"4a", title:"Коллекция кодов",
+  brief:"<h3>Коллекция кодов</h3><p>Соберите пять разных кодов ответа, вызвав их намеренно.</p><ul><li><span class='st c2'>200</span> — любое чтение</li><li><span class='st c4'>404</span> — <code>GET /users/999</code></li><li><span class='st c4'>405</span> — <code>DELETE /users</code></li><li><span class='st c4'>406</span> — <code>GET /users -H 'Accept: application/xml'</code></li><li><span class='st c3'>301</span> — <code>GET /user/1</code> (старый путь в единственном числе)</li></ul><p>В ответе 301 посмотрите заголовок <code>Location</code>.</p>",
+  hint:"Каждый код вызывается отдельным запросом. Для 406 нужен заголовок Accept с форматом, которого сервер не умеет.",
+  setup(){},
+  checks:[
+   {label:"Получен <span class='st c2'>200</span>", test:s=>did(s,(q,r)=>r.status===200)},
+   {label:"Получен <span class='st c4'>404</span>", test:s=>did(s,(q,r)=>r.status===404)},
+   {label:"Получен <span class='st c4'>405</span>", test:s=>did(s,(q,r)=>r.status===405)},
+   {label:"Получен <span class='st c4'>406</span>", test:s=>did(s,(q,r)=>r.status===406)},
+   {label:"Получен <span class='st c3'>301</span> с заголовком <code>Location</code>", test:s=>did(s,(q,r)=>r.status===301&&!!r.headers["Location"])}
+  ]},
+ {id:"4b", title:"401 против 403",
+  brief:"<h3>401 против 403</h3><p>Разница между «кто вы?» и «знаю, но нельзя» — руками.</p><ul><li>Попробуйте создать пользователя без токена — придёт <span class='st c4'>401</span> с заголовком <code>WWW-Authenticate</code></li><li>Получите токен <b>только на чтение</b>: в тело запроса токена добавьте <code>\"scope\":\"read\"</code></li><li>Повторите создание с этим токеном — теперь <span class='st c4'>403</span></li><li>Получите обычный токен и создайте пользователя — <span class='st c2'>201</span></li></ul>",
+  hint:"Тело для токена только на чтение: {\"username\":\"demo\",\"password\":\"secret\",\"scope\":\"read\"}",
+  setup(){},
+  checks:[
+   {label:"Получен <span class='st c4'>401</span> с <code>WWW-Authenticate</code>", test:s=>did(s,(q,r)=>r.status===401&&!!r.headers["WWW-Authenticate"])},
+   {label:"Выпущен токен только на чтение", test:s=>Object.values(s.tokens).some(t=>!t.scopes.includes("write"))},
+   {label:"Получен <span class='st c4'>403</span> с этим токеном", test:s=>did(s,(q,r)=>r.status===403)},
+   {label:"С полноценным токеном ресурс создан (<span class='st c2'>201</span>)", test:s=>did(s,(q,r)=>r.status===201)}
+  ]}
+]
+},
+/* ------------------------------------------------ 5 */
+{
+n:5, id:"headers", title:"Заголовки и форматы", sub:"Согласование содержимого",
+lede:"Как клиент и сервер договариваются о формате, и почему 406 и 415 — про разные стороны обмена.",
+theory:`
+<p>Один ресурс может быть отдан в разных представлениях. Механизм, которым стороны выбирают формат, называется <b>согласованием содержимого</b>.</p>
+
+<h2>Две стороны, два заголовка</h2>
+<figure class="fig">
+<svg viewBox="0 0 620 192" role="img" aria-label="Accept и Content-Type в запросе и ответе">
+ <g font-family="var(--fm)" font-size="10">
+  <rect x="0" y="10" width="290" height="70" rx="3" fill="var(--acc-s)" stroke="var(--acc)"/>
+  <text x="12" y="29" font-weight="700" fill="var(--ink)">ЗАПРОС</text>
+  <text x="12" y="47" font-size="9" fill="var(--ink2)">Content-Type: что я отправляю</text>
+  <text x="12" y="63" font-size="9" fill="var(--ink2)">Accept: что готов получить</text>
+
+  <path d="M294 45h32" stroke="var(--acc)" stroke-width="1.3"/><path d="M326 45l-7-4v8z" fill="var(--acc)"/>
+
+  <rect x="330" y="10" width="290" height="70" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="342" y="29" font-weight="700" fill="var(--ink)">ОТВЕТ</text>
+  <text x="342" y="47" font-size="9" fill="var(--ink2)">Content-Type: что я вернул</text>
+  <text x="342" y="63" font-size="9" fill="var(--ink3)">Accept в ответе не бывает</text>
+
+  <rect x="0" y="94" width="290" height="60" rx="3" fill="var(--s4s)" stroke="var(--s4)"/>
+  <text x="12" y="113" font-weight="700" fill="var(--s4)">415 Unsupported Media Type</text>
+  <text x="12" y="130" font-size="9" fill="var(--ink2)">не устраивает Content-Type</text>
+  <text x="12" y="145" font-size="9" fill="var(--ink3)">то есть формат, который прислал клиент</text>
+
+  <rect x="330" y="94" width="290" height="60" rx="3" fill="var(--s4s)" stroke="var(--s4)"/>
+  <text x="342" y="113" font-weight="700" fill="var(--s4)">406 Not Acceptable</text>
+  <text x="342" y="130" font-size="9" fill="var(--ink2)">не устраивает Accept</text>
+  <text x="342" y="145" font-size="9" fill="var(--ink3)">то есть формат, который просит клиент</text>
+  <text x="0" y="172" font-size="9" fill="var(--ink3)">Мнемоника: Content-Type описывает то тело, в сообщении которого он стоит.</text>
+  <text x="0" y="186" font-size="9" fill="var(--ink3)">В запросе это тело запроса, в ответе — тело ответа.</text>
+ </g>
+</svg>
+<figcaption>Оба кода из класса 4xx, но причины противоположные: один про отправленное, другой про запрошенное.</figcaption>
+</figure>
+
+<h2>Как выглядит Accept</h2>
+<pre><code><span class="h">Accept</span>: application/json                  <span class="c">только JSON</span>
+<span class="h">Accept</span>: application/json, text/*;q=0.5   <span class="c">JSON предпочтительнее, текст сойдёт</span>
+<span class="h">Accept</span>: */*                               <span class="c">что угодно — так делает curl по умолчанию</span></code></pre>
+<p>Число <code>q</code> от 0 до 1 — вес предпочтения. Отсутствие <code>q</code> равносильно <code>q=1</code>. Сервер выбирает самое подходящее из того, что умеет.</p>
+
+<h2>Типы содержимого, которые стоит узнавать</h2>
+<div class="tw"><table>
+<tr><th>Тип</th><th>Где встречается</th></tr>
+<tr><td><code>application/json</code></td><td>Основной формат REST API</td></tr>
+<tr><td><code>application/problem+json</code></td><td>Стандартизованное тело ошибки (RFC 9457)</td></tr>
+<tr><td><code>application/merge-patch+json</code></td><td>Тело PATCH: «слить эти поля с текущими»</td></tr>
+<tr><td><code>application/x-www-form-urlencoded</code></td><td>Обычная HTML-форма</td></tr>
+<tr><td><code>multipart/form-data</code></td><td>Загрузка файлов</td></tr>
+<tr><td><code>text/event-stream</code></td><td>Server-Sent Events — поток событий</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Суффикс +json</b><p><code>application/problem+json</code> — это JSON с оговоренной структурой. Клиент, умеющий разбирать JSON, разберёт и его: суффикс сообщает <em>синтаксис</em>, а основная часть — <em>смысл</em>. Поэтому проверять «это JSON?» надо не сравнением строк, а по суффиксу.</p></div>
+
+<h2>Заголовки, о которых часто забывают</h2>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Зачем</th></tr>
+<tr><td><code>Accept-Language</code></td><td>Язык ответа. Тот же механизм согласования, что и с форматом</td></tr>
+<tr><td><code>Accept-Encoding</code></td><td>Сжатие: gzip, br. Экономит трафик почти бесплатно</td></tr>
+<tr><td><code>User-Agent</code></td><td>Кто клиент. Часто по нему разбирают инциденты и вводят лимиты</td></tr>
+<tr><td><code>X-Request-Id</code></td><td>Сквозной идентификатор запроса. Незаменим при разборе распределённых сбоев</td></tr>
+<tr><td><code>Retry-After</code></td><td>Через сколько повторить. Приходит с 429 и 503</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Забытый Content-Type — самая частая ошибка</b><p>Отправили тело, но не объявили формат — и получили <span class="st c4">415</span> вместо ожидаемого <span class="st c2">201</span>. В curl это лечится флагом <code>--json</code>, который заодно ставит и <code>Accept</code>. В коде тестов такой заголовок обычно ставит сам клиент HTTP — но только если вы передали данные как объект, а не как строку.</p></div>
+`,
+quiz:[
+ {q:"Клиент прислал <code>Accept: application/xml</code>, сервер умеет только JSON. Какой код?",
+  opts:["415","406","400","409"],
+  a:1, why:"406 Not Acceptable — сервер не может отдать ответ в запрошенном формате. 415 был бы про формат тела запроса."},
+ {q:"Клиент отправил тело без заголовка <code>Content-Type</code>. Какой код правильнее?",
+  opts:["400","406","415","422"],
+  a:2, why:"415 Unsupported Media Type — сервер не понимает, в каком формате пришло тело, и не берётся угадывать."},
+ {q:"Что означает <code>q=0.5</code> в заголовке <code>Accept</code>?",
+  opts:["Максимальный размер ответа","Вес предпочтения формата от 0 до 1","Версию формата","Таймаут"],
+  a:1, why:"Относительное предпочтение. Отсутствие <code>q</code> равно <code>q=1</code>, то есть наивысшему приоритету."},
+ {q:"Как правильно проверить, что тело ответа — JSON, если Content-Type равен <code>application/problem+json</code>?",
+  opts:["Сравнить строку с «application/json» — не совпадёт, значит не JSON","Проверить суффикс +json","Попробовать разобрать и поймать исключение","По длине тела"],
+  a:1, why:"Суффикс <code>+json</code> сообщает синтаксис. Точное сравнение строк ломается на любом специализированном типе."},
+ {q:"В ответе сервера может присутствовать заголовок <code>Accept</code>?",
+  opts:["Да, он сообщает, что сервер готов принимать","Нет: Accept — заголовок запроса; в ответе формат описывает Content-Type","Только при 406","Только в OPTIONS"],
+  a:1, why:"Accept выражает предпочтения клиента и осмыслен только в запросе. Иногда в ответе встречается <code>Accept-Post</code> или <code>Accept-Patch</code> — но это другие заголовки."},
+ {q:"Зачем нужен <code>X-Request-Id</code>?",
+  opts:["Для кэширования","Чтобы связать записи журналов о запросе между сервисами","Для авторизации","Для сжатия"],
+  a:1, why:"Сквозной идентификатор позволяет пройти по журналам всех участвовавших сервисов и собрать картину одного запроса."}
+],
+labs:[
+ {id:"5a", title:"Договориться о формате",
+  brief:"<h3>Договориться о формате</h3><p>Вызовите оба «формата» ошибки и добейтесь успеха.</p><ul><li>Попросите XML: <code>GET /users -H 'Accept: application/xml'</code> → <span class='st c4'>406</span></li><li>Получите токен</li><li>Отправьте создание <b>без</b> <code>Content-Type</code> → <span class='st c4'>415</span></li><li>Добавьте <code>-H 'Content-Type: application/json'</code> → <span class='st c2'>201</span></li><li>Убедитесь, что <code>Accept: */*</code> сервер устраивает</li></ul>",
+  hint:"Тело создания: {\"name\":\"Kim\",\"email\":\"kim@example.com\"}. Токен получается запросом POST /auth/token.",
+  setup(){},
+  checks:[
+   {label:"Получен <span class='st c4'>406</span> из-за <code>Accept</code>", test:s=>did(s,(q,r)=>r.status===406)},
+   {label:"Получен <span class='st c4'>415</span> из-за отсутствия <code>Content-Type</code>", test:s=>did(s,(q,r)=>r.status===415)},
+   {label:"После добавления заголовка ресурс создан", test:s=>did(s,(q,r)=>r.status===201&&/^\/users$/.test(q.path))},
+   {label:"Проверено, что <code>Accept: */*</code> проходит", test:s=>did(s,(q,r)=>{const a=hasHeader(q,"Accept"); return a&&a.includes("*/*")&&r.status<400;})}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 6 */
+{
+n:6, id:"design", title:"Проектирование адресов", sub:"Коллекции, фильтры, связи",
+lede:"Как называть ресурсы, где заканчивается путь и начинается строка запроса, и когда вложенность оправдана.",
+theory:`
+<h2>Правила именования, о которых договорились почти все</h2>
+<div class="tw"><table>
+<tr><th>Правило</th><th>Хорошо</th><th>Плохо</th></tr>
+<tr><td>Существительные, не глаголы</td><td><code>POST /users</code></td><td><code>POST /createUser</code></td></tr>
+<tr><td>Множественное число для коллекций</td><td><code>/users</code>, <code>/users/1</code></td><td><code>/user</code>, <code>/user/1</code></td></tr>
+<tr><td>Нижний регистр и дефисы</td><td><code>/order-items</code></td><td><code>/OrderItems</code>, <code>/order_items</code></td></tr>
+<tr><td>Без расширения формата</td><td><code>/users</code> + <code>Accept</code></td><td><code>/users.json</code></td></tr>
+<tr><td>Без завершающего слэша</td><td><code>/users</code></td><td><code>/users/</code></td></tr>
+</table></div>
+<div class="note"><b class="hd">Почему множественное число</b><p><code>/users</code> — это коллекция, <code>/users/1</code> — элемент в ней. Читается последовательно и предсказуемо. Единственное число вынуждает угадывать: <code>/user/1</code> — это «пользователь номер один» или «первый ресурс типа пользователь»? На практике важнее не выбор, а единообразие: смешивать <code>/users</code> и <code>/order</code> в одном API хуже, чем последовательно выбрать любой вариант.</p></div>
+
+<h2>Путь или строка запроса</h2>
+<p>Граница проходит по вопросу: параметр определяет, <b>какой</b> ресурс, или <b>как его показать</b>?</p>
+<div class="tw"><table>
+<tr><th>В пути</th><th>В строке запроса</th></tr>
+<tr><td>Идентификатор: <code>/users/1</code></td><td>Фильтр: <code>?role=admin</code></td></tr>
+<tr><td>Связь: <code>/users/1/posts</code></td><td>Сортировка: <code>?sort=-createdAt</code></td></tr>
+<tr><td>Подресурс: <code>/orders/7/items</code></td><td>Пагинация: <code>?page=2&amp;limit=20</code></td></tr>
+<tr><td></td><td>Выбор полей: <code>?fields=id,name</code></td></tr>
+</table></div>
+<p>Практическое следствие: <code>/users/1</code> и <code>/users?id=1</code> — разные вещи. Первый адресует один ресурс и вернёт <span class="st c4">404</span>, если его нет. Второй адресует коллекцию и вернёт <span class="st c2">200</span> с пустым массивом.</p>
+
+<div class="note ok"><b class="hd">Это ловит больше всего ошибок в тестах</b><p>Проверка «пустой список» и проверка «ресурс не найден» — разные проверки. Коллекция без совпадений — <b>успех</b>: <span class="st c2">200</span> и <code>[]</code>. Отсутствующий элемент — <b>ошибка</b>: <span class="st c4">404</span>. Тест, ожидающий 404 от фильтра без результатов, написан неверно.</p></div>
+
+<h2>Вложенность</h2>
+<pre><code>GET /users/1/posts        <span class="c">посты пользователя 1 — связь осмысленна</span>
+GET /posts?userId=1       <span class="c">то же самое через фильтр — тоже нормально</span>
+GET /users/1/posts/9      <span class="c">избыточно: у поста уже есть свой адрес /posts/9</span></code></pre>
+<p>Разумная глубина — один уровень. Как только адрес становится длиннее <code>/коллекция/id/коллекция</code>, у вложенного ресурса почти наверняка есть собственный адрес, и лучше дать ссылку на него.</p>
+
+<h2>Действия, которые не ложатся на CRUD</h2>
+<p>«Опубликовать пост», «отменить заказ», «отправить письмо повторно» — это не создание и не изменение поля. Три рабочих подхода:</p>
+<ol>
+<li><b>Изменить состояние как поле:</b> <code>PATCH /posts/9 {"published": true}</code>. Самый чистый вариант, когда действие сводится к смене статуса.</li>
+<li><b>Подресурс-действие:</b> <code>POST /orders/7/cancellation</code>. Действие становится ресурсом, и у него появляется история.</li>
+<li><b>Глагол как крайняя мера:</b> <code>POST /orders/7/cancel</code>. Формально нарушает единообразие, зато честно и понятно. Многие крупные API так и делают.</li>
+</ol>
+<div class="note warn"><b class="hd">Не изобретайте новые методы</b><p>Соблазн объявить <code>CANCEL /orders/7</code> велик, но такой метод не пройдёт через прокси, кэши, брандмауэры и половину клиентских библиотек. Инфраструктура знает конечный список методов.</p></div>
+`,
+quiz:[
+ {q:"Фильтр не нашёл ни одного совпадения. Что должен вернуть <code>GET /users?role=ghost</code>?",
+  opts:["404, ресурсов нет","200 и пустой массив","204","400"],
+  a:1, why:"Коллекция существует, просто ничего не подошло — это успех. 404 означал бы, что нет самой коллекции."},
+ {q:"Где место параметру сортировки?",
+  opts:["В пути: <code>/users/sort/name</code>","В строке запроса: <code>/users?sort=name</code>","В заголовке","В теле GET-запроса"],
+  a:1, why:"Сортировка не меняет, какой ресурс запрошен, — только форму выдачи. Значит, строка запроса."},
+ {q:"Какой адрес лучше для «отменить заказ»?",
+  opts:["<code>CANCEL /orders/7</code>","<code>POST /orders/7/cancellation</code> или <code>PATCH /orders/7</code> со сменой статуса","<code>GET /orders/7/cancel</code>","<code>DELETE /orders/7</code>"],
+  a:1, why:"Новый метод не пройдёт через инфраструктуру. GET не должен менять состояние. DELETE означал бы удаление заказа, а не отмену."},
+ {q:"Насколько глубоко разумно вкладывать ресурсы?",
+  opts:["Чем глубже, тем точнее отражена модель","Обычно один уровень: дальше у ресурса есть собственный адрес","Ровно два","Вложенность вообще не нужна"],
+  a:1, why:"<code>/users/1/posts</code> осмысленно. <code>/users/1/posts/9/comments/3</code> — нет: у комментария есть свой адрес <code>/comments/3</code>."},
+ {q:"Чем <code>/users/1</code> отличается от <code>/users?id=1</code>?",
+  opts:["Ничем","Первый адресует элемент и даёт 404, если его нет; второй — коллекцию и даёт 200 с пустым массивом","Второй быстрее","Первый нельзя кэшировать"],
+  a:1, why:"Разные ресурсы: элемент и отфильтрованная коллекция. Отсюда и разные коды при отсутствии данных."},
+ {q:"Почему не стоит писать <code>/users.json</code>?",
+  opts:["Слишком длинно","Формат — предмет согласования через <code>Accept</code>, а не часть адреса ресурса","Не поддерживается браузерами","Мешает кэшированию"],
+  a:1, why:"Адрес идентифицирует ресурс, а не его представление. Расширение в пути превращает два представления одного ресурса в два разных ресурса."}
+],
+labs:[
+ {id:"6a", title:"Выборка и связи",
+  brief:"<h3>Выборка и связи</h3><p>Соберите одну и ту же информацию разными способами.</p><ul><li>Отфильтруйте по роли: <code>GET /users?role=admin</code></li><li>Найдите подстрокой: <code>GET /users?q=turing</code></li><li>Отсортируйте по убыванию имени: <code>GET /users?sort=-name</code></li><li>Посты пользователя через связь: <code>GET /users/1/posts</code></li><li>Те же посты через фильтр: <code>GET /posts?userId=1</code></li><li>Фильтр без совпадений: <code>GET /users?role=ghost</code> — обратите внимание, что это <span class='st c2'>200</span>, а не 404</li></ul>",
+  hint:"Минус перед именем поля в sort означает убывание. Несколько параметров соединяются символом &.",
+  setup(){},
+  checks:[
+   {label:"Применён фильтр по роли", test:s=>did(s,(q,r)=>q.query&&q.query.role&&r.status===200)},
+   {label:"Выполнен поиск по подстроке", test:s=>did(s,(q,r)=>q.query&&q.query.q&&r.status===200)},
+   {label:"Применена сортировка по убыванию", test:s=>did(s,(q,r)=>q.query&&q.query.sort&&q.query.sort.startsWith("-")&&r.status===200)},
+   {label:"Прочитаны посты через вложенную коллекцию", test:s=>didStatus(s,"GET",/^\/users\/\d+\/posts$/,200)},
+   {label:"Прочитаны посты через фильтр <code>?userId=</code>", test:s=>did(s,(q,r)=>/^\/posts$/.test(q.path)&&q.query.userId&&r.status===200)},
+   {label:"Пустая выборка вернула <span class='st c2'>200</span>, а не 404", test:s=>did(s,(q,r)=>r.status===200&&Array.isArray(r.body)&&r.body.length===0)}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 7 */
+{
+n:7, id:"paging", title:"Пагинация", sub:"Страницы, курсоры, Link",
+lede:"Коллекция из миллиона записей не помещается в один ответ. Как её резать и как сообщить клиенту, что дальше.",
+theory:`
+<p>Отдавать коллекцию целиком нельзя: она растёт, а ответ должен оставаться предсказуемым. Значит, нужен способ выдавать её частями и объяснять клиенту, как получить следующую.</p>
+
+<h2>Два подхода</h2>
+<div class="tw"><table>
+<tr><th></th><th>Смещение (page / offset)</th><th>Курсор</th></tr>
+<tr><td>Вид</td><td><code>?page=3&amp;limit=20</code></td><td><code>?cursor=eyJpZCI6NDJ9&amp;limit=20</code></td></tr>
+<tr><td>Можно прыгнуть на страницу N</td><td>да</td><td>нет, только вперёд по цепочке</td></tr>
+<tr><td>Общее количество</td><td>обычно известно</td><td>обычно нет</td></tr>
+<tr><td>Устойчивость к вставкам</td><td><b>нет</b>: новая запись сдвигает всё, и элемент попадёт на две страницы или пропадёт</td><td><b>да</b>: курсор указывает на позицию в данных</td></tr>
+<tr><td>Стоимость на больших смещениях</td><td>растёт: базе приходится пропускать строки</td><td>постоянная</td></tr>
+<tr><td>Когда выбирать</td><td>интерфейсы с номерами страниц, небольшие наборы</td><td>ленты, экспорт, большие и живые данные</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Почему смещение «теряет» записи</b><p>Вы прочитали страницу 1 (записи 1–20). Пока читали, кто-то добавил запись в начало. Запрашиваете страницу 2 — и запись, бывшая двадцатой, стала двадцать первой и приедет снова. А при удалении — наоборот, одна запись будет пропущена. При обходе всей коллекции этой цепочкой ошибка накапливается.</p></div>
+
+<h2>Как сообщать о границах</h2>
+<p>Три способа, и они не исключают друг друга.</p>
+<pre><code><span class="c">1 — заголовок Link (RFC 8288)</span>
+<span class="h">Link</span>: &lt;https://api.example.com/users?page=3&amp;limit=2&gt;; rel="next",
+      &lt;https://api.example.com/users?page=1&amp;limit=2&gt;; rel="prev",
+      &lt;https://api.example.com/users?page=1&amp;limit=2&gt;; rel="first",
+      &lt;https://api.example.com/users?page=2&amp;limit=2&gt;; rel="last"
+<span class="h">X-Total-Count</span>: 4
+
+<span class="c">2 — обёртка в теле</span>
+{ "data": [ … ], "meta": { "page": 2, "limit": 20, "total": 4213 } }
+
+<span class="c">3 — курсор в теле</span>
+{ "data": [ … ], "next_cursor": "eyJpZCI6NDJ9" }</code></pre>
+<div class="note"><b class="hd">Чем хорош Link</b><p>Клиенту не нужно уметь собирать адреса — он просто идёт по готовой ссылке <code>rel="next"</code>, пока она есть. Это тот самый принцип HATEOAS в самом полезном его проявлении. Обёртка в теле удобнее, когда клиент — интерфейс, которому нужно нарисовать номера страниц.</p></div>
+
+<h2>Границы, которые надо задать явно</h2>
+<ul>
+<li><b>Значение по умолчанию</b> для <code>limit</code>: клиент, забывший параметр, не должен получить всю базу.</li>
+<li><b>Максимум:</b> <code>limit=1000000</code> должен приводить к <span class="st c4">400</span>, а не к падению сервиса.</li>
+<li><b>Проверка типа:</b> <code>limit=abc</code> — тоже <span class="st c4">400</span>, а не молчаливая подстановка умолчания.</li>
+<li><b>Устойчивый порядок:</b> без явной сортировки база вправе вернуть строки в любом порядке, и пагинация поедет. Сортировка по уникальному полю обязательна.</li>
+</ul>
+<div class="note warn"><b class="hd">Что стоит проверять в тестах</b><p>Не только «первая страница пришла». Проверяйте: сумма страниц равна <code>X-Total-Count</code>; между страницами нет пересечений; последняя страница не содержит <code>rel="next"</code>; выход за последнюю страницу даёт пустой список, а не ошибку; недопустимый <code>limit</code> даёт 400.</p></div>
+`,
+quiz:[
+ {q:"Почему пагинация по смещению «теряет» и дублирует записи?",
+  opts:["Из-за кэширования","Вставки и удаления сдвигают позиции между запросами страниц","Из-за ограничения limit","Из-за сортировки"],
+  a:1, why:"Смещение считает от начала. Любое изменение выше по списку сдвигает всё остальное, и при обходе страниц элементы повторяются или пропадают."},
+ {q:"Что означает <code>rel=\"next\"</code> в заголовке <code>Link</code>?",
+  opts:["Адрес следующей страницы","Общее количество записей","Номер текущей страницы","Ссылку на документацию"],
+  a:0, why:"Клиент идёт по этой ссылке, пока она присутствует, и не собирает адреса сам."},
+ {q:"Клиент прислал <code>?limit=1000000</code>. Как правильно поступить?",
+  opts:["Отдать всё","Вернуть 400 с указанием максимума","Молча подставить умолчание","Вернуть 413"],
+  a:1, why:"Явная ошибка честнее молчаливой подмены: клиент узнает о границе. Молчаливое усечение приводит к тому, что клиент считает выдачу полной."},
+ {q:"Когда курсорная пагинация предпочтительнее?",
+  opts:["Когда нужны номера страниц в интерфейсе","Для больших и часто меняющихся наборов, а также для полного обхода","Когда данных мало","Когда нужен общий счётчик"],
+  a:1, why:"Курсор устойчив к вставкам и не дорожает на больших смещениях. Ценой становится невозможность прыгнуть на произвольную страницу."},
+ {q:"Что обязательно для корректной пагинации на стороне базы?",
+  opts:["Индекс по всем полям","Устойчивый порядок сортировки по уникальному полю","Транзакция на весь обход","Кэширование страниц"],
+  a:1, why:"Без явного и однозначного порядка база вправе вернуть строки как угодно, и страницы перестанут стыковаться."},
+ {q:"Запрос страницы за пределами последней. Что вернуть?",
+  opts:["404","200 с пустым массивом","400","204"],
+  a:1, why:"Коллекция существует, просто на этой странице ничего нет. Это тот же случай, что и фильтр без совпадений."}
+],
+labs:[
+ {id:"7a", title:"Пройти по страницам",
+  brief:"<h3>Пройти по страницам</h3><p>Разберите коллекцию на страницы и проверьте границы.</p><ul><li>Возьмите по два: <code>GET /users?limit=2</code> — посмотрите заголовки <code>X-Total-Count</code> и <code>Link</code></li><li>Перейдите на вторую: <code>GET /users?limit=2&page=2</code> — в <code>Link</code> появится <code>rel=\"prev\"</code></li><li>Запросите страницу за пределами: <code>GET /users?limit=2&page=99</code> — придёт <span class='st c2'>200</span> с пустым массивом</li><li>Нарушьте границу: <code>GET /users?limit=500</code> → <span class='st c4'>400</span></li><li>Передайте не число: <code>GET /users?limit=abc</code> → <span class='st c4'>400</span></li></ul>",
+  hint:"В заголовке Link ссылки перечислены через запятую, у каждой указано rel. Он приходит в каждом ответе коллекции.",
+  setup(){},
+  checks:[
+   {label:"Запрошена страница с <code>limit</code> и получен <code>X-Total-Count</code>", test:s=>did(s,(q,r)=>q.query.limit&&r.headers["X-Total-Count"])},
+   {label:"Получена вторая страница со ссылкой <code>rel=\"prev\"</code>", test:s=>did(s,(q,r)=>q.query.page&&+q.query.page>1&&r.status===200&&/rel="prev"/.test(r.headers["Link"]||""))},
+   {label:"Страница за пределами вернула пустой массив с <span class='st c2'>200</span>", test:s=>did(s,(q,r)=>q.query.page&&+q.query.page>2&&r.status===200&&Array.isArray(r.body)&&r.body.length===0)},
+   {label:"Слишком большой <code>limit</code> дал <span class='st c4'>400</span>", test:s=>did(s,(q,r)=>r.status===400&&q.query.limit&&+q.query.limit>100)},
+   {label:"Нечисловой <code>limit</code> дал <span class='st c4'>400</span>", test:s=>did(s,(q,r)=>r.status===400&&q.query.limit&&isNaN(+q.query.limit))}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 8 */
+{
+n:8, id:"errors", title:"Тела и ошибки", sub:"Валидация и problem+json",
+lede:"Как выглядит хорошее тело ошибки, чем 400 отличается от 422 и почему клиенту нужен машиночитаемый ответ.",
+theory:`
+<p>Ошибка — часть контракта API, а не досадная случайность. Клиент должен уметь понять из ответа: что пошло не так, по чьей вине, что делать дальше и какое именно поле виновато.</p>
+
+<h2>Стандартный формат: problem+json</h2>
+<p>RFC 9457 описывает единую форму тела ошибки. Тип содержимого — <code>application/problem+json</code>.</p>
+<pre><code>HTTP/1.1 <span class="m">422</span> Unprocessable Content
+<span class="h">Content-Type</span>: application/problem+json
+
+{
+  <span class="h">"type"</span>:   <span class="s">"https://api.example.com/probs/validation-failed"</span>,
+  <span class="h">"title"</span>:  <span class="s">"Validation Failed"</span>,
+  <span class="h">"status"</span>: <span class="m">422</span>,
+  <span class="h">"detail"</span>: <span class="s">"Тело запроса не прошло проверку."</span>,
+  <span class="h">"errors"</span>: [
+    { <span class="h">"field"</span>: <span class="s">"email"</span>, <span class="h">"code"</span>: <span class="s">"invalid_format"</span> }
+  ]
+}</code></pre>
+<div class="tw"><table>
+<tr><th>Поле</th><th>Назначение</th></tr>
+<tr><td><code>type</code></td><td>Идентификатор вида проблемы. По нему клиент ветвит логику</td></tr>
+<tr><td><code>title</code></td><td>Короткое название, одинаковое для всех случаев этого типа</td></tr>
+<tr><td><code>status</code></td><td>Дублирует код ответа — удобно, когда тело сохранили отдельно</td></tr>
+<tr><td><code>detail</code></td><td>Подробности <em>этого</em> случая. Можно показывать человеку</td></tr>
+<tr><td>любые свои</td><td>Разрешено добавлять: <code>errors</code>, <code>current_etag</code>, <code>retry_after</code></td></tr>
+</table></div>
+
+<div class="note ok"><b class="hd">Ветвиться надо по коду и type, а не по тексту</b><p><code>detail</code> — для человека: его переведут, перепишут, уточнят. Программа должна опираться на код состояния и на <code>type</code> либо <code>code</code> внутри <code>errors</code>. Клиент, разбирающий сообщение регулярным выражением, сломается на первом же улучшении формулировки.</p></div>
+
+<h2>400 или 422</h2>
+<div class="tw"><table>
+<tr><th>Ситуация</th><th>Код</th></tr>
+<tr><td>Тело не является корректным JSON</td><td><span class="st c4">400</span></td></tr>
+<tr><td>Параметр строки запроса не разбирается: <code>limit=abc</code></td><td><span class="st c4">400</span></td></tr>
+<tr><td>JSON корректен, но нет обязательного поля</td><td><span class="st c4">422</span></td></tr>
+<tr><td>Значение поля недопустимо: почта без собаки</td><td><span class="st c4">422</span></td></tr>
+<tr><td>Значение корректно, но конфликтует с состоянием: почта уже занята</td><td><span class="st c4">409</span></td></tr>
+</table></div>
+<p>Грубо: 400 — «не смог разобрать», 422 — «разобрал, но не принимаю», 409 — «принял бы, но мешает то, что уже есть».</p>
+
+<h2>Что должно быть в хорошем ответе об ошибке</h2>
+<ul>
+<li><b>Все</b> ошибки сразу, а не первая попавшаяся. Иначе пользователь исправляет форму по одному полю за круг.</li>
+<li><b>Машиночитаемый код</b> у каждой ошибки: <code>required</code>, <code>invalid_format</code>, <code>too_long</code>.</li>
+<li><b>Указание на поле</b> — чтобы интерфейс подсветил нужный ввод.</li>
+<li><b>Идентификатор запроса</b> для разбора инцидентов.</li>
+</ul>
+<div class="note trap"><b class="hd">Чего быть не должно</b><p>Стектрейсов, имён таблиц и SQL-запросов, внутренних адресов, полного текста исключения. Всё это — подарок атакующему и шум для клиента. Внутренние подробности идут в журнал, наружу — <code>type</code>, <code>title</code>, <code>detail</code> и идентификатор запроса, по которому вы найдёте подробности сами.</p></div>
+
+<h2>Тела успешных ответов</h2>
+<ul>
+<li><b>Создание</b> возвращает созданный ресурс целиком — клиенту нужны присвоенный идентификатор и значения по умолчанию.</li>
+<li><b>Обновление</b> возвращает результат: так клиент видит, что именно сохранилось, включая нормализацию.</li>
+<li><b>Удаление</b> обычно ничего не возвращает: <span class="st c2">204</span>.</li>
+<li><b>Коллекция</b> — массив или объект с обёрткой. Обёртка удобнее: в неё помещаются метаданные пагинации, и формат не придётся ломать позже.</li>
+</ul>
+`,
+quiz:[
+ {q:"Клиент прислал <code>{oops</code> вместо JSON. Какой код?",
+  opts:["400","422","415","409"],
+  a:0, why:"Сервер не смог разобрать тело — это синтаксическая ошибка, 400. Код 422 применяется, когда JSON корректен, но содержимое неприемлемо."},
+ {q:"Какой тип содержимого у стандартизованного тела ошибки?",
+  opts:["<code>application/json</code>","<code>application/problem+json</code>","<code>application/error+json</code>","<code>text/plain</code>"],
+  a:1, why:"RFC 9457 определяет <code>application/problem+json</code> с полями type, title, status, detail."},
+ {q:"На что клиенту следует опираться при разборе ошибки?",
+  opts:["На текст поля detail","На код состояния и поле type или code","На порядок полей","На длину ответа"],
+  a:1, why:"Текст предназначен человеку и меняется при первой же правке формулировок. Машиночитаемыми являются код состояния и идентификаторы."},
+ {q:"Форма содержит три некорректных поля. Что вернуть?",
+  opts:["Первую ошибку — остальные клиент найдёт потом","Все три сразу в массиве errors","Только количество ошибок","422 без тела"],
+  a:1, why:"Иначе пользователь исправляет по одному полю за круг, а каждый круг — это ещё один запрос."},
+ {q:"Что недопустимо включать в тело ошибки?",
+  opts:["Идентификатор запроса","Стектрейс и текст SQL-запроса","Имя поля","Машиночитаемый код"],
+  a:1, why:"Внутренние подробности раскрывают устройство системы. Их место в журнале, а наружу отдают идентификатор запроса."},
+ {q:"Почта уже занята другим пользователем. Какой код?",
+  opts:["400","409","422","403"],
+  a:1, why:"Значение синтаксически и семантически корректно, но конфликтует с текущим состоянием — это 409 Conflict."}
+],
+labs:[
+ {id:"8a", title:"Разобрать ошибку валидации",
+  brief:"<h3>Разобрать ошибку валидации</h3><p>Пройдите путь от неверного запроса к успешному, наблюдая, как меняется код.</p><ul><li>Получите токен</li><li>Отправьте битый JSON: <code>-d '{oops'</code> → <span class='st c4'>400</span></li><li>Отправьте пустой объект <code>{}</code> → <span class='st c4'>422</span>, в теле массив <code>errors</code> с обоими полями</li><li>Отправьте почту без собаки → снова <span class='st c4'>422</span>, но код ошибки другой</li><li>Исправьте и создайте → <span class='st c2'>201</span></li><li>Повторите с той же почтой → <span class='st c4'>409</span></li></ul><p>Сравните <code>Content-Type</code> у ошибок и у успеха.</p>",
+  hint:"Не забудьте -H 'Content-Type: application/json' — иначе получите 415 вместо интересующих вас кодов.",
+  setup(){},
+  checks:[
+   {label:"Битый JSON дал <span class='st c4'>400</span>", test:s=>did(s,(q,r)=>r.status===400&&/^\/users$/.test(q.path))},
+   {label:"Пустое тело дало <span class='st c4'>422</span> со списком <code>errors</code>", test:s=>did(s,(q,r)=>r.status===422&&r.body&&Array.isArray(r.body.errors)&&r.body.errors.length>=2)},
+   {label:"Неверный формат почты дал код <code>invalid_format</code>", test:s=>did(s,(q,r)=>r.status===422&&r.body&&(r.body.errors||[]).some(e=>e.code==="invalid_format"))},
+   {label:"Тело ошибки пришло как <code>application/problem+json</code>", test:s=>did(s,(q,r)=>r.status>=400&&(r.headers["Content-Type"]||"").includes("problem+json"))},
+   {label:"Корректный запрос создал ресурс (<span class='st c2'>201</span>)", test:s=>did(s,(q,r)=>r.status===201)},
+   {label:"Повтор той же почты дал <span class='st c4'>409</span>", test:s=>did(s,(q,r)=>r.status===409)}
+  ]}
+]
+},
+/* ------------------------------------------------ 9 */
+{
+n:9, id:"auth", title:"Аутентификация", sub:"Basic, Bearer, области доступа",
+lede:"Кто спрашивает и что ему можно. Схемы авторизации, разница между 401 и 403 и что нельзя класть в URL.",
+theory:`
+<p>REST не хранит состояние диалога — значит, каждый запрос обязан <b>сам</b> нести доказательство личности. Сессии на сервере не годятся: они и есть состояние.</p>
+
+<h2>Схемы, которые встречаются</h2>
+<div class="tw"><table>
+<tr><th>Схема</th><th>Как выглядит</th><th>Где уместна</th></tr>
+<tr><td><b>Basic</b></td><td><code>Authorization: Basic ZGVtbzpzZWNyZXQ=</code></td><td>Внутренние сервисы, стенды. Base64 — это <b>не шифрование</b>, только по HTTPS</td></tr>
+<tr><td><b>Bearer</b></td><td><code>Authorization: Bearer tok_9f2c…</code></td><td>Основной способ. Токен получают отдельным запросом</td></tr>
+<tr><td><b>API-ключ</b></td><td><code>X-API-Key: k_live_…</code></td><td>Межсервисное взаимодействие. Обычно не истекает — тем опаснее утечка</td></tr>
+<tr><td><b>OAuth 2.0</b></td><td>протокол <em>получения</em> Bearer-токена</td><td>Когда нужно действовать от имени пользователя, не зная его пароля</td></tr>
+<tr><td><b>mTLS</b></td><td>клиентский сертификат</td><td>Строго внутренние, высокодоверенные каналы</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Basic — это кодирование, а не шифрование</b><p><code>ZGVtbzpzZWNyZXQ=</code> расшифровывается в <code>demo:secret</code> любым онлайн-декодером. Никакой защиты сам по себе он не даёт — вся защита в HTTPS. И потому пароль улетает в каждом запросе, а не один раз.</p></div>
+
+<h2>OAuth 2.0 в двух абзацах</h2>
+<p>Задача: приложение хочет читать ваши данные в другом сервисе, но не должно узнать ваш пароль. Решение: вас перенаправляют на сервер авторизации, вы входите там, приложение получает <b>токен доступа</b> с ограниченным набором прав и сроком жизни.</p>
+<p>Для API это означает: сервер проверяет токен и его <b>области доступа</b> (scopes). Область — это ответ на вопрос «что этому токену разрешено»: <code>read</code>, <code>write</code>, <code>orders:read</code>. Один и тот же пользователь с разными токенами имеет разные права.</p>
+
+<h2>401 или 403 — решающий вопрос</h2>
+<figure class="fig">
+<svg viewBox="0 0 620 172" role="img" aria-label="Различие между 401 и 403">
+ <g font-family="var(--fm)" font-size="10">
+  <rect x="150" y="8" width="320" height="34" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="310" y="30" text-anchor="middle" fill="var(--ink)">Пришёл запрос</text>
+  <path d="M310 44v14" stroke="var(--ink3)"/><path d="M310 58l-4-7h8z" fill="var(--ink3)"/>
+  <rect x="150" y="60" width="320" height="34" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="310" y="82" text-anchor="middle" fill="var(--ink)">Личность установлена?</text>
+  <path d="M150 77H60v33" stroke="var(--s4)" fill="none"/><path d="M60 110l-4-7h8z" fill="var(--s4)"/>
+  <text x="95" y="72" font-size="9" fill="var(--s4)">нет</text>
+  <path d="M470 77h90v33" stroke="var(--ink3)" fill="none"/><path d="M560 110l-4-7h8z" fill="var(--ink3)"/>
+  <text x="505" y="72" font-size="9" fill="var(--ink3)">да</text>
+
+  <rect x="0" y="112" width="180" height="46" rx="3" fill="var(--s4s)" stroke="var(--s4)"/>
+  <text x="90" y="131" text-anchor="middle" font-weight="700" fill="var(--s4)">401 Unauthorized</text>
+  <text x="90" y="147" text-anchor="middle" font-size="9" fill="var(--ink2)">+ WWW-Authenticate</text>
+
+  <rect x="230" y="112" width="180" height="46" rx="3" fill="var(--surf3)" stroke="var(--line)"/>
+  <text x="320" y="131" text-anchor="middle" fill="var(--ink)">Прав хватает?</text>
+  <text x="320" y="147" text-anchor="middle" font-size="9" fill="var(--ink3)">нет → 403 · да → выполняем</text>
+
+  <rect x="440" y="112" width="180" height="46" rx="3" fill="var(--s4s)" stroke="var(--s4)"/>
+  <text x="530" y="131" text-anchor="middle" font-weight="700" fill="var(--s4)">403 Forbidden</text>
+  <text x="530" y="147" text-anchor="middle" font-size="9" fill="var(--ink2)">повторять бессмысленно</text>
+ </g>
+</svg>
+<figcaption>Практический признак: если после повторного входа результат изменится — это 401. Если нет — 403.</figcaption>
+</figure>
+<p>Ответ <span class="st c4">401</span> <b>обязан</b> нести заголовок <code>WWW-Authenticate</code> с указанием схемы. Без него клиент не знает, как именно представиться.</p>
+
+<h2>Чего нельзя делать</h2>
+<ul>
+<li><b>Класть токен в строку запроса.</b> <code>?token=…</code> оседает в журналах сервера, прокси и в заголовке <code>Referer</code>. Место токена — в заголовке.</li>
+<li><b>Возвращать 200 при неудачной аутентификации.</b> Клиентские библиотеки не поймут, что надо обновить токен.</li>
+<li><b>Раскрывать, что именно не так.</b> «Пользователь не найден» против «неверный пароль» — подарок для перебора. Ответ один: «неверные учётные данные».</li>
+<li><b>Выдавать вечные токены.</b> Ограниченный срок жизни плюс токен обновления — необходимый минимум.</li>
+</ul>
+<div class="note ok"><b class="hd">Что проверять в тестах на авторизацию</b><p>Запрос без токена даёт 401; с истёкшим — 401; с токеном другого пользователя — 403 или 404; с недостаточной областью — 403; токен не появляется в журналах и в адресе; после выхода старый токен перестаёт работать.</p></div>
+`,
+quiz:[
+ {q:"Токен корректен, но у него нет нужной области доступа. Какой код?",
+  opts:["401","403","400","404"],
+  a:1, why:"Личность установлена, прав не хватает — 403. Повторный вход ничего не изменит, потому что дело не в личности."},
+ {q:"Что обязательно в ответе 401?",
+  opts:["<code>Allow</code>","<code>WWW-Authenticate</code> с указанием схемы","<code>Retry-After</code>","<code>Location</code>"],
+  a:1, why:"Без него клиент не знает, каким способом представляться. Это требование спецификации, а не пожелание."},
+ {q:"Насколько защищает схема Basic сама по себе?",
+  opts:["Шифрует пароль","Никак: base64 обратим, защита только от HTTPS","Использует одноразовые коды","Защищает от перебора"],
+  a:1, why:"Base64 — кодирование, а не шифрование. По открытому каналу Basic равносилен передаче пароля открытым текстом, причём в каждом запросе."},
+ {q:"Почему нельзя передавать токен в строке запроса?",
+  opts:["Слишком длинно","Он попадает в журналы серверов, прокси и в заголовок Referer","Так запрещено спецификацией","Не поддерживается браузерами"],
+  a:1, why:"Строка запроса пишется в журналы по умолчанию и утекает вовне через Referer. Заголовки в журналы обычно не пишутся."},
+ {q:"Что такое область доступа (scope)?",
+  opts:["Срок жизни токена","Набор прав, ограничивающий, что этим токеном можно делать","Идентификатор пользователя","Домен, для которого токен выдан"],
+  a:1, why:"Один и тот же пользователь может иметь токен только на чтение и токен на запись — области ограничивают именно действия."},
+ {q:"Вход не удался. Что вернуть в теле?",
+  opts:["«Пользователь не найден» или «неверный пароль» — что именно произошло","Одинаковое сообщение о неверных учётных данных","Список похожих логинов","Подсказку к паролю"],
+  a:1, why:"Разные сообщения позволяют перебором выяснить, какие учётные записи существуют. Ответ должен быть одинаковым в обоих случаях."}
+],
+labs:[
+ {id:"9a", title:"Получить и применить токен",
+  brief:"<h3>Получить и применить токен</h3><p>Полный цикл авторизации.</p><ul><li>Попробуйте изменить пользователя без токена: <code>PATCH /users/2 …</code> → <span class='st c4'>401</span></li><li>Ошибитесь паролем при получении токена → <span class='st c4'>401</span>, и заметьте: сервер не говорит, что именно неверно</li><li>Получите токен с верными данными <code>demo</code> / <code>secret</code></li><li>Повторите <code>PATCH</code> с заголовком <code>Authorization: Bearer …</code> → <span class='st c2'>200</span></li></ul>",
+  hint:"PATCH требует Content-Type: application/json и тело, например {\"role\":\"user\"}.",
+  setup(){},
+  checks:[
+   {label:"Изменение без токена дало <span class='st c4'>401</span>", test:s=>did(s,(q,r)=>r.status===401&&q.method!=="POST")},
+   {label:"Неверный пароль дал <span class='st c4'>401</span>", test:s=>did(s,(q,r)=>/auth\/token/.test(q.path)&&r.status===401)},
+   {label:"Токен получен", test:s=>Object.keys(s.tokens).length>0},
+   {label:"С токеном изменение прошло (<span class='st c2'>200</span>)", test:s=>did(s,(q,r)=>["PATCH","PUT"].includes(q.method)&&r.status===200)}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 10 */
+{
+n:10, id:"cache", title:"Кэширование", sub:"ETag и условные запросы",
+lede:"Как не пересылать то, что не изменилось, и как не затереть чужие правки. Оба механизма стоят на одном заголовке.",
+theory:`
+<p><code>ETag</code> — метка версии представления. Сервер выдаёт её вместе с ресурсом, клиент возвращает обратно, и на этом строятся сразу две разные вещи: экономия трафика и защита от гонок.</p>
+
+<h2>Механизм первый: не присылай, если не менялось</h2>
+<pre><code><span class="c">1. обычное чтение</span>
+GET /users/1
+→ 200 OK, <span class="h">ETag</span>: <span class="s">"u1-v1"</span>, тело 240 байт
+
+<span class="c">2. повторное чтение с условием</span>
+GET /users/1
+<span class="h">If-None-Match</span>: <span class="s">"u1-v1"</span>
+→ <span class="m">304</span> Not Modified, тела нет</code></pre>
+<p>Клиент оставляет в кэше то, что уже скачал, сервер экономит трафик. Ответ <span class="st c3">304</span> не несёт тела — в этом и смысл.</p>
+
+<h2>Механизм второй: не перезаписывай, если изменилось</h2>
+<pre><code><span class="c">1. читаем и запоминаем версию</span>
+GET /users/1 → 200, <span class="h">ETag</span>: <span class="s">"u1-v1"</span>
+
+<span class="c">2. кто-то другой успел изменить ресурс: теперь "u1-v2"</span>
+
+<span class="c">3. пробуем записать поверх прочитанного</span>
+PATCH /users/1
+<span class="h">If-Match</span>: <span class="s">"u1-v1"</span>
+→ <span class="m">412</span> Precondition Failed</code></pre>
+<div class="note ok"><b class="hd">Это называется оптимистичной блокировкой</b><p>Ресурс не запирается. Вместо этого запись выполняется только при условии «версия всё ещё та, которую я читал». Если условие нарушено, клиент получает <span class="st c4">412</span>, перечитывает ресурс и решает, что делать: слить изменения или спросить пользователя. Без этого механизма два одновременных редактирования молча затирают друг друга — выигрывает тот, кто записал последним.</p></div>
+
+<h2>Управление кэшем</h2>
+<div class="tw"><table>
+<tr><th>Директива <code>Cache-Control</code></th><th>Смысл</th></tr>
+<tr><td><code>no-store</code></td><td>Не сохранять вообще. Для персональных и платёжных данных</td></tr>
+<tr><td><code>no-cache</code></td><td>Сохранять можно, но перед выдачей обязательно переспросить. <b>Не</b> «не кэшировать»</td></tr>
+<tr><td><code>private</code></td><td>Только браузер пользователя. Промежуточные кэши — мимо</td></tr>
+<tr><td><code>public</code></td><td>Можно кэшировать и общим прокси</td></tr>
+<tr><td><code>max-age=60</code></td><td>Свежо 60 секунд, всё это время можно отдавать без запроса</td></tr>
+<tr><td><code>must-revalidate</code></td><td>После истечения срока — обязательно проверить, а не отдавать протухшее</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">no-cache не означает «не кэшировать»</b><p>Он означает «кэшируй, но каждый раз спрашивай, не устарело ли». Запрет на хранение — это <code>no-store</code>. Ошибка стоит дорого в обе стороны: либо персональные данные оседают в общем кэше, либо трафик не экономится там, где мог бы.</p></div>
+
+<h2>Сильные и слабые метки</h2>
+<p><code>ETag: "abc"</code> — сильная: представления совпадают байт в байт. <code>ETag: W/"abc"</code> — слабая: содержимое эквивалентно по смыслу, но байты могут отличаться (например, изменился порядок полей). Слабую нельзя использовать в <code>If-Match</code> для условной записи — только для проверки свежести.</p>
+
+<h2>Как это выглядит в тестах</h2>
+<ul>
+<li>Прочитать ресурс, взять <code>ETag</code>, повторить с <code>If-None-Match</code> — ожидать <span class="st c3">304</span> и отсутствие тела.</li>
+<li>Изменить ресурс, снова прочитать — ожидать <b>другой</b> <code>ETag</code>.</li>
+<li>Записать со <b>старым</b> <code>If-Match</code> — ожидать <span class="st c4">412</span>.</li>
+<li>Проверить, что персональные ответы приходят с <code>Cache-Control: private</code> или <code>no-store</code>.</li>
+</ul>
+`,
+quiz:[
+ {q:"Клиент прислал <code>If-None-Match</code> с актуальной меткой. Что вернёт сервер?",
+  opts:["200 с телом","304 без тела","412","204"],
+  a:1, why:"304 Not Modified — представление не изменилось, тело пересылать незачем. Именно ради экономии всё и затевалось."},
+ {q:"Для чего служит <code>If-Match</code>?",
+  opts:["Для кэширования ответов","Для условной записи: изменить только если ресурс не менялся с момента чтения","Для согласования формата","Для аутентификации"],
+  a:1, why:"Это оптимистичная блокировка. При несовпадении версии сервер отвечает 412 и запись не выполняется."},
+ {q:"Что означает <code>Cache-Control: no-cache</code>?",
+  opts:["Не сохранять ответ","Сохранять можно, но перед выдачей обязательно проверить актуальность","Кэшировать навсегда","Кэшировать только на сервере"],
+  a:1, why:"Запрет на сохранение — это <code>no-store</code>. Директива <code>no-cache</code> требует обязательной перепроверки перед использованием сохранённого."},
+ {q:"Два клиента одновременно правят один ресурс, условных заголовков нет. Что произойдёт?",
+  opts:["Сервер вернёт 409","Изменения второго затрут изменения первого молча","Оба изменения объединятся","Второй получит 412"],
+  a:1, why:"Побеждает записавший последним, и первый об этом не узнает. Именно от этого защищает связка ETag и If-Match."},
+ {q:"Чем слабая метка <code>W/\"abc\"</code> отличается от сильной?",
+  opts:["Она короче","Означает смысловую эквивалентность, а не побайтовое совпадение, и не годится для условной записи","Работает только с GET","Не участвует в кэшировании"],
+  a:1, why:"Для проверки свежести слабой метки достаточно. Для условной записи нужна побайтовая точность, то есть сильная метка."},
+ {q:"Какой ответ на персональные данные пользователя правильнее?",
+  opts:["<code>Cache-Control: public, max-age=3600</code>","<code>Cache-Control: private</code> или <code>no-store</code>","Без заголовка вовсе","<code>Cache-Control: no-cache</code> обязательно"],
+  a:1, why:"Директива <code>public</code> разрешает общим прокси хранить чужие персональные данные и отдавать их другим."}
+],
+labs:[
+ {id:"10a", title:"304 и экономия трафика",
+  brief:"<h3>304 и экономия трафика</h3><p>Пройдите полный цикл условного чтения.</p><ul><li>Прочитайте пользователя: <code>GET /users/1</code> — запомните значение <code>ETag</code> из ответа</li><li>Повторите с условием: <code>GET /users/1 -H 'If-None-Match: \"u1-v1\"'</code> → <span class='st c3'>304</span> без тела</li><li>Отправьте заведомо неверную метку → снова <span class='st c2'>200</span> с телом</li></ul><p>Кавычки вокруг метки — часть её значения, их нужно передавать.</p>",
+  hint:"ETag выглядит как \"u1-v1\" вместе с кавычками. Внутри одинарных кавычек заголовка двойные писать можно.",
+  setup(){},
+  checks:[
+   {label:"Ресурс прочитан и получен <code>ETag</code>", test:s=>did(s,(q,r)=>q.method==="GET"&&/^\/users\/\d+$/.test(q.path)&&!!r.headers["ETag"])},
+   {label:"Условное чтение вернуло <span class='st c3'>304</span>", test:s=>did(s,(q,r)=>r.status===304)},
+   {label:"Ответ <span class='st c3'>304</span> пришёл без тела", test:s=>did(s,(q,r)=>r.status===304&&r.body===null)},
+   {label:"С неверной меткой снова пришло тело", test:s=>did(s,(q,r)=>!!hasHeader(q,"If-None-Match")&&r.status===200)}
+  ]},
+ {id:"10b", title:"Защита от гонки",
+  brief:"<h3>Защита от гонки</h3><p>Смоделируйте одновременное редактирование.</p><ul><li>Получите токен</li><li>Прочитайте <code>GET /users/2</code> и запомните <code>ETag</code></li><li>Измените ресурс <b>без</b> условия: <code>PATCH /users/2</code> с любым полем — версия вырастет</li><li>Теперь попробуйте записать со <b>старой</b> меткой: <code>PATCH /users/2 -H 'If-Match: \"u2-v1\"' …</code> → <span class='st c4'>412</span></li><li>Прочитайте актуальную метку и повторите с ней → <span class='st c2'>200</span></li></ul>",
+  hint:"В теле ответа 412 приходит поле current_etag с актуальным значением — по нему удобно повторить запрос.",
+  setup(){},
+  checks:[
+   {label:"Получен токен", test:s=>Object.keys(s.tokens).length>0},
+   {label:"Ресурс изменён без условия", test:s=>did(s,(q,r)=>["PATCH","PUT"].includes(q.method)&&!hasHeader(q,"If-Match")&&r.status===200)},
+   {label:"Устаревший <code>If-Match</code> дал <span class='st c4'>412</span>", test:s=>did(s,(q,r)=>r.status===412)},
+   {label:"С актуальной меткой запись прошла", test:s=>did(s,(q,r)=>!!hasHeader(q,"If-Match")&&r.status===200)}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 11 */
+{
+n:11, id:"idem", title:"Повторы и лимиты", sub:"Idempotency-Key, 429",
+lede:"Сеть теряет ответы. Как сделать так, чтобы повторный запрос не создал второй заказ, и что делать при 429.",
+theory:`
+<p>Классическая ситуация: клиент отправил <code>POST /orders</code>, соединение оборвалось. Заказ создан или нет — неизвестно. Повторить? Можно получить два заказа. Не повторять? Можно остаться без заказа вовсе.</p>
+
+<h2>Ключ идемпотентности</h2>
+<p>Решение: клиент сам генерирует уникальный ключ и присылает его с запросом. Сервер запоминает пару «ключ — результат». Повторный запрос с тем же ключом получает <b>сохранённый ответ</b>, а не создаёт новый ресурс.</p>
+<pre><code>POST /orders
+<span class="h">Idempotency-Key</span>: 9f2c8a1e-4b7d-4c11-9f0e-2a6b3c5d7e81
+<span class="h">Content-Type</span>: application/json
+
+{ <span class="h">"item"</span>: <span class="s">"desk"</span>, <span class="h">"amount"</span>: <span class="m">2</span> }
+
+→ 201 Created, Location: /orders/1
+
+<span class="c">повтор того же запроса с тем же ключом:</span>
+→ 201 Created, Location: /orders/1, <span class="h">Idempotency-Replayed</span>: true
+<span class="c">второй заказ НЕ создан</span></code></pre>
+<div class="note"><b class="hd">Ключ генерирует клиент, и это принципиально</b><p>Ключ должен пережить перезапуск клиента и оставаться тем же при повторе. Обычно это UUID, созданный <em>до</em> первой попытки и сохранённый вместе с намерением. Если генерировать ключ на каждую попытку заново, весь механизм бессмыслен.</p></div>
+<ul>
+<li>Ключ хранится ограниченное время — обычно от суток.</li>
+<li>Тот же ключ с <b>другим</b> телом — обычно <span class="st c4">409</span>: это ошибка клиента, а не повтор.</li>
+<li>Для <code>GET</code>, <code>PUT</code> и <code>DELETE</code> ключ не нужен — они идемпотентны сами по себе.</li>
+</ul>
+
+<h2>Ограничение частоты</h2>
+<p>Сервер вправе отказать, если запросов слишком много. Ответ — <span class="st c4">429</span>, и он должен объяснять, когда возвращаться.</p>
+<pre><code>HTTP/1.1 <span class="m">429</span> Too Many Requests
+<span class="h">Retry-After</span>: 37
+<span class="h">X-RateLimit-Limit</span>: 100
+<span class="h">X-RateLimit-Remaining</span>: 0
+<span class="h">X-RateLimit-Reset</span>: 1786412400</code></pre>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Что сообщает</th></tr>
+<tr><td><code>Retry-After</code></td><td>Через сколько секунд можно повторить. Иногда — дата</td></tr>
+<tr><td><code>X-RateLimit-Limit</code></td><td>Квота на окно</td></tr>
+<tr><td><code>X-RateLimit-Remaining</code></td><td>Сколько осталось</td></tr>
+<tr><td><code>X-RateLimit-Reset</code></td><td>Когда квота обновится</td></tr>
+</table></div>
+
+<h2>Как правильно повторять</h2>
+<ul>
+<li><b>Уважайте <code>Retry-After</code>.</b> Он не совет, а условие возвращения.</li>
+<li><b>Экспоненциальная задержка:</b> 1 с, 2 с, 4 с, 8 с — и предел числа попыток.</li>
+<li><b>Случайный разброс.</b> Иначе тысяча клиентов, получивших 429 одновременно, вернётся тоже одновременно и добьёт сервер.</li>
+<li><b>Повторяйте только осмысленное:</b> 429, 503, сетевые сбои и таймауты. Класс 4xx (кроме 429) повторять бесполезно — запрос не станет правильнее.</li>
+</ul>
+<div class="note trap"><b class="hd">Ошибка, которая рушит сервисы</b><p>Повтор без задержки в цикле. Сервер, попросивший подождать, получает вместо паузы удвоенную нагрузку. Так локальная перегрузка превращается в отказ всей системы: клиенты не дают ей восстановиться.</p></div>
+
+<h2>Что проверять в тестах</h2>
+<ul>
+<li>Повтор с тем же ключом не создаёт второй ресурс и возвращает тот же идентификатор.</li>
+<li>Тот же ключ с другим телом отвергается.</li>
+<li>Ответ <span class="st c4">429</span> содержит <code>Retry-After</code>.</li>
+<li>После указанного времени запрос снова проходит.</li>
+</ul>
+`,
+quiz:[
+ {q:"Кто должен генерировать значение <code>Idempotency-Key</code>?",
+  opts:["Сервер и возвращать его клиенту","Клиент — до первой попытки, и переиспользовать при повторах","Прокси","Оно вычисляется из тела запроса"],
+  a:1, why:"Ключ должен быть одинаковым у первой попытки и у повтора. Если генерировать заново на каждую попытку, механизм не работает."},
+ {q:"Повторный POST с тем же ключом идемпотентности. Что вернёт сервер?",
+  opts:["409","Сохранённый ответ первой попытки, не создавая второй ресурс","201 с новым идентификатором","429"],
+  a:1, why:"В этом и смысл: клиент получает тот же результат, а второго заказа не появляется."},
+ {q:"Какой заголовок обязан сопровождать 429?",
+  opts:["<code>Allow</code>","<code>Retry-After</code>","<code>WWW-Authenticate</code>","<code>ETag</code>"],
+  a:1, why:"Без него клиенту остаётся угадывать, когда возвращаться, — и он будет угадывать плохо."},
+ {q:"Зачем добавлять случайный разброс к задержке перед повтором?",
+  opts:["Чтобы запутать сервер","Чтобы клиенты не вернулись все одновременно и не добили сервис","Для безопасности","Так требует спецификация"],
+  a:1, why:"Синхронный возврат тысячи клиентов создаёт ту же пиковую нагрузку, из-за которой сработало ограничение."},
+ {q:"Какие ответы имеет смысл повторять?",
+  opts:["Любые 4xx","429, 503, сетевые сбои и таймауты","Все, кроме 200","Только 500"],
+  a:1, why:"Класс 4xx означает ошибку в запросе — повтор ничего не изменит. Исключение — 429, где явно сказано «позже можно»."},
+ {q:"Нужен ли <code>Idempotency-Key</code> для <code>PUT</code>?",
+  opts:["Да, обязательно","Нет: PUT идемпотентен сам по себе","Только при обновлении части полей","Только для новых ресурсов"],
+  a:1, why:"Повторный PUT приводит систему в то же состояние. Ключ нужен там, где повтор создаёт новую сущность, — то есть для POST."}
+],
+labs:[
+ {id:"11a", title:"Ключ идемпотентности",
+  brief:"<h3>Ключ идемпотентности</h3><p>Сравните поведение POST с ключом и без него.</p><ul><li>Получите токен</li><li>Создайте заказ <b>без</b> ключа: <code>POST /orders … -d '{\"item\":\"desk\",\"amount\":2}'</code></li><li>Повторите ту же команду — появится <b>второй</b> заказ</li><li>Теперь создайте заказ <b>с</b> ключом: добавьте <code>-H 'Idempotency-Key: k1'</code></li><li>Повторите с тем же ключом — придёт <code>Idempotency-Replayed: true</code>, третьего заказа не будет</li></ul><p>Следите за счётчиком заказов в панели справа.</p>",
+  hint:"Ключ — произвольная строка, главное чтобы совпадала при повторе. Тело: {\"item\":\"chair\",\"amount\":1}",
+  setup(){},
+  checks:[
+   {label:"Получен токен", test:s=>Object.keys(s.tokens).length>0},
+   {label:"Создано два заказа без ключа", test:s=>s.log.filter(e=>e.req.method==="POST"&&/^\/orders$/.test(e.req.path)&&e.res.status===201&&!hasHeader(e.req,"Idempotency-Key")).length>=2},
+   {label:"Заказ создан с ключом идемпотентности", test:s=>did(s,(q,r)=>!!hasHeader(q,"Idempotency-Key")&&r.status===201&&!r.headers["Idempotency-Replayed"])},
+   {label:"Повтор с тем же ключом вернул сохранённый ответ", test:s=>did(s,(q,r)=>r.headers["Idempotency-Replayed"]==="true")},
+   {label:"Второй заказ по тому же ключу не создан", test:s=>{
+     const withKey=s.log.filter(e=>e.req.method==="POST"&&/^\/orders$/.test(e.req.path)&&hasHeader(e.req,"Idempotency-Key")&&e.res.status===201);
+     const ids=new Set(withKey.map(e=>e.res.body&&e.res.body.id));
+     return withKey.length>=2 && ids.size===1;}}
+  ]},
+ {id:"11b", title:"Упереться в лимит",
+  brief:"<h3>Упереться в лимит</h3><p>На этом задании сервер ограничен <b>пятью запросами в минуту</b>.</p><ul><li>Отправьте пять любых запросов — все пройдут</li><li>Шестой вернёт <span class='st c4'>429</span></li><li>Найдите в ответе <code>Retry-After</code> и <code>X-RateLimit-*</code></li></ul><p>Обратите внимание: лимит считает <b>все</b> запросы, включая неудачные. Это осознанное решение — иначе перебором можно обойти ограничение.</p>",
+  hint:"Быстрее всего — повторять GET /users стрелкой вверх и Enter.",
+  setup(s){ s.rate.limit = 5; s.rate.reset = Date.now()+60000; },
+  checks:[
+   {label:"Отправлено не менее шести запросов", test:s=>s.log.length>=6},
+   {label:"Получен <span class='st c4'>429</span>", test:s=>did(s,(q,r)=>r.status===429)},
+   {label:"В ответе есть <code>Retry-After</code>", test:s=>did(s,(q,r)=>r.status===429&&!!r.headers["Retry-After"])},
+   {label:"В ответе есть <code>X-RateLimit-Limit</code>", test:s=>did(s,(q,r)=>r.status===429&&!!r.headers["X-RateLimit-Limit"])}
+  ]}
+]
+},
+
+/* ------------------------------------------------ 12 */
+{
+n:12, id:"prod", title:"Версии и тестирование", sub:"Совместимость и проверки",
+lede:"Как менять API, не ломая клиентов, и что именно проверять тестами — с оглядкой на то, что API живёт годами.",
+theory:`
+<h2>Способы версионирования</h2>
+<div class="tw"><table>
+<tr><th>Способ</th><th>Вид</th><th>Плюсы и минусы</th></tr>
+<tr><td>В пути</td><td><code>/v3/users</code></td><td>Виден сразу, легко маршрутизировать. Формально нарушает идею постоянного идентификатора ресурса. Самый распространённый</td></tr>
+<tr><td>В заголовке</td><td><code>Accept: application/vnd.api.v3+json</code></td><td>Чище с точки зрения REST, но неудобно отлаживать и легко забыть</td></tr>
+<tr><td>В параметре</td><td><code>?version=3</code></td><td>Просто, но версия смешивается с фильтрами и теряется при копировании ссылок</td></tr>
+<tr><td>По дате</td><td><code>API-Version: 2026-08-19</code></td><td>Клиент фиксирует дату и получает поведение того дня. Требует дисциплины на сервере</td></tr>
+</table></div>
+<div class="note"><b class="hd">Лучшая версия — та, которую не пришлось выпускать</b><p>Новая мажорная версия означает поддержку двух реализаций годами. Прежде чем её выпускать, проверьте, нельзя ли обойтись совместимым изменением.</p></div>
+
+<h2>Что ломает клиентов, а что нет</h2>
+<div class="tw"><table>
+<tr><th>Совместимо</th><th>Ломает</th></tr>
+<tr><td>Добавить <b>необязательное</b> поле в ответ</td><td>Удалить или переименовать поле</td></tr>
+<tr><td>Добавить новый ресурс или метод</td><td>Изменить тип поля: строка → число</td></tr>
+<tr><td>Добавить необязательный параметр</td><td>Сделать необязательный параметр обязательным</td></tr>
+<tr><td>Добавить значение в перечисление <em>ответа</em></td><td>Ужесточить проверку: то, что раньше принималось, теперь 422</td></tr>
+<tr><td>Ослабить проверку</td><td>Изменить код ответа для той же ситуации</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Добавление значения в перечисление — коварный случай</b><p>Формально это расширение. Но клиент, у которого <code>switch</code> по статусам без ветки «иначе», сломается на новом значении. Поэтому либо в контракте сразу заявляют «список может пополняться», либо считают такое изменение ломающим.</p></div>
+
+<h2>Что проверять тестами</h2>
+<p>Тесты API отличаются от тестов интерфейса тем, что проверяют <b>контракт</b>, а не картинку. Полезно разделять уровни:</p>
+<div class="tw"><table>
+<tr><th>Уровень</th><th>Что проверяет</th><th>Пример</th></tr>
+<tr><td>Схема</td><td>Форма ответа: поля, типы, обязательность</td><td>У пользователя есть <code>id</code> типа number</td></tr>
+<tr><td>Семантика</td><td>Правильность кодов и заголовков</td><td>Создание даёт 201 и <code>Location</code></td></tr>
+<tr><td>Состояние</td><td>Что произошло на сервере</td><td>После DELETE чтение даёт 404</td></tr>
+<tr><td>Контракт</td><td>Что реализация соответствует спецификации</td><td>Ответ валиден по схеме OpenAPI</td></tr>
+</table></div>
+
+<h2>Приёмы, которые экономят время</h2>
+<ul>
+<li><b>Проверяйте код и заголовки, а не только тело.</b> Тест, смотрящий лишь в тело, пропустит смену 201 на 200 и потерю <code>Location</code>.</li>
+<li><b>Не проверяйте лишнее.</b> Жёсткое сравнение всего ответа целиком ломается от каждого нового необязательного поля — то есть от совместимого изменения.</li>
+<li><b>Проверяйте последствия.</b> Создали — прочитайте. Удалили — убедитесь, что стало 404. Ответ 201 сам по себе не доказывает, что ресурс существует.</li>
+<li><b>Изолируйте данные.</b> Тест, зависящий от чужих записей, будет падать по вторникам. Создавайте своё и убирайте за собой.</li>
+<li><b>Негативные сценарии обязательны.</b> 401, 403, 404, 422, 409 — часть контракта ровно так же, как 200.</li>
+</ul>
+<div class="note ok"><b class="hd">Связь с UI-автоматизацией</b><p>Тот же приём применяется и в браузерных тестах: перехватить сетевой запрос и проверить <b>тело отправки</b>, а не только то, что нарисовалось на экране. Проверка «в CRM ушёл правильный продукт» надёжнее проверки «на экране появилась галочка» — она доказывает результат, а не отображение.</p></div>
+`,
+quiz:[
+ {q:"Какое изменение НЕ ломает существующих клиентов?",
+  opts:["Переименовать поле в ответе","Добавить необязательное поле в ответ","Сделать параметр обязательным","Изменить код ответа с 201 на 200"],
+  a:1, why:"Клиент, не знающий о новом поле, просто его игнорирует. Остальные три изменения меняют контракт для тех, кто уже написан."},
+ {q:"Почему добавление значения в перечисление ответа считают рискованным?",
+  opts:["Увеличивает размер ответа","Клиент с разбором без ветки «иначе» сломается на неизвестном значении","Нарушает спецификацию HTTP","Мешает кэшированию"],
+  a:1, why:"Формально это расширение, но на практике многие клиенты перечисляют известные значения явно. Возможность пополнения списка нужно заявлять в контракте заранее."},
+ {q:"Тест проверяет только тело ответа. Что он пропустит?",
+  opts:["Ничего, тело — главное","Смену кода состояния и потерю заголовков вроде <code>Location</code> или <code>ETag</code>","Ошибки сети","Медленный ответ"],
+  a:1, why:"Код и заголовки — такая же часть контракта. Смена 201 на 200 с тем же телом сломает клиентов, а такой тест этого не заметит."},
+ {q:"Почему жёсткое сравнение всего ответа целиком — плохая идея?",
+  opts:["Слишком медленно","Ломается при добавлении необязательного поля, то есть при совместимом изменении","Не поддерживается библиотеками","Требует много памяти"],
+  a:1, why:"Тест начинает падать на изменениях, которые никого не ломают, и команда привыкает его чинить не глядя."},
+ {q:"Тест получил 201 при создании. Достаточно ли этого?",
+  opts:["Да, ресурс создан","Нет: стоит прочитать ресурс по адресу из <code>Location</code> и убедиться, что он есть","Достаточно, если есть ETag","Достаточно при наличии тела"],
+  a:1, why:"Проверка последствия доказывает результат. Код ответа доказывает лишь то, что сервер так ответил."},
+ {q:"Какой способ версионирования встречается чаще всего?",
+  opts:["В заголовке Accept","В пути: <code>/v3/users</code>","По дате","Версионирование не применяется"],
+  a:1, why:"Версия в пути видна сразу, легко маршрутизируется и отлаживается. Формальные претензии к ней есть, но практика выбрала её."}
+],
+labs:[
+ {id:"12a", title:"Итоговая работа: полный цикл ресурса",
+  brief:"<h3>Итоговая работа: полный цикл ресурса</h3><p>Соберите всё изученное в один сценарий.</p><ol><li>Получите токен</li><li><b>Создайте</b> пользователя — ожидается <span class='st c2'>201</span> и заголовок <code>Location</code></li><li><b>Прочитайте</b> его по адресу из <code>Location</code> — запомните <code>ETag</code></li><li><b>Проверьте кэш:</b> повторите чтение с <code>If-None-Match</code> → <span class='st c3'>304</span></li><li><b>Обновите</b> его методом <code>PATCH</code> с заголовком <code>If-Match</code> и актуальной меткой → <span class='st c2'>200</span></li><li><b>Убедитесь</b>, что метка изменилась</li><li><b>Удалите</b> его → <span class='st c2'>204</span></li><li><b>Докажите</b> удаление: повторное чтение → <span class='st c4'>404</span></li></ol><p>Последний шаг и есть проверка последствия — без него удаление не доказано.</p>",
+  hint:"Адрес созданного ресурса берите из заголовка Location ответа 201. ETag после PATCH меняется — перечитайте его.",
+  setup(){},
+  checks:[
+   {label:"Получен токен", test:s=>Object.keys(s.tokens).length>0},
+   {label:"Ресурс создан: <span class='st c2'>201</span> и <code>Location</code>", test:s=>did(s,(q,r)=>r.status===201&&!!r.headers["Location"]&&/^\/users$/.test(q.path))},
+   {label:"Созданный ресурс прочитан", test:s=>{
+     const c=s.log.find(e=>e.res.status===201&&/^\/users$/.test(e.req.path));
+     if(!c) return false; const id=c.res.body.id;
+     return did(s,(q,r)=>q.method==="GET"&&q.path==="/users/"+id&&r.status===200);}},
+   {label:"Условное чтение вернуло <span class='st c3'>304</span>", test:s=>did(s,(q,r)=>r.status===304)},
+   {label:"Обновление выполнено с <code>If-Match</code>", test:s=>did(s,(q,r)=>["PATCH","PUT"].includes(q.method)&&!!hasHeader(q,"If-Match")&&r.status===200)},
+   {label:"Ресурс удалён (<span class='st c2'>204</span>)", test:s=>did(s,(q,r)=>q.method==="DELETE"&&r.status===204)},
+   {label:"Удаление доказано: повторное чтение дало <span class='st c4'>404</span>", test:s=>{
+     const d=s.log.find(e=>e.req.method==="DELETE"&&e.res.status===204);
+     if(!d) return false; const i=s.log.indexOf(d);
+     return s.log.slice(i+1).some(e=>e.req.method==="GET"&&e.req.path===d.req.path&&e.res.status===404);}}
+  ]}
+]
+}
+];
+/* ============================================================
+   Интерфейс тренажёра
+   ============================================================ */
+const LS = "restwire.v1";
+const $ = s => document.querySelector(s);
+
+function hash32(str){ let h=2166136261>>>0; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
+(function shuffle(){
+  MODULES.forEach(m=>m.quiz.forEach(q=>{
+    let seed = hash32(q.q);
+    const rnd = ()=>{ seed=(Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; };
+    const idx = q.opts.map((_,i)=>i);
+    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
+    q.opts = idx.map(i=>q.opts[i]); q.a = idx.indexOf(q.a);
+  }));
+})();
+
+let P = {q:{}, l:{}};
+try{ const raw = localStorage.getItem(LS); if(raw) P = Object.assign({q:{},l:{}}, JSON.parse(raw)); }catch(e){}
+const save = ()=>{ try{ localStorage.setItem(LS, JSON.stringify(P)); }catch(e){} };
+
+let cur = 0, tab = "th", curLab = 0;
+const labs = {};
+const key = (m,l) => m.id+"/"+l.id;
+function labState(m,l){
+  const k = key(m,l);
+  if(!labs[k]){ const s = newServer(); try{ l.setup && l.setup(s); }catch(e){} labs[k] = {s, lines:[], hist:[], hi:-1}; }
+  return labs[k];
+}
+function resetLab(m,l){ const s=newServer(); try{ l.setup&&l.setup(s); }catch(e){} labs[key(m,l)] = {s, lines:[], hist:[], hi:-1}; }
+
+const qs = m => (P.q[m.id] = P.q[m.id] || {});
+const qDone = m => m.quiz.filter((_,i)=> qs(m)[i] && qs(m)[i].ok).length;
+const lDone = m => m.labs.filter(l=>P.l[key(m,l)]).length;
+function totals(){ let d=0,a=0; MODULES.forEach(m=>{ a+=m.quiz.length+m.labs.length; d+=qDone(m)+lDone(m); }); return {d,a}; }
+function paintProg(){
+  const t=totals(), pct = t.a?Math.round(t.d/t.a*100):0;
+  $("#pl").textContent = t.d+" / "+t.a;
+  $("#pf").style.width = pct+"%";
+  $("#pb").setAttribute("aria-valuenow", String(pct));
+}
+
+function paintRail(){
+  $("#modList").innerHTML = MODULES.map((m,i)=>{
+    const qd = qDone(m)===m.quiz.length, ld = lDone(m)===m.labs.length;
+    return '<button class="mb" data-i="'+i+'" aria-current="'+(i===cur)+'">'+
+      '<span class="n">'+String(m.n).padStart(2,"0")+'</span>'+
+      '<span><span class="t">'+esc(m.title)+'</span><span class="s">'+esc(m.sub)+'</span></span>'+
+      '<span class="d"><i class="dot'+(qd?" on":"")+'"></i><i class="dot'+(ld?" on":"")+'"></i></span></button>';
+  }).join("");
+  $("#modList").querySelectorAll(".mb").forEach(b=>b.onclick=()=>{ cur=+b.dataset.i; tab="th"; curLab=0; paintAll(); window.scrollTo({top:0}); });
+}
+function paintHead(){
+  const m = MODULES[cur];
+  $("#kick").textContent = "Модуль "+String(m.n).padStart(2,"0")+" · "+m.sub;
+  $("#mtitle").textContent = m.title;
+  $("#mlede").textContent = m.lede;
+  const bq=$("#bqz"), bl=$("#blb");
+  bq.textContent = qDone(m)+"/"+m.quiz.length; bq.classList.toggle("ok", qDone(m)===m.quiz.length);
+  bl.textContent = lDone(m)+"/"+m.labs.length; bl.classList.toggle("ok", lDone(m)===m.labs.length);
+  ["th","qz","lb"].forEach(t=>{ $("#t-"+t).setAttribute("aria-selected", String(tab===t)); $("#p-"+t).hidden = tab!==t; });
+  const p=$("#prev"), n=$("#next");
+  p.disabled = cur===0; n.disabled = cur===MODULES.length-1;
+  p.innerHTML = '<span>◀ Назад<span class="sub">'+(cur>0?esc(MODULES[cur-1].title):"—")+'</span></span>';
+  n.innerHTML = '<span>Далее ▶<span class="sub">'+(cur<MODULES.length-1?esc(MODULES[cur+1].title):"—")+'</span></span>';
+}
+function paintTheory(){ $("#theory").innerHTML = MODULES[cur].theory; }
+
+function paintQuiz(){
+  const m = MODULES[cur], st = qs(m), d = qDone(m);
+  let h = d===m.quiz.length
+    ? '<div class="score"><span class="big" style="color:var(--s2)">'+d+'/'+m.quiz.length+'</span><p>Тест пройден полностью. Переходите к практике.</p></div>'
+    : '<div class="score"><span class="big">'+d+'<span style="color:var(--ink3);font-size:16px">/'+m.quiz.length+'</span></span><p>Ошибка не блокирует: объяснение появляется сразу, вопрос остаётся открытым до верного ответа.</p></div>';
+  m.quiz.forEach((q,i)=>{
+    const a = st[i] || {picks:[], ok:false};
+    h += '<div class="qc"><div class="qn"><span>Вопрос '+(i+1)+' из '+m.quiz.length+'</span>'+(a.ok?'<span style="color:var(--s2)">верно</span>':'')+'</div>'+
+         '<p class="qt">'+q.q+'</p><div class="opts">';
+    q.opts.forEach((o,j)=>{
+      let c="opt";
+      if(a.ok && j===q.a) c+=" right"; else if(a.picks.includes(j)&&j!==q.a) c+=" wrong";
+      h += '<button class="'+c+'" data-q="'+i+'" data-o="'+j+'"'+(a.ok?" disabled":"")+'><span class="mk">'+String.fromCharCode(65+j)+'</span><span>'+o+'</span></button>';
+    });
+    h += '</div>';
+    if(a.picks.length) h += '<div class="why '+(a.ok?"g":"b")+'"><b>'+(a.ok?"Верно. ":"Не то. ")+'</b>'+q.why+'</div>';
+    h += '</div>';
+  });
+  $("#quiz").innerHTML = h;
+  $("#quiz").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.q, j=+b.dataset.o;
+    const a = st[i] = st[i] || {picks:[], ok:false};
+    if(a.ok) return;
+    if(!a.picks.includes(j)) a.picks.push(j);
+    if(j===m.quiz[i].a) a.ok = true;
+    save(); paintQuiz(); paintHead(); paintRail(); paintProg();
+  });
+}
+
+function paintPicker(){
+  const m = MODULES[cur];
+  $("#picker").innerHTML = m.labs.map((l,i)=>{
+    const done = !!P.l[key(m,l)];
+    return '<button class="chip'+(done?" done":"")+'" data-i="'+i+'" aria-current="'+(i===curLab)+'">'+
+      '<svg class="tk" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/><path d="M4 7.2l2.1 2.1L10 5.4"/></svg>'+esc(l.title)+'</button>';
+  }).join("");
+  $("#picker").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ curLab=+b.dataset.i; paintLab(); });
+}
+function refs(){ const m=MODULES[cur]; const l=m.labs[curLab]; return {m,l,S:labState(m,l)}; }
+
+function paintLab(){
+  const {m,l,S} = refs();
+  paintPicker();
+  $("#brief").innerHTML = l.brief +
+    '<div class="tools"><button class="mini" id="bh">Подсказка</button>'+
+    '<button class="mini" id="br">Начать заново</button>'+
+    '<button class="mini" id="bhelp">help</button></div><div id="hs"></div>';
+  $("#bh").onclick = ()=>{ const s=$("#hs"); s.innerHTML = s.innerHTML ? "" : '<div class="hintbox"><b>Подсказка.</b> '+l.hint+'</div>'; };
+  $("#br").onclick = ()=>{ resetLab(m,l); paintLab(); };
+  $("#bhelp").onclick = ()=>run("help");
+  renderTape(S); refreshChecks(); paintSrv(); $("#inp").value="";
+}
+function renderTape(S){
+  const t = $("#tape");
+  t.innerHTML = S.lines.length ? S.lines.join("")
+    : '<div class="empty">Эмулятор REST-сервера <b>api.example.com</b>. Запросы выполняются по-настоящему: состояние меняется, панель справа обновляется.\n\nПримеры:\n  GET /users\n  GET /users/1\n  POST /auth/token -H \'Content-Type: application/json\' -d \'{"username":"demo","password":"secret"}\'\n\nНаберите help для списка возможностей.</div>';
+  t.scrollTop = t.scrollHeight;
+}
+function paintSrv(){ $("#srv").innerHTML = renderState(refs().S.s); }
+
+const HELP = [
+ ["Формат","МЕТОД /путь [-H 'Имя: значение'] [-d 'тело']. Метод можно опустить — тогда GET. Поддерживается и запись в стиле curl."],
+ ["Ресурсы","/ · /users · /users/{id} · /users/{id}/posts · /posts · /posts/{id} · /orders · /orders/{id} · /auth/token"],
+ ["Параметры","?limit= ?page= ?sort=поле или -поле ?role= ?q= ?userId= ?published="],
+ ["Заголовки","Content-Type · Accept · Authorization · If-None-Match · If-Match · Idempotency-Key"],
+ ["Учётные данные","demo / secret. Область доступа задаётся полем scope в теле запроса токена."],
+ ["Команды","help — эта справка · clear — очистить ленту · reset — начать задание заново"]
+];
+function run(line){
+  const {m,l,S} = refs();
+  const cmd = line.trim();
+  if(cmd==="clear"){ S.lines=[]; renderTape(S); return; }
+  if(cmd==="reset"){ resetLab(m,l); paintLab(); return; }
+  if(cmd==="help"){
+    S.lines.push('<div class="ex"><div class="lbl">справка</div><pre>'+
+      HELP.map(([a,b])=>'<span class="h">'+esc(a)+'</span>\n  '+esc(b)).join("\n\n")+'</pre></div>');
+    renderTape(S); return;
+  }
+  const req = parseRequest(cmd);
+  if(req.error){
+    S.lines.push('<div class="ex c4"><div class="lbl">клиент</div><pre><span class="c">'+esc(cmd)+'</span>\n\nне удалось разобрать: '+esc(req.error)+'</pre></div>');
+    renderTape(S); return;
+  }
+  let r;
+  try{ r = handle(S.s, req); }
+  catch(e){ r = {status:500, headers:{"Content-Type":"application/json"}, body:{error:"emulator_failure", detail:e.message}}; }
+  S.lines.push(renderExchange(req, r));
+  if(S.lines.length>60) S.lines = S.lines.slice(-40);
+  if(cmd && S.hist[S.hist.length-1]!==cmd) S.hist.push(cmd);
+  S.hi = -1;
+  renderTape(S); refreshChecks(); paintSrv();
+}
+
+function refreshChecks(){
+  const {m,l,S} = refs();
+  let n = 0;
+  const items = l.checks.map(c=>{
+    let ok=false; try{ ok = !!c.test(S.s); }catch(e){ ok=false; }
+    if(ok) n++;
+    return '<li class="'+(ok?"on":"")+'"><span class="bx"><svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2l2.4 2.4L8.6 2.7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>'+c.label+'</span></li>';
+  });
+  $("#clist").innerHTML = items.join("");
+  $("#cct").textContent = n+"/"+l.checks.length;
+  const done = n===l.checks.length;
+  $("#cdone").hidden = !done;
+  if(done && !P.l[key(m,l)]){ P.l[key(m,l)] = true; save(); paintHead(); paintRail(); paintProg(); paintPicker(); }
+}
+
+function paintAll(){ paintRail(); paintHead(); paintTheory(); paintQuiz(); paintLab(); paintProg(); }
+
+$("#t-th").onclick=()=>{ tab="th"; paintHead(); };
+$("#t-qz").onclick=()=>{ tab="qz"; paintHead(); };
+$("#t-lb").onclick=()=>{ tab="lb"; paintHead(); paintLab(); };
+$("#prev").onclick=()=>{ if(cur>0){ cur--; tab="th"; curLab=0; paintAll(); window.scrollTo({top:0}); } };
+$("#next").onclick=()=>{ if(cur<MODULES.length-1){ cur++; tab="th"; curLab=0; paintAll(); window.scrollTo({top:0}); } };
+$("#reset").onclick=()=>{
+  if(!confirm("Сбросить весь прогресс: ответы на тесты и выполненные задания?")) return;
+  P={q:{},l:{}}; save(); Object.keys(labs).forEach(k=>delete labs[k]);
+  cur=0; tab="th"; curLab=0; paintAll();
+};
+$("#cheat").onclick=()=>{
+  let ov = document.getElementById("ov");
+  if(ov){ ov.remove(); return; }
+  ov = document.createElement("div"); ov.id="ov";
+  ov.setAttribute("style","position:fixed;inset:0;z-index:200;background:rgba(8,10,18,.6);display:flex;align-items:center;justify-content:center;padding:24px");
+  const REF = HELP.concat([
+   ["Коды","200 OK · 201 Created + Location · 204 No Content · 301 Moved · 304 Not Modified · 400 Bad Request · 401 Unauthorized · 403 Forbidden · 404 Not Found · 405 Method Not Allowed + Allow · 406 Not Acceptable · 409 Conflict · 412 Precondition Failed · 415 Unsupported Media Type · 422 Unprocessable · 429 Too Many Requests + Retry-After"],
+   ["Свойства методов","безопасные: GET HEAD OPTIONS · идемпотентные: GET HEAD OPTIONS PUT DELETE · неидемпотентный: POST · PATCH — как получится"]
+  ]);
+  ov.innerHTML = '<div style="background:var(--surf);border:1px solid var(--line);border-radius:4px;max-width:740px;width:100%;max-height:84vh;overflow:auto">'+
+   '<div style="display:flex;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surf)">'+
+   '<b style="font-family:var(--fd);font-size:15px">Справочник</b><button class="gb" id="ovc" style="margin-left:auto">Закрыть</button></div>'+
+   '<div style="padding:16px 18px">'+REF.map(([a,b])=>'<div style="margin-bottom:13px"><div style="font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:700;margin-bottom:3px">'+esc(a)+'</div><div style="font-family:var(--fm);font-size:11.5px;line-height:1.75;color:var(--ink2)">'+esc(b)+'</div></div>').join("")+'</div></div>';
+  document.body.appendChild(ov);
+  ov.onclick = e=>{ if(e.target===ov||e.target.id==="ovc") ov.remove(); };
+};
+$("#form").onsubmit = e=>{ e.preventDefault(); const v=$("#inp").value; if(!v.trim()) return; $("#inp").value=""; run(v); };
+$("#inp").addEventListener("keydown", e=>{
+  const {S} = refs();
+  if(e.key==="Tab"){
+    e.preventDefault();
+    const v = e.target.value;
+    if(!v.trim()) return;
+    const c = [...new Set(SUGGEST.filter(x=>x.toLowerCase().startsWith(v.toLowerCase())))];
+    if(!c.length) return;
+    if(c.length===1){ e.target.value = c[0]; return; }
+    let pre = c[0];
+    c.forEach(x=>{ let i=0; while(i<pre.length&&i<x.length&&pre[i].toLowerCase()===x[i].toLowerCase()) i++; pre = pre.slice(0,i); });
+    if(pre.length>v.length){ e.target.value = pre; return; }
+    S.lines.push('<div class="ex"><div class="lbl">варианты</div><pre>'+c.slice(0,8).map(x=>esc(x)).join("\n")+'</pre></div>');
+    renderTape(S); return;
+  }
+  if(e.key==="ArrowUp"){ e.preventDefault(); if(!S.hist.length) return;
+    S.hi = S.hi<0 ? S.hist.length-1 : Math.max(0,S.hi-1); e.target.value = S.hist[S.hi]; return; }
+  if(e.key==="ArrowDown"){ e.preventDefault(); if(S.hi<0) return;
+    S.hi++; if(S.hi>=S.hist.length){ S.hi=-1; e.target.value=""; } else e.target.value = S.hist[S.hi]; }
+});
+$("#tape").addEventListener("click", ()=>$("#inp").focus());
+
+paintAll();
+</script>
+
+</body>
+</html>

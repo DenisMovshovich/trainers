@@ -14,14 +14,14 @@ FAST=""; [ "$1" = "--fast" ] && FAST=1
 
 # слаг → папка материала → имя автономного файла
 MAP="
-docker|docker-trainer|docker-yard-offline.html
-rest|rest-wire|rest-wire-offline.html
-bash|bash-palm|bash-palm-offline.html
-sql|sql-grossbuh|grossbuh-offline.html
-kafka|kafka-dispatch|dispatch-offline.html
-testing|qa-protocol|qa-protocol-offline.html
-dotnet|net-build-sheet|net-build-sheet-offline.html
-anatomy|portal-anatomy|portal-anatomy-offline.html
+docker|docker|docker-offline.html
+rest|rest|rest-offline.html
+bash|bash|bash-offline.html
+sql|sql|sql-offline.html
+kafka|kafka|kafka-offline.html
+testing|testing|testing-offline.html
+dotnet|dotnet|dotnet-offline.html
+anatomy|anatomy|anatomy-offline.html
 "
 
 rm -rf docs

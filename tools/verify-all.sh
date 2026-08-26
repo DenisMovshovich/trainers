@@ -10,7 +10,7 @@ set -u
 cd "$(dirname "$0")/.."
 fail=0
 
-for d in docker-trainer rest-wire bash-palm sql-grossbuh kafka-dispatch qa-protocol net-build-sheet portal-anatomy; do
+for d in docker rest bash sql kafka testing dotnet anatomy; do
   [ -d "$d" ] || continue
   printf "\n\033[1m═══ %s\033[0m\n" "$d"
   ran=0

@@ -1,0 +1,290 @@
+<title>Message broker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#E7EBEC; --surf:#F2F5F5; --surf2:#DBE1E3; --surf3:#E1E7E8;
+  --ink:#0F1619; --ink2:#3D4A4F; --ink3:#6E7C82;
+  --line:#C2CBCE; --line2:#A6B2B7;
+  --acc:#C2540A; --acc-l:#E08A4A; --acc-s:#F7E7DA; --acc-d:#9A4108;
+  --key:#0E6C74; --key-s:#D8EAEB;
+  --ok:#2F6B46; --ok-s:#DCEBE1;
+  --warn:#8A6410; --warn-s:#F3E9D2;
+  --trap:#A32C1E; --trap-s:#F6DFDB;
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fs:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
+  --fm:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --dockh:230px;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#0F1619; --surf:#171F23; --surf2:#212C31; --surf3:#1B2428;
+  --ink:#E4EAEC; --ink2:#A7B4B9; --ink3:#75838A;
+  --line:#2C383D; --line2:#3E4C53;
+  --acc:#E8894B; --acc-l:#C2540A; --acc-s:#2B1D13; --acc-d:#F2A876;
+  --key:#4FADB5; --key-s:#12262A;
+  --ok:#77B48D; --ok-s:#132318;
+  --warn:#D0A64B; --warn-s:#26200F;
+  --trap:#DE7462; --trap-s:#2B1714;
+}}
+:root[data-theme="dark"]{
+  --paper:#0F1619; --surf:#171F23; --surf2:#212C31; --surf3:#1B2428;
+  --ink:#E4EAEC; --ink2:#A7B4B9; --ink3:#75838A;
+  --line:#2C383D; --line2:#3E4C53;
+  --acc:#E8894B; --acc-l:#C2540A; --acc-s:#2B1D13; --acc-d:#F2A876;
+  --key:#4FADB5; --key-s:#12262A;
+  --ok:#77B48D; --ok-s:#132318;
+  --warn:#D0A64B; --warn-s:#26200F;
+  --trap:#DE7462; --trap-s:#2B1714;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--fs); font-size:15px; line-height:1.6; overflow-x:hidden}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+.lbl{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:var(--ink3)}
+
+/* ── шапка ────────────────────────────────────────────── */
+.top{position:sticky; top:0; z-index:40; background:var(--surf); border-bottom:2px solid var(--acc)}
+.tbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:11px 20px 9px; max-width:1520px; margin:0 auto}
+.brand{display:flex; align-items:center; gap:11px; min-width:0}
+.mark{font-family:var(--fd); font-weight:700; font-size:21px; letter-spacing:.005em; color:var(--ink); line-height:1; text-transform:uppercase}
+.mark i{color:var(--acc); font-style:normal}
+.tag{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:var(--ink3); border-left:1px solid var(--line2); padding-left:11px}
+.tspace{flex:1 1 auto; min-width:0}
+.meter{display:flex; align-items:center; gap:9px; font-family:var(--fm); font-size:11px; color:var(--ink3); white-space:nowrap}
+.bar{width:92px; height:4px; background:var(--surf2); overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--acc); transition:width .35s ease}
+.tbtn{font:inherit; font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; color:var(--ink2);
+  background:var(--surf3); border:1px solid var(--line2); padding:5px 10px; cursor:pointer}
+.tbtn:hover{border-color:var(--acc); color:var(--acc)}
+.nav{display:flex; overflow-x:auto; padding:0 20px; max-width:1520px; margin:0 auto; border-top:1px solid var(--line); scrollbar-width:thin}
+.nav::-webkit-scrollbar{height:4px}
+.nav::-webkit-scrollbar-thumb{background:var(--line2)}
+.nav button{font:inherit; font-size:12.5px; font-weight:500; color:var(--ink2); background:none; border:none;
+  border-bottom:2px solid transparent; padding:8px 12px; cursor:pointer; white-space:nowrap; display:flex; gap:7px; align-items:center}
+.nav button:hover{color:var(--acc); background:var(--surf3)}
+.nav button[aria-current="true"]{color:var(--acc); border-bottom-color:var(--acc); font-weight:600}
+.nav .num{font-family:var(--fm); font-size:10px; color:var(--ink3); background:var(--surf2); padding:1px 4px; min-width:18px; text-align:center}
+.nav button[aria-current="true"] .num{background:var(--acc); color:#fff}
+.nav .dot{width:5px; height:5px; background:var(--ok); display:none}
+.nav button.done .dot{display:block}
+
+/* ── раскладка ────────────────────────────────────────── */
+.wrap{max-width:1520px; margin:0 auto; padding:0 20px 22px; display:grid; grid-template-columns:minmax(0,1fr) 278px; gap:28px; align-items:start}
+@media (max-width:1100px){ .wrap{grid-template-columns:minmax(0,1fr)} .wrap .rail{display:none} }
+.col{min-width:0; padding-top:20px}
+
+.lede{display:grid; grid-template-columns:44px minmax(0,1fr); gap:0 14px; margin:0 0 20px}
+.lede .no{font-family:var(--fd); font-size:34px; font-weight:700; color:var(--acc); line-height:.9; letter-spacing:-.02em; grid-row:span 3; padding-top:5px}
+.lede .sub{margin:0 0 2px; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:var(--key)}
+.lede h1{font-family:var(--fd); font-size:29px; font-weight:600; letter-spacing:-.012em; margin:0 0 5px; line-height:1.12; text-wrap:balance}
+.lede p{margin:0; color:var(--ink2); font-size:14.6px; max-width:66ch}
+
+.tabs{display:flex; gap:0; border-bottom:1px solid var(--line2); margin:0 0 18px; overflow-x:auto; scroll-margin-top:104px}
+.tabs button{font:inherit; font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:600; color:var(--ink3);
+  background:none; border:none; border-bottom:2px solid transparent; padding:8px 14px; cursor:pointer; white-space:nowrap; margin-bottom:-1px}
+.tabs button:hover{color:var(--acc)}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--acc)}
+.tabs .cnt{font-family:var(--fm); font-size:10px; color:var(--ink3); margin-left:6px}
+
+/* ── теория ───────────────────────────────────────────── */
+.theory{max-width:96ch}
+.theory>p,.theory>ul,.theory>ol,.theory>h2,.theory>h3,.theory>.note{max-width:72ch}
+.theory>.fig,.theory>pre,.theory>.tw{max-width:none}
+.theory h2{font-family:var(--fd); font-size:18px; font-weight:600; margin:26px 0 8px; padding:0 0 5px;
+  border-bottom:1px solid var(--line); text-wrap:balance; letter-spacing:-.005em}
+.theory h3{font-family:var(--fd); font-size:15.5px; font-weight:600; margin:18px 0 6px}
+.theory p{margin:0 0 12px; color:var(--ink2)}
+.theory b{color:var(--ink); font-weight:600}
+.theory ol,.theory ul{margin:0 0 12px; padding-left:21px; color:var(--ink2)}
+.theory li{margin:0 0 4px}
+code{font-family:var(--fm); font-size:.87em; background:var(--surf2); padding:.06em .32em; overflow-wrap:anywhere; color:var(--ink)}
+pre{background:var(--surf); border:1px solid var(--line); border-left:3px solid var(--key); padding:11px 13px; margin:0 0 14px; overflow-x:auto}
+pre code{background:none; padding:0; font-size:12.4px; line-height:1.62; white-space:pre}
+pre .k{color:var(--acc); font-weight:500}
+pre .c{color:var(--ink3); font-style:italic}
+
+.note{border:1px solid var(--line); border-left:3px solid var(--line2); padding:11px 14px; margin:0 0 15px; background:var(--surf); font-size:14.2px}
+.note p{margin:0 0 8px; color:var(--ink2)}
+.note p:last-child{margin:0}
+.note ul{margin:0; padding-left:20px; color:var(--ink2)}
+.note .hd{display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:var(--ink); margin:0 0 6px}
+.note.ok{border-left-color:var(--ok); background:var(--ok-s)} .note.ok .hd{color:var(--ok)}
+.note.warn{border-left-color:var(--warn); background:var(--warn-s)} .note.warn .hd{color:var(--warn)}
+.note.trap{border-left-color:var(--trap); background:var(--trap-s)} .note.trap .hd{color:var(--trap)}
+.note pre{background:var(--surf); margin:0 0 8px}
+
+.tw{overflow-x:auto; margin:0 0 15px; border:1px solid var(--line)}
+.tw table{border-collapse:collapse; width:100%; font-size:13.3px; min-width:440px}
+.tw th{text-align:left; font-weight:600; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3);
+  background:var(--surf2); padding:7px 11px; border-bottom:1px solid var(--line2); white-space:nowrap}
+.tw td{padding:7px 11px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top}
+.tw tr:last-child td{border-bottom:none}
+.tw td code{white-space:nowrap}
+.tw td:first-child{color:var(--ink)}
+
+.fig{margin:0 0 18px; padding:0}
+.fig svg{display:block; width:100%; height:auto; background:var(--surf); border:1px solid var(--line); padding:12px}
+.fig figcaption{font-size:12.2px; color:var(--ink3); margin-top:7px; line-height:1.5; border-left:2px solid var(--line2); padding-left:9px}
+
+/* ── тесты ────────────────────────────────────────────── */
+.quiz{max-width:74ch}
+.qc{border:1px solid var(--line); background:var(--surf); margin:0 0 12px}
+.qc.right{border-left:3px solid var(--ok)}
+.qc.wrong{border-left:3px solid var(--trap)}
+.qq{display:flex; gap:11px; padding:12px 14px; align-items:baseline; border-bottom:1px solid var(--line)}
+.qn{font-family:var(--fm); font-size:11px; color:var(--ink3); flex:0 0 auto}
+.qt{font-size:14.8px; font-weight:500; color:var(--ink); line-height:1.48}
+.qo{display:flex; flex-direction:column; padding:9px 14px; gap:4px}
+.qo button{font:inherit; font-size:13.8px; text-align:left; color:var(--ink2); background:var(--surf3);
+  border:1px solid var(--line); padding:8px 11px; cursor:pointer; display:flex; gap:9px; align-items:baseline; line-height:1.45}
+.qo button:hover:not(:disabled){border-color:var(--acc); color:var(--ink)}
+.qo button:disabled{cursor:default}
+.qo .ltr{font-family:var(--fm); font-size:10.5px; color:var(--ink3); flex:0 0 auto}
+.qo button.good{border-color:var(--ok); background:var(--ok-s); color:var(--ink)}
+.qo button.good .ltr{color:var(--ok)}
+.qo button.bad{border-color:var(--trap); background:var(--trap-s)}
+.qo button.bad .ltr{color:var(--trap)}
+.qw{padding:0 14px 12px; font-size:13.4px; color:var(--ink2); line-height:1.54}
+.qw .lbl{display:block; margin-bottom:3px; color:var(--acc)}
+.qsum{font-family:var(--fm); font-size:12px; color:var(--ink3); margin:0 0 15px}
+.qsum b{color:var(--ink)}
+
+/* ── задания ──────────────────────────────────────────── */
+.labs{display:flex; flex-direction:column; gap:14px}
+.lab{border:1px solid var(--line); background:var(--surf); scroll-margin-top:104px}
+.lab.done{border-color:var(--ok)}
+.labh{display:flex; gap:11px; align-items:center; padding:10px 14px; background:var(--surf2); border-bottom:1px solid var(--line); flex-wrap:wrap}
+.labh .id{font-family:var(--fm); font-size:10.5px; color:#fff; background:var(--acc); padding:2px 7px; letter-spacing:.04em}
+.lab.done .labh .id{background:var(--ok)}
+.labh .nm{font-family:var(--fd); font-weight:600; font-size:14.5px; flex:1 1 auto; min-width:0}
+.labh .st{font-family:var(--fm); font-size:11px; color:var(--ink3); white-space:nowrap}
+.labb{padding:13px 15px; font-size:14.2px; color:var(--ink2)}
+.labb ul,.labb ol{margin:0 0 10px; padding-left:20px}
+.labb li{margin:0 0 5px}
+.labb p{margin:0 0 10px}
+.labb p:last-child{margin:0}
+.chk{list-style:none; margin:12px 0 0; padding:11px 0 0; border-top:1px solid var(--line)}
+.chk li{display:flex; gap:9px; align-items:baseline; font-size:13.2px; color:var(--ink3); margin:0 0 5px}
+.chk li.hit{color:var(--ink2)}
+.chk .bx{font-family:var(--fm); font-size:10px; flex:0 0 auto; width:14px; height:14px; line-height:12px; text-align:center;
+  border:1px solid var(--line2); color:transparent}
+.chk li.hit .bx{border-color:var(--ok); background:var(--ok); color:#fff}
+.labact{display:flex; gap:9px; flex-wrap:wrap; padding:0 15px 13px}
+.btn{font:inherit; font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; color:var(--ink2);
+  background:var(--surf3); border:1px solid var(--line2); padding:6px 12px; cursor:pointer}
+.btn:hover{border-color:var(--acc); color:var(--acc)}
+.btn.pri{background:var(--acc); border-color:var(--acc); color:#fff}
+.btn.pri:hover{background:var(--acc-d); border-color:var(--acc-d); color:#fff}
+.hintbox{font-size:13px; color:var(--ink2); background:var(--warn-s); border:1px solid var(--warn); padding:8px 12px; margin:0 15px 13px}
+.hintbox code{background:rgba(0,0,0,.06)}
+.lab-done{display:flex; gap:9px; align-items:center; font-size:12.8px; color:var(--ok); font-weight:600; padding:0 15px 13px}
+.lab-done[hidden]{display:none}
+
+/* ── правая колонка ───────────────────────────────────── */
+.rail{position:sticky; top:92px; padding:20px 0 8px; display:flex; flex-direction:column;
+  max-height:calc(100vh - 100px - var(--dockh)); overflow:hidden}
+.rh{display:flex; align-items:baseline; gap:8px; margin:0 0 8px}
+.rh .n{font-family:var(--fm); font-size:10px; color:var(--ink3); margin-left:auto}
+.cst{border:1px solid var(--line); background:var(--surf); margin:0 0 12px; overflow:hidden auto; flex:0 0 auto}
+#brokers{max-height:104px}
+#topics{flex:1 1 auto; min-height:40px}
+.rail .rh{flex:0 0 auto} .rail .hint{flex:0 0 auto} .rail>.btn{flex:0 0 auto; align-self:flex-start}
+.brow{display:flex; gap:8px; align-items:center; padding:5px 10px; border-bottom:1px solid var(--line); font-family:var(--fm); font-size:11.5px}
+.brow:last-child{border-bottom:none}
+.brow .bi{color:var(--ink); font-weight:500}
+.brow .bs{margin-left:auto; font-size:10px; letter-spacing:.05em; text-transform:uppercase; padding:1px 5px}
+.brow.up .bs{color:var(--ok); background:var(--ok-s)}
+.brow.down .bs{color:var(--trap); background:var(--trap-s)}
+.brow .bl{color:var(--ink3); font-size:10px}
+.tps details{border-bottom:1px solid var(--line)}
+.tps details:last-child{border-bottom:none}
+.tps summary{cursor:pointer; padding:6px 10px; font-family:var(--fm); font-size:11.5px; color:var(--ink);
+  background:var(--surf2); display:flex; align-items:center; gap:7px; list-style:none}
+.tps summary::-webkit-details-marker{display:none}
+.tps summary::before{content:"▸"; color:var(--ink3); font-size:8px; transition:transform .15s}
+.tps details[open] summary::before{transform:rotate(90deg)}
+.tps summary .n{color:var(--ink3); font-size:10px; margin-left:auto}
+.tps .pl{padding:4px 10px 7px; font-family:var(--fm); font-size:10.5px}
+.tps .prow{display:flex; gap:7px; align-items:baseline; padding:1.5px 0; color:var(--ink2)}
+.tps .prow .pid{color:var(--acc); min-width:22px}
+.tps .prow .ld{color:var(--ink)}
+.tps .prow .isr{margin-left:auto; color:var(--ink3)}
+.tps .prow.bad .isr{color:var(--trap)}
+.rail .hint{font-size:11.6px; color:var(--ink3); line-height:1.5; margin:0 0 10px}
+.rail .hint b{color:var(--ink2)}
+
+/* ── консоль ──────────────────────────────────────────── */
+.dock{position:sticky; bottom:0; z-index:30; background:var(--surf); border-top:2px solid var(--line2)}
+.dockin{max-width:1520px; margin:0 auto; padding:0 20px 12px}
+.dockbar{display:flex; align-items:center; gap:12px; padding:7px 0; flex-wrap:wrap}
+.dockbar .sp{flex:1 1 auto}
+.dockbar .st{font-family:var(--fm); font-size:11px; color:var(--ink3)}
+.dtabs{display:flex; gap:0}
+.dtabs button{font:inherit; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600;
+  color:var(--ink3); background:none; border:1px solid transparent; padding:4px 10px; cursor:pointer}
+.dtabs button[aria-selected="true"]{color:var(--ink); background:var(--surf3); border-color:var(--line)}
+.ed{display:grid; grid-template-columns:minmax(0,1fr); gap:9px}
+@media (min-width:900px){ .ed{grid-template-columns:minmax(0,340px) minmax(0,1fr)} }
+.edwrap{display:flex; flex-direction:column; gap:7px}
+.inbox{display:flex; align-items:stretch; border:1px solid var(--line2); background:var(--paper)}
+.inbox:focus-within{border-color:var(--acc)}
+.inbox .ps{font-family:var(--fm); font-size:12.5px; color:var(--acc); padding:8px 0 8px 10px; user-select:none}
+#cmd{flex:1 1 auto; min-width:0; font-family:var(--fm); font-size:12.5px; color:var(--ink); background:none;
+  border:none; padding:8px 10px; outline:none}
+#cmd::placeholder{color:var(--ink3)}
+.hist{border:1px solid var(--line); background:var(--paper); height:118px; overflow:auto; padding:5px 0}
+.hist button{display:block; width:100%; text-align:left; font-family:var(--fm); font-size:11px; color:var(--ink3);
+  background:none; border:none; padding:2px 10px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hist button:hover{background:var(--surf3); color:var(--acc)}
+.hist button.bad{color:var(--trap)}
+.out{border:1px solid var(--line); background:var(--paper); height:178px; overflow:auto}
+.out pre{margin:0; border:none; background:none; padding:9px 11px; font-size:12px; line-height:1.55; white-space:pre; color:var(--ink2)}
+.out .err{color:var(--trap); background:var(--trap-s); border-bottom:1px solid var(--line)}
+.out .nt{color:var(--key); background:var(--key-s); border-top:1px solid var(--line)}
+.out .empty{padding:11px; font-family:var(--fm); font-size:11.5px; color:var(--ink3)}
+
+/* ── визуализатор журнала ─────────────────────────────── */
+.viz{border:1px solid var(--line); background:var(--paper); height:178px; overflow:auto; padding:8px 10px}
+.viz .vt{display:flex; align-items:baseline; gap:8px; margin:0 0 6px}
+.viz select{font:inherit; font-family:var(--fm); font-size:11px; color:var(--ink); background:var(--surf3);
+  border:1px solid var(--line); padding:2px 5px}
+.viz .pr{margin:0 0 7px}
+.viz .ph{display:flex; align-items:baseline; gap:8px; font-family:var(--fm); font-size:10px; color:var(--ink3); margin:0 0 2px}
+.viz .ph b{color:var(--acc); font-weight:500}
+.viz .cells{display:flex; gap:2px; flex-wrap:wrap}
+.viz .cell{min-width:30px; padding:2px 4px; font-family:var(--fm); font-size:9.5px; text-align:center;
+  border:1px solid var(--line); background:var(--surf3); color:var(--ink2); line-height:1.35}
+.viz .cell .o{display:block; font-size:8.5px; color:var(--ink3)}
+.viz .cell.hw{opacity:.45; border-style:dashed}
+.viz .cell.tomb{background:var(--trap-s); border-color:var(--trap); color:var(--trap)}
+.viz .gap{min-width:14px; padding:2px 0; text-align:center; font-family:var(--fm); font-size:9px; color:var(--ink3)}
+.viz .empty{font-family:var(--fm); font-size:10.5px; color:var(--ink3)}
+.viz .lg{display:flex; gap:12px; flex-wrap:wrap; font-family:var(--fm); font-size:9.5px; color:var(--ink3); margin-top:4px; padding-top:6px; border-top:1px solid var(--line)}
+.viz .lg i{display:inline-block; width:9px; height:9px; margin-right:4px; vertical-align:-1px; border:1px solid var(--line)}
+
+.chips{display:flex; gap:5px; flex-wrap:wrap; padding:7px 0 0}
+.chips button{font:inherit; font-family:var(--fm); font-size:10.5px; color:var(--ink2); background:var(--surf3);
+  border:1px solid var(--line); padding:3px 7px; cursor:pointer; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.chips button:hover{border-color:var(--acc); color:var(--acc)}
+
+/* на узком экране консоль ужимается, чтобы не съедать вьюпорт вместе с шапкой */
+@media (max-width:900px){
+  .hist{display:none}
+  .out,.viz{height:118px}
+  .chips{display:none}
+  .dockin{padding:0 14px 8px}
+  .wrap .rail{display:none}
+}
+@media (max-height:800px){
+  .rail .hint{display:none}
+  #brokers{max-height:78px}
+}
+@media (max-height:640px){
+  .out,.viz{height:96px}
+  .hist{display:none}
+}
+.foot{max-width:1520px; margin:0 auto; padding:24px 20px 32px; border-top:1px solid var(--line); font-size:12.4px; color:var(--ink3); line-height:1.6}
+.foot b{color:var(--ink2)}
+</style>

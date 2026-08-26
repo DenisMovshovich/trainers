@@ -1,0 +1,91 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">QA <i>basics</i></span>
+      <span class="tag">Основы тестирования · подготовка к собеседованию</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 98</span><span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сброс прогресса</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1><span id="mno"></span><em id="mttl" style="font-style:normal"></em></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Глоссарий</span><span class="n" id="gn"></span></div>
+    <input id="gsearch" type="search" placeholder="поиск термина…" aria-label="Поиск по глоссарию" autocomplete="off">
+    <div class="gl" id="gl"></div>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Инструменты тест-дизайна">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="lbl">Инструменты</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="bva" aria-selected="true">Границы</button>
+        <button role="tab" data-d="pw" aria-selected="false">Попарно</button>
+        <button role="tab" data-d="sev" aria-selected="false">Severity × Priority</button>
+      </div>
+      <span class="sp"></span>
+      <span class="lbl" id="dhint"></span>
+    </div>
+
+    <div class="tool" id="t-bva">
+      <div class="tin">
+        <label>Минимум<input id="bmin" type="text" value="1" inputmode="decimal"></label>
+        <label>Максимум<input id="bmax" type="text" value="100" inputmode="decimal"></label>
+        <label>Шаг сетки<select id="bstep">
+          <option value="1">1 — целые числа</option>
+          <option value="0.01">0.01 — деньги</option>
+          <option value="0.1">0.1 — доли</option>
+        </select></label>
+        <button class="btn pri" id="brun" type="button">Посчитать</button>
+      </div>
+      <div class="tout" id="bout"><p class="empty">задайте диапазон и нажмите «Посчитать»</p></div>
+    </div>
+
+    <div class="tool" id="t-pw" hidden>
+      <div class="tin">
+        <label>Параметры — по одному на строку, вид «имя=знач1,знач2»
+          <textarea id="pwin" spellcheck="false">браузер=chrome,firefox,safari
+ос=windows,macos,linux
+роль=админ,пользователь
+язык=ru,en</textarea></label>
+        <button class="btn pri" id="pwrun" type="button">Построить набор</button>
+      </div>
+      <div class="tout" id="pwout"><p class="empty">опишите параметры и нажмите «Построить набор»</p></div>
+    </div>
+
+    <div class="tool" id="t-sev" hidden style="grid-template-columns:minmax(0,1fr)">
+      <div class="tout" id="sevout" style="height:auto; max-height:160px"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>QA basics</b> — база знаний по основам тестирования ПО: 12 разделов теории, 72 вопроса, 26 заданий со 138 автоматическими проверками, 37 разборов вопросов с собеседований и глоссарий из 88 терминов. Задания проверяются по-настоящему: разбор ввода, расчёт граничных значений, аудит таблиц решений и переходов состояний, построение попарного набора, аудит баг-репорта.</p>
+  <p>Материал опирается на общепринятую практику и терминологию (ISTQB и отраслевые соглашения), но не является пересказом силлабуса: акцент сделан на том, что спрашивают на собеседованиях и что применяется в работе. Инструменты внизу — не иллюстрации, а рабочие калькуляторы, которыми можно пользоваться на реальных задачах. Прогресс хранится в браузере.</p>
+</footer>

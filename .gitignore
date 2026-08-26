@@ -1,3 +1,8 @@
+# Настройки IDE — у каждого свои
+.idea/
+.vscode/
+*.iml
+
 # Служебное от macOS
 .DS_Store
 ._*
@@ -14,9 +19,10 @@ node_modules/
 **/src/n[0-9].png
 **/src/_s[0-9].png
 
-# Устаревшие дубликаты сборки внутри src — собранные файлы лежат в корне материала
-portal-anatomy/src/portal-anatomy.html
-portal-anatomy/src/portal-anatomy-offline.html
+# Внутри src/ легитимны только пронумерованные части (10_head.html, 20_body.html).
+# Всё остальное там — устаревшие копии сборки: настоящие лежат в корне материала.
+**/src/*.html
+!**/src/[0-9][0-9]_*.html
 
 # Сайт собирается из исходников скриптом tools/build-site.sh и публикуется
 # через GitHub Actions. В репозитории не хранится, чтобы не плодить дубликаты.

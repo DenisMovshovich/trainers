@@ -1,0 +1,66 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">SQL</span>
+      <span class="tag">SQL на примере PostgreSQL</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 96</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Модули"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <p class="rh">Схема учебной базы</p>
+    <div class="sch" id="sch"></div>
+    <p class="hint"><b>Ctrl+Enter</b> — выполнить запрос. Изменения данных живут до перезагрузки страницы; кнопка «Сбросить базу» возвращает исходное состояние.</p>
+    <button class="btn" id="reset" type="button">Сбросить базу</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Консоль запроса">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Консоль</span>
+      <span class="st" id="ctx"></span>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn pri" id="run" type="button">Выполнить</button>
+    </div>
+    <div class="ed">
+      <div class="edwrap">
+        <textarea id="sql" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+          aria-label="SQL-запрос" placeholder="SELECT * FROM customers;"></textarea>
+      </div>
+      <div class="out" id="out"><p class="empty">результат появится здесь</p></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>SQL</b> — интерактивный курс на диалекте PostgreSQL: 12 модулей теории, 72 вопроса, 24 задания со 110 автоматическими проверками. Запросы выполняет встроенный движок: разбор SQL, соединения, группировка, подзапросы, оконные функции, транзакции, ограничения целостности и учебный план выполнения.</p>
+  <p>Движок учебный и намеренно упрощён: нет типов <code>jsonb</code>, массивов, полнотекстового поиска, настоящих индексов и параллельного доступа. Синтаксис и семантика — включая трёхзначную логику NULL, поведение внешних соединений и правила видимости псевдонимов — воспроизводят PostgreSQL. Прогресс хранится в браузере.</p>
+</footer>

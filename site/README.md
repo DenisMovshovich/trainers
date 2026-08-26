@@ -7,14 +7,14 @@
 
 | Путь | Инструмент | Источник |
 |---|---|---|
-| `docker/` | Docker Yard | `../docker-trainer/` |
-| `rest/` | Проволока REST | `../rest-wire/` |
-| `bash/` | Оболочка на ладони | `../bash-palm/` |
-| `sql/` | Гроссбух (SQL) | `../sql-grossbuh/` |
-| `kafka/` | Диспетчерская (Kafka) | `../kafka-dispatch/` |
-| `testing/` | Протокол проверки | `../qa-protocol/` |
+| `docker/` | Docker | `../docker/` |
+| `rest/` | REST | `../rest/` |
+| `bash/` | Bash | `../bash/` |
+| `sql/` | SQL (SQL) | `../sql/` |
+| `kafka/` | Message broker (Kafka) | `../kafka/` |
+| `testing/` | QA basics | `../testing/` |
 
-Сюда не входят «Анатомия Portal» и «Сборочный лист .NET»: они устроены иначе —
+Сюда не входят «C# + Playwright» и «.NET»: они устроены иначе —
 это разборы, а не курсы с прогрессом, и на титульной странице сайта им не место.
 Открываются напрямую из своих папок.
 

@@ -8,14 +8,14 @@
 
 | Материал | О чём | Открыть |
 |---|---|---|
-| [docker-trainer](docker-trainer/) | Docker: образы, слои, тома, сети, Dockerfile | `docker-yard-offline.html` |
-| [rest-wire](rest-wire/) | REST и HTTP: ресурсы, коды, идемпотентность | `rest-wire-offline.html` |
-| [bash-palm](bash-palm/) | Bash: конвейеры, перенаправления, sed, grep | `bash-palm-offline.html` |
-| [sql-grossbuh](sql-grossbuh/) | SQL на диалекте PostgreSQL | `grossbuh-offline.html` |
-| [kafka-dispatch](kafka-dispatch/) | Kafka: партиции, ISR, группы потребителей | `dispatch-offline.html` |
-| [qa-protocol](qa-protocol/) | Основы тестирования и техники тест-дизайна | `qa-protocol-offline.html` |
-| [net-build-sheet](net-build-sheet/) | .NET-проекты + собеседование Automation QA | `net-build-sheet-offline.html` |
-| [portal-anatomy](portal-anatomy/) | Разбор архитектуры набора UI-автотестов | `portal-anatomy-offline.html` |
+| [docker](docker/) | Docker: образы, слои, тома, сети, Dockerfile | `docker-offline.html` |
+| [rest](rest/) | REST и HTTP: ресурсы, коды, идемпотентность | `rest-offline.html` |
+| [bash](bash/) | Bash: конвейеры, перенаправления, sed, grep | `bash-offline.html` |
+| [sql](sql/) | SQL на диалекте PostgreSQL | `sql-offline.html` |
+| [kafka](kafka/) | Kafka: партиции, ISR, группы потребителей | `kafka-offline.html` |
+| [testing](testing/) | QA basics: основы тестирования и тест-дизайн | `testing-offline.html` |
+| [dotnet](dotnet/) | .NET-проекты + собеседование Automation QA | `dotnet-offline.html` |
+| [anatomy](anatomy/) | C# + Playwright: разбор набора UI-автотестов | `anatomy-offline.html` |
 
 ## Сайт
 Все восемь доступны по отдельным адресам как статический сайт:
@@ -90,7 +90,7 @@ cd <материал>/src && ./verify.sh   # один материал
 
 ## Данные
 
-Материалы `portal-anatomy` и `net-build-sheet` построены на архитектуре
+Материалы `anatomy` и `dotnet` построены на архитектуре
 реального рабочего проекта, но полностью обезличены: пространства имён,
 адреса стендов и идентификаторы задач заменены на вымышленные
 (`Acme.WebAutomation.*`, `*.example.com`, `TC-####`). Никаких данных

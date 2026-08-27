@@ -1,0 +1,87 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">net<i>·</i>work</span>
+      <span class="tag">Сеть и отладка HTTP</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 96</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Карта сети</span><span class="n" id="rctx"></span></div>
+    <div class="rbox grow" id="map"></div>
+    <div class="rbox" id="extra"></div>
+    <p class="hint"><b>↑ ↓</b> — история команд, <b>Tab</b> — дополнение. Карта показывает, как всё устроено на самом деле, — но при разборе честнее сначала выяснить это командами.</p>
+    <button class="btn" id="reset" type="button">Сбросить сценарий</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Терминал">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Терминал</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="term" aria-selected="true">Команды</button>
+        <button role="tab" data-d="file" aria-selected="false">Машина</button>
+      </div>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn" id="clear" type="button">Очистить</button>
+    </div>
+
+    <div class="tool" id="t-term">
+      <div class="term">
+        <div class="tout" id="out"></div>
+        <div class="tin">
+          <span class="p" id="prompt">dev@laptop $</span>
+          <input id="cmd" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+            aria-label="Команда" placeholder="curl -v https://api.example.com/health">
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="tool fed" id="t-file" hidden>
+      <div class="fbar">
+        <label class="fl" for="fpick">Файл</label>
+        <select id="fpick" aria-label="Какой файл открыть"></select>
+        <span class="sp"></span>
+        <span class="fname" id="fname">правится вручную</span>
+        <button class="btn pri" id="fsave" type="button">Сохранить</button>
+      </div>
+      <textarea id="ftext" spellcheck="false" aria-label="Содержимое файла"></textarea>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>Network</b> — интерактивный курс сети и отладки HTTP: 12 разделов теории, 72 вопроса, 24 задания со 114 автоматическими проверками и 12 разборов вопросов с собеседований. Запросы выполняет встроенная модель сети: разрешение имён с записями и цепочками CNAME, установка соединения с различием отказа и потери пакетов, рукопожатие с проверкой срока, имени и издателя сертификата, HTTP с методами, кодами, перенаправлениями и условными запросами, обратные и корпоративные прокси, а также отдельная команда <code>browser</code>, которая ходит по тем же адресам, но с правилами источника.</p>
+  <p>Модель учебная и намеренно упрощена: нет IPv6, маршрутизации, HTTP/2 и HTTP/3, сжатия, повторного использования соединений и настоящей криптографии. Поведение воспроизводит реальность там, где на этом учатся: отказ приходит мгновенно, а потеря пакетов — по таймауту; сертификат ломается тремя разными способами; обращение по адресу теряет имя в <code>Host</code> и SNI; прокси отвечает 502 сам, а логи приложения при этом пусты; и запрос, который проходит в <code>curl</code>, блокируется браузером, если сервер не разрешил источник. Прогресс хранится в браузере.</p>
+</footer>

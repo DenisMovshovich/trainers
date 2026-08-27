@@ -1,0 +1,3122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Karla:wght@400;500;600;700&family=Cousine:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#F6F4EF; --surf:#FCFBF8; --surf2:#E7E3D9; --surf3:#EFEBE3;
+  --ink:#1A1714; --ink2:#4C463D; --ink3:#797266;
+  --line:#D6D1C5; --line2:#B6AF9F;
+  --acc:#3F6212; --acc-l:#86A85A; --acc-s:#E7EEDA; --acc-d:#2C450C;
+  --val:#1D4ED8; --str:#9A3412; --onacc:#FFFFFF;
+  --good:#166534; --good-s:#DEEDE1;
+  --bad:#A3231D; --bad-s:#F7E1DF;
+  --warn:#8A5A00; --warn-s:#F4EAD3;
+  --fd:'Sora','Helvetica Neue',Arial,sans-serif;
+  --fs:'Karla','Helvetica Neue',Arial,sans-serif;
+  --fm:'Cousine','SF Mono',Menlo,Consolas,monospace;
+  --dockh:220px;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#141210; --surf:#1D1A17; --surf2:#2A2621; --surf3:#221F1B;
+  --ink:#EDE9E2; --ink2:#AEA79C; --ink3:#7C766C;
+  --line:#332F29; --line2:#474138;
+  --acc:#A3D26A; --acc-l:#3F6212; --acc-s:#1C2413; --acc-d:#C0E294;
+  --val:#8AB0FF; --str:#E0A17A; --onacc:#131A0B;
+  --good:#6FC08C; --good-s:#12241A;
+  --bad:#E5807A; --bad-s:#2A1616;
+  --warn:#D3A356; --warn-s:#241C10;
+}}
+:root[data-theme="dark"]{
+  --paper:#141210; --surf:#1D1A17; --surf2:#2A2621; --surf3:#221F1B;
+  --ink:#EDE9E2; --ink2:#AEA79C; --ink3:#7C766C;
+  --line:#332F29; --line2:#474138;
+  --acc:#A3D26A; --acc-l:#3F6212; --acc-s:#1C2413; --acc-d:#C0E294;
+  --val:#8AB0FF; --str:#E0A17A; --onacc:#131A0B;
+  --good:#6FC08C; --good-s:#12241A;
+  --bad:#E5807A; --bad-s:#2A1616;
+  --warn:#D3A356; --warn-s:#241C10;
+}
+*{box-sizing:border-box}
+/* класс с display перебивает атрибут hidden — закрываем весь класс ошибки разом */
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--fs); font-size:15.5px; line-height:1.6; overflow-x:hidden}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+.lbl{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink3)}
+
+/* ── шапка ────────────────────────────────────────────── */
+.top{position:sticky; top:0; z-index:40; background:var(--surf); border-bottom:1px solid var(--line2)}
+.tbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 20px 8px; max-width:1540px; margin:0 auto}
+.brand{display:flex; align-items:baseline; gap:11px; min-width:0}
+.mark{font-family:var(--fd); font-weight:700; font-size:23px; letter-spacing:-.015em; color:var(--ink); line-height:1}
+.mark i{color:var(--acc); font-style:normal; letter-spacing:-.04em}
+.tag{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink3)}
+.tspace{flex:1 1 auto; min-width:0}
+.meter{display:flex; align-items:center; gap:9px; font-family:var(--fm); font-size:11px; color:var(--ink3); white-space:nowrap}
+.bar{width:90px; height:4px; background:var(--surf2); overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--acc); transition:width .35s ease}
+.tbtn{font:inherit; font-size:11px; letter-spacing:.05em; text-transform:uppercase; font-weight:700; color:var(--ink2);
+  background:var(--surf3); border:1px solid var(--line2); padding:5px 10px; cursor:pointer; border-radius:2px}
+.tbtn:hover{border-color:var(--acc); color:var(--acc)}
+.nav{display:flex; overflow-x:auto; padding:0 20px; max-width:1540px; margin:0 auto; border-top:1px solid var(--line); scrollbar-width:thin}
+.nav::-webkit-scrollbar{height:4px}
+.nav::-webkit-scrollbar-thumb{background:var(--line2)}
+.nav button{font:inherit; font-size:12.5px; font-weight:500; color:var(--ink2); background:none; border:none;
+  border-bottom:2px solid transparent; padding:8px 11px; cursor:pointer; white-space:nowrap; display:flex; gap:7px; align-items:center}
+.nav button:hover{color:var(--acc); background:var(--surf3)}
+.nav button[aria-current="true"]{color:var(--acc); border-bottom-color:var(--acc); font-weight:600}
+.nav .num{font-family:var(--fm); font-size:10px; color:var(--ink3); min-width:16px; text-align:right}
+.nav button[aria-current="true"] .num{color:var(--acc)}
+.nav .dot{width:5px; height:5px; border-radius:50%; background:var(--good); display:none}
+.nav button.done .dot{display:block}
+
+/* ── раскладка ────────────────────────────────────────── */
+.wrap{max-width:1540px; margin:0 auto; padding:0 20px 22px; display:grid; grid-template-columns:minmax(0,1fr) 286px; gap:30px; align-items:start}
+@media (max-width:1120px){ .wrap{grid-template-columns:minmax(0,1fr)} .wrap .rail{display:none} }
+.col{min-width:0; padding-top:20px}
+.lede{border-top:2px solid var(--acc); padding:12px 0 0; margin:0 0 20px}
+.lede .sub{margin:0 0 4px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--acc)}
+.lede h1{font-family:var(--fd); font-size:30px; font-weight:600; letter-spacing:-.02em; margin:0 0 7px; line-height:1.1; text-wrap:balance}
+.lede h1 span{font-family:var(--fm); font-size:16px; font-weight:400; color:var(--ink3); letter-spacing:0; vertical-align:6px; margin-right:8px}
+.lede p{margin:0; color:var(--ink2); font-size:15px; max-width:66ch}
+
+.tabs{display:flex; gap:0; border-bottom:1px solid var(--line2); margin:0 0 20px; overflow-x:auto; scroll-margin-top:106px}
+.tabs button{font:inherit; font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:var(--ink3);
+  background:none; border:none; border-bottom:2px solid transparent; padding:9px 14px; cursor:pointer; white-space:nowrap; margin-bottom:-1px}
+.tabs button:hover{color:var(--acc)}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--acc)}
+.tabs .cnt{font-family:var(--fm); font-size:10px; color:var(--ink3); margin-left:6px}
+
+/* ── теория ───────────────────────────────────────────── */
+.theory{max-width:98ch}
+.theory>p,.theory>ul,.theory>ol,.theory>h2,.theory>h3,.theory>.note{max-width:70ch}
+.theory h2{font-family:var(--fd); font-size:19.5px; font-weight:700; letter-spacing:-.015em; margin:28px 0 9px; padding:0 0 4px; border-bottom:1px solid var(--line); text-wrap:balance}
+.theory h3{font-family:var(--fd); font-size:17px; font-weight:600; margin:18px 0 6px}
+.theory p{margin:0 0 12px; color:var(--ink2)}
+.theory b{color:var(--ink); font-weight:600}
+.theory ol,.theory ul{margin:0 0 12px; padding-left:21px; color:var(--ink2)}
+.theory li{margin:0 0 5px}
+code{font-family:var(--fm); font-size:.86em; background:var(--surf2); padding:.06em .32em; border-radius:2px; overflow-wrap:anywhere; color:var(--ink)}
+pre{background:var(--surf); border:1px solid var(--line); border-left:3px solid var(--acc-l); padding:11px 13px; margin:0 0 14px; overflow-x:auto; border-radius:2px}
+pre code{background:none; padding:0; font-size:12.4px; line-height:1.62; white-space:pre}
+pre .k{color:var(--acc); font-weight:600}
+pre .c{color:var(--ink3); font-style:italic}
+pre .s{color:var(--str)}
+pre .n{color:var(--val)}
+pre .g{color:var(--good); font-weight:600}
+pre .c2{color:var(--warn); font-weight:600}
+pre .q{color:var(--bad); font-weight:600}
+.note{border:1px solid var(--line); border-left:3px solid var(--line2); padding:11px 14px; margin:0 0 15px; background:var(--surf); font-size:14.4px; border-radius:2px}
+.note p{margin:0 0 8px; color:var(--ink2)} .note p:last-child{margin:0}
+.note ul{margin:0; padding-left:20px; color:var(--ink2)}
+.note .hd{display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:var(--ink); margin:0 0 6px}
+.note.ok{border-left-color:var(--good); background:var(--good-s)} .note.ok .hd{color:var(--good)}
+.note.warn{border-left-color:var(--warn); background:var(--warn-s)} .note.warn .hd{color:var(--warn)}
+.note.trap{border-left-color:var(--bad); background:var(--bad-s)} .note.trap .hd{color:var(--bad)}
+.note .tw{margin-top:.5em} .note pre{background:var(--surf); margin:0 0 8px}
+.tw{overflow-x:auto; margin:0 0 15px; border:1px solid var(--line); border-radius:2px}
+.tw table{border-collapse:collapse; width:100%; font-size:13.4px; min-width:440px}
+.tw th{text-align:left; font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3);
+  background:var(--surf2); padding:7px 11px; border-bottom:1px solid var(--line2); white-space:nowrap}
+.tw td{padding:7px 11px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top}
+.tw tr:last-child td{border-bottom:none}
+.tw td:first-child{color:var(--ink)}
+.tw td code{white-space:nowrap}
+.fig{margin:0 0 18px; padding:0}
+.fig svg{display:block; width:100%; height:auto; background:var(--surf); border:1px solid var(--line); padding:12px; border-radius:2px}
+.fig figcaption{font-size:12.3px; color:var(--ink3); margin-top:7px; line-height:1.5; border-left:2px solid var(--acc-l); padding-left:9px}
+
+/* ── тесты ────────────────────────────────────────────── */
+.quiz{max-width:74ch}
+.qc{border:1px solid var(--line); background:var(--surf); margin:0 0 12px; border-radius:2px}
+.qc.right{border-left:3px solid var(--good)}
+.qc.wrong{border-left:3px solid var(--bad)}
+.qq{display:flex; gap:11px; padding:12px 14px; align-items:baseline; border-bottom:1px solid var(--line)}
+.qn{font-family:var(--fm); font-size:11px; color:var(--ink3); flex:0 0 auto}
+.qt{font-size:15px; font-weight:500; color:var(--ink); line-height:1.46}
+.qo{display:flex; flex-direction:column; padding:9px 14px; gap:4px}
+.qo button{font:inherit; font-size:14px; text-align:left; color:var(--ink2); background:var(--surf3);
+  border:1px solid var(--line); padding:8px 11px; cursor:pointer; display:flex; gap:9px; align-items:baseline; line-height:1.45; border-radius:2px}
+.qo button:hover:not(:disabled){border-color:var(--acc); color:var(--ink)}
+.qo button:disabled{cursor:default}
+.qo .ltr{font-family:var(--fm); font-size:10.5px; color:var(--ink3); flex:0 0 auto}
+.qo button.good{border-color:var(--good); background:var(--good-s); color:var(--ink)}
+.qo button.good .ltr{color:var(--good)}
+.qo button.bad{border-color:var(--bad); background:var(--bad-s)}
+.qo button.bad .ltr{color:var(--bad)}
+.qw{padding:0 14px 12px; font-size:13.5px; color:var(--ink2); line-height:1.54}
+.qw .lbl{display:block; margin-bottom:3px; color:var(--acc)}
+.qsum{font-family:var(--fm); font-size:12px; color:var(--ink3); margin:0 0 15px}
+.qsum b{color:var(--ink)}
+
+/* ── задания ──────────────────────────────────────────── */
+.labs{display:flex; flex-direction:column; gap:16px; max-width:92ch}
+.lab{border:1px solid var(--line); background:var(--surf); border-radius:2px; scroll-margin-top:106px}
+.lab.done{border-color:var(--good)}
+.labh{display:flex; gap:11px; align-items:center; padding:10px 14px; background:var(--surf2); border-bottom:1px solid var(--line); flex-wrap:wrap}
+.labh .id{font-family:var(--fm); font-size:10.5px; color:var(--onacc); background:var(--acc); padding:2px 7px; border-radius:2px}
+.lab.done .labh .id{background:var(--good); color:var(--paper)}
+.labh .nm{font-family:var(--fd); font-weight:600; font-size:16px; flex:1 1 auto; min-width:0}
+.labh .st{font-family:var(--fm); font-size:11px; color:var(--ink3); white-space:nowrap}
+.labb{padding:13px 15px; font-size:14.4px; color:var(--ink2)}
+.labb ul,.labb ol{margin:0 0 10px; padding-left:20px}
+.labb li{margin:0 0 5px}
+.labb p{margin:0 0 10px} .labb p:last-child{margin:0}
+.chk{list-style:none; margin:13px 0 0; padding:11px 0 0; border-top:1px solid var(--line)}
+.chk li{display:flex; gap:9px; align-items:baseline; font-size:13.3px; color:var(--ink3); margin:0 0 5px}
+.chk li.hit{color:var(--ink2)}
+.chk .bx{font-family:var(--fm); font-size:10px; flex:0 0 auto; width:14px; height:14px; line-height:12px; text-align:center;
+  border:1px solid var(--line2); color:transparent; border-radius:2px}
+.chk li.hit .bx{border-color:var(--good); background:var(--good); color:var(--paper)}
+.labact{display:flex; gap:9px; flex-wrap:wrap; padding:0 15px 13px}
+.hintbox{font-size:13px; color:var(--ink2); background:var(--warn-s); border:1px solid var(--warn); padding:8px 12px; margin:0 15px 13px; border-radius:2px}
+.lab-done{display:flex; gap:9px; align-items:center; font-size:12.8px; color:var(--good); font-weight:600; padding:0 15px 13px}
+.lab-done[hidden]{display:none}
+
+/* ── собеседование ────────────────────────────────────── */
+.ivs{display:flex; flex-direction:column; gap:14px; max-width:82ch}
+.ivc{border:1px solid var(--line); background:var(--surf); border-radius:2px; overflow:hidden; scroll-margin-top:106px}
+.ivq{display:flex; gap:11px; align-items:baseline; padding:13px 15px; cursor:pointer; background:var(--surf)}
+.ivq:hover{background:var(--surf3)}
+.ivq .qn{font-family:var(--fm); font-size:11px; color:var(--acc); flex:0 0 auto}
+.ivq .qt{font-family:var(--fd); font-size:17.5px; font-weight:600; color:var(--ink); line-height:1.28; flex:1 1 auto}
+.ivq .tog{font-family:var(--fm); font-size:10px; color:var(--ink3); flex:0 0 auto; letter-spacing:.06em; text-transform:uppercase}
+.ivb{border-top:1px solid var(--line); padding:12px 15px 14px; font-size:14.4px; color:var(--ink2)}
+.ivb[hidden]{display:none}
+.ivp{background:var(--acc-s); border-left:3px solid var(--acc); padding:8px 11px; margin:0 0 11px; font-size:13.4px; color:var(--ink2); border-radius:2px}
+.ivp b{display:block; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--acc); margin-bottom:3px}
+.iva{margin:0 0 11px; line-height:1.62}
+.ivm{margin:0; padding:9px 0 0; border-top:1px solid var(--line); font-size:13px; color:var(--ink3)}
+.ivm b{display:block; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); margin-bottom:4px}
+.ivm ul{margin:0; padding-left:18px} .ivm li{margin:0 0 3px}
+
+/* ── карта сети ───────────────────────────────────────── */
+.rail{position:sticky; top:92px; padding:20px 0 8px; display:flex; flex-direction:column; gap:9px;
+  max-height:calc(100vh - 100px - var(--dockh)); overflow:hidden}
+.rh{display:flex; align-items:baseline; gap:8px; margin:0; flex:0 0 auto}
+.rh .n{font-family:var(--fm); font-size:10px; color:var(--ink3); margin-left:auto}
+.rbox{border:1px solid var(--line); background:var(--surf); border-radius:2px; overflow:auto; flex:0 1 auto}
+.rbox.grow{flex:1 1 auto; min-height:56px}
+.hd2{display:flex; gap:7px; align-items:baseline; padding:6px 10px; border-bottom:1px solid var(--line);
+  background:var(--surf2); font-size:10px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:var(--ink3)}
+.hd2 .n{margin-left:auto; font-family:var(--fm); letter-spacing:0; text-transform:none; font-size:10px}
+.nrow{display:flex; gap:7px; align-items:baseline; padding:3px 10px; font-family:var(--fm); font-size:11.3px; white-space:nowrap}
+.nrow.kid{padding-left:22px}
+.nrow .nm{color:var(--ink); overflow:hidden; text-overflow:ellipsis; min-width:0}
+.nrow .ip{color:var(--val); flex:0 0 auto}
+.nrow .tag{flex:0 0 auto; font-size:10px; color:var(--ink3)}
+.nrow .tag.open{color:var(--good)} .nrow .tag.shut{color:var(--bad)} .nrow .tag.drop{color:var(--warn)}
+.nrow .arrow{color:var(--ink3); flex:0 0 auto}
+.rempty{padding:8px 10px; font-family:var(--fm); font-size:11px; color:var(--ink3)}
+.vbox{padding:7px 10px; font-family:var(--fm); font-size:11px; color:var(--ink2)}
+.vbox b{color:var(--acc)}
+.rail .hint{font-size:11.6px; color:var(--ink3); line-height:1.5; margin:0; flex:0 0 auto}
+.rail .hint b{color:var(--ink2); font-family:var(--fm); font-size:11px}
+
+/* ── терминал ─────────────────────────────────────────── */
+.dock{position:sticky; bottom:0; z-index:30; background:var(--surf); border-top:1px solid var(--line2)}
+.dockin{max-width:1540px; margin:0 auto; padding:0 20px 12px}
+.dockbar{display:flex; align-items:center; gap:12px; padding:7px 0; flex-wrap:wrap}
+.dockbar .sp{flex:1 1 auto}
+.dockbar .ttl{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink3)}
+.dockbar .st{font-family:var(--fm); font-size:11px; color:var(--ink3); white-space:nowrap}
+.dockbar .st.err{color:var(--bad)}
+.dtabs{display:flex; gap:0}
+.dtabs button{font:inherit; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  color:var(--ink3); background:none; border:1px solid transparent; padding:4px 11px; cursor:pointer; border-radius:2px}
+.dtabs button[aria-selected="true"]{color:var(--ink); background:var(--surf3); border-color:var(--line)}
+.btn{font:inherit; font-size:11px; letter-spacing:.05em; text-transform:uppercase; font-weight:700; color:var(--ink2);
+  background:var(--surf3); border:1px solid var(--line2); padding:5px 11px; cursor:pointer; border-radius:2px}
+.btn:hover{border-color:var(--acc); color:var(--acc)}
+.btn.pri{background:var(--acc); border-color:var(--acc); color:var(--onacc)}
+.btn.pri:hover{background:var(--acc-d); border-color:var(--acc-d); color:var(--onacc)}
+
+.term{border:1px solid var(--line); border-left:3px solid var(--acc-l); background:var(--paper); border-radius:2px}
+.tout{height:200px; overflow:auto; padding:8px 0; font-family:var(--fm); font-size:12.2px; line-height:1.55}
+.tout .l{padding:0 11px; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ink2)}
+.tout .cmd{color:var(--ink); font-weight:500}
+.tout .cmd .p{color:var(--acc); user-select:none}
+.tout .e{color:var(--bad)}
+.tout .h{color:var(--ink3); font-style:italic; padding-left:11px}
+.tout .add{color:var(--good)} .tout .del{color:var(--bad)} .tout .hunk{color:var(--val)}
+.tout .cfl{color:var(--warn); font-weight:600}
+.tout .none{color:var(--ink3); padding:0 11px}
+.tin{display:flex; align-items:baseline; gap:0; border-top:1px solid var(--line); padding:6px 11px}
+.tin .p{font-family:var(--fm); font-size:12.2px; color:var(--acc); flex:0 0 auto; user-select:none}
+.tin input{font:inherit; font-family:var(--fm); font-size:12.2px; color:var(--ink); background:none;
+  border:none; outline:none; flex:1 1 auto; min-width:0; padding:0 0 0 6px}
+
+.fed{display:grid; grid-template-columns:minmax(0,1fr); gap:8px}
+.fed .fbar{display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+.fed .fname{font-family:var(--fm); font-size:12px; color:var(--ink3)}
+.fed .fl{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; color:var(--ink3)}
+.fed select{font:inherit; font-family:var(--fm); font-size:12px; color:var(--ink); background:var(--surf3);
+  border:1px solid var(--line2); padding:4px 7px; border-radius:2px; max-width:min(46vw, 320px)}
+.fed select:focus{outline:none; border-color:var(--acc)}
+.fed textarea{font-family:var(--fm); font-size:12.4px; line-height:1.55; tab-size:2; color:var(--ink); background:var(--paper);
+  border:1px solid var(--line2); border-left:3px solid var(--acc-l); padding:9px 11px; width:100%; height:184px;
+  resize:vertical; tab-size:4; white-space:pre; overflow:auto; border-radius:2px}
+.fed textarea:focus{outline:none; border-color:var(--acc); border-left-color:var(--acc)}
+
+.chips{display:flex; gap:6px; flex-wrap:wrap; padding:9px 0 0}
+.chips button{font-family:var(--fm); font-size:11px; color:var(--ink2); background:var(--surf3);
+  border:1px solid var(--line); padding:4px 9px; cursor:pointer; border-radius:2px; text-align:left}
+.chips button:hover{border-color:var(--acc); color:var(--acc)}
+
+.tout .ok2{color:var(--good)} .tout .warn2{color:var(--warn)} .tout .bad2{color:var(--bad)}
+.tout .star{color:var(--ink3)} .tout .req{color:var(--acc); font-weight:600} .tout .res{color:var(--val)}
+.tout .hdr{color:var(--ink3); letter-spacing:.03em}
+
+@media (max-width:900px){
+  .tout{height:150px} .fed textarea{height:160px}
+  .dockin{padding:0 14px 8px}
+  .wrap .rail{display:none}
+}
+@media (max-height:800px){ .rail .hint{display:none} }
+@media (max-height:700px){ .tout{height:130px} .fed textarea{height:130px} }
+
+.foot{max-width:1540px; margin:0 auto; padding:24px 20px 32px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink3); line-height:1.6}
+.foot b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">net<i>·</i>work</span>
+      <span class="tag">Сеть и отладка HTTP</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 96</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Карта сети</span><span class="n" id="rctx"></span></div>
+    <div class="rbox grow" id="map"></div>
+    <div class="rbox" id="extra"></div>
+    <p class="hint"><b>↑ ↓</b> — история команд, <b>Tab</b> — дополнение. Карта показывает, как всё устроено на самом деле, — но при разборе честнее сначала выяснить это командами.</p>
+    <button class="btn" id="reset" type="button">Сбросить сценарий</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Терминал">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Терминал</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="term" aria-selected="true">Команды</button>
+        <button role="tab" data-d="file" aria-selected="false">Машина</button>
+      </div>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn" id="clear" type="button">Очистить</button>
+    </div>
+
+    <div class="tool" id="t-term">
+      <div class="term">
+        <div class="tout" id="out"></div>
+        <div class="tin">
+          <span class="p" id="prompt">dev@laptop $</span>
+          <input id="cmd" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+            aria-label="Команда" placeholder="curl -v https://api.example.com/health">
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="tool fed" id="t-file" hidden>
+      <div class="fbar">
+        <label class="fl" for="fpick">Файл</label>
+        <select id="fpick" aria-label="Какой файл открыть"></select>
+        <span class="sp"></span>
+        <span class="fname" id="fname">правится вручную</span>
+        <button class="btn pri" id="fsave" type="button">Сохранить</button>
+      </div>
+      <textarea id="ftext" spellcheck="false" aria-label="Содержимое файла"></textarea>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>Network</b> — интерактивный курс сети и отладки HTTP: 12 разделов теории, 72 вопроса, 24 задания со 114 автоматическими проверками и 12 разборов вопросов с собеседований. Запросы выполняет встроенная модель сети: разрешение имён с записями и цепочками CNAME, установка соединения с различием отказа и потери пакетов, рукопожатие с проверкой срока, имени и издателя сертификата, HTTP с методами, кодами, перенаправлениями и условными запросами, обратные и корпоративные прокси, а также отдельная команда <code>browser</code>, которая ходит по тем же адресам, но с правилами источника.</p>
+  <p>Модель учебная и намеренно упрощена: нет IPv6, маршрутизации, HTTP/2 и HTTP/3, сжатия, повторного использования соединений и настоящей криптографии. Поведение воспроизводит реальность там, где на этом учатся: отказ приходит мгновенно, а потеря пакетов — по таймауту; сертификат ломается тремя разными способами; обращение по адресу теряет имя в <code>Host</code> и SNI; прокси отвечает 502 сам, а логи приложения при этом пусты; и запрос, который проходит в <code>curl</code>, блокируется браузером, если сервер не разрешил источник. Прогресс хранится в браузере.</p>
+</footer>
+<script>
+"use strict";
+/* ============================================================
+   Модель сети: имена, узлы, порты, сертификаты
+   ============================================================ */
+class NetErr extends Error {
+  constructor(msg, hint){ super(msg); this.hint = hint || ""; }
+}
+const nerr = (m, h) => { throw new NetErr(m, h); };
+
+function newNet(opts){
+  opts = opts || {};
+  const N = {
+    now: 0,
+    dns: {},          /* имя → [{type, value, ttl}] */
+    hostsFile: {},    /* имя → адрес; сильнее DNS */
+    nodes: {},        /* адрес → {name, ports:{порт: {server, tls}}, drop:[порты], down:false} */
+    servers: {},      /* имя сервера → {routes, slow, requires} */
+    certs: {},        /* имя → {cn, san, notAfter, issuer, selfSigned} */
+    proxyEnv: null,   /* адрес прокси из окружения */
+    origin: opts.origin || "https://app.example.com",
+    resolver: opts.resolver || "10.0.0.53",
+    latency: opts.latency || {},   /* адрес → мс */
+    log: []
+  };
+  for(const k in (opts.dns || {})) N.dns[k] = [].concat(opts.dns[k]);
+  Object.assign(N.hostsFile, opts.hostsFile || {});
+  for(const ip in (opts.nodes || {})) N.nodes[ip] = Object.assign({ports:{}, drop:[], down:false}, opts.nodes[ip]);
+  for(const s in (opts.servers || {})) N.servers[s] = opts.servers[s];
+  for(const h in (opts.certs || {})) N.certs[h] = opts.certs[h];
+  if(opts.proxyEnv) N.proxyEnv = opts.proxyEnv;
+  return N;
+}
+
+/* ── разрешение имени ──────────────────────────────────── */
+/* Возвращает {ip, chain:[шаги], source} либо {error} */
+function resolve(N, name, opts){
+  opts = opts || {};
+  const chain = [];
+  if(opts.override && opts.override[name]){
+    return {ip: opts.override[name], chain: [name + " → " + opts.override[name] + " (--resolve)"], source: "--resolve"};
+  }
+  if(N.hostsFile[name]){
+    return {ip: N.hostsFile[name], chain: [name + " → " + N.hostsFile[name] + " (/etc/hosts)"], source: "/etc/hosts"};
+  }
+  if(/^\d+\.\d+\.\d+\.\d+$/.test(name)) return {ip: name, chain: [name + " — уже адрес"], source: "literal"};
+
+  let cur = name;
+  for(let hop = 0; hop < 6; hop++){
+    const rr = N.dns[cur];
+    if(!rr || !rr.length)
+      return {error: "NXDOMAIN", name: cur,
+              msg: "Could not resolve host: " + name,
+              hint: cur === name ? "Записи для этого имени нет. Проверьте «dig " + name + "» и опечатки."
+                                 : "Цепочка CNAME ведёт к имени «" + cur + "», которого нет в DNS."};
+    const cn = rr.filter(r => r.type === "CNAME")[0];
+    if(cn){ chain.push(cur + " CNAME " + cn.value); cur = cn.value; continue; }
+    const a = rr.filter(r => r.type === "A");
+    if(!a.length)
+      return {error: "NOANSWER", name: cur, msg: "Could not resolve host: " + name,
+              hint: "Для имени есть записи, но нет ни одной A — обращаться некуда."};
+    chain.push(cur + " A " + a[0].value + " (ttl " + (a[0].ttl || 300) + ")");
+    return {ip: a[0].value, chain, source: "dns", all: a.map(x => x.value)};
+  }
+  return {error: "LOOP", msg: "Could not resolve host: " + name,
+          hint: "Цепочка CNAME зациклилась."};
+}
+
+/* ── соединение ────────────────────────────────────────── */
+/* {ok, ms} либо {error: refused|timeout|unreach} */
+function connect(N, ip, port, timeoutS){
+  const node = N.nodes[ip];
+  const lat = N.latency[ip] || 20;
+  if(!node) return {error: "unreach", ms: (timeoutS || 30) * 1000,
+    msg: "Failed to connect to " + ip + " port " + port + ": No route to host",
+    hint: "Адрес не отвечает вовсе: имя разрешилось не туда либо узла нет."};
+  if(node.down) return {error: "timeout", ms: (timeoutS || 30) * 1000,
+    msg: "Failed to connect to " + ip + " port " + port + ": Connection timed out",
+    hint: "Узел не отвечает. Так выглядит выключенная машина или потерянные пакеты."};
+  if((node.drop || []).indexOf(port) >= 0) return {error: "timeout", ms: (timeoutS || 30) * 1000,
+    msg: "Failed to connect to " + ip + " port " + port + ": Connection timed out",
+    hint: "Пакеты молча отбрасываются — так ведёт себя межсетевой экран с политикой DROP. Отличие от «отказано в соединении» в том, что ответа нет вовсе."};
+  if(!node.ports[port]) return {error: "refused", ms: lat,
+    msg: "Failed to connect to " + ip + " port " + port + ": Connection refused",
+    hint: "Узел ответил отказом: на этом порту никто не слушает. Значит, машина жива, а служба не запущена или слушает другой порт."};
+  return {ok: true, ms: lat, listener: node.ports[port]};
+}
+
+/* ── TLS ───────────────────────────────────────────────── */
+function tlsHandshake(N, ip, port, hostname, opts){
+  opts = opts || {};
+  const node = N.nodes[ip];
+  const listener = node.ports[port];
+  if(!listener.tls) return {error: "notls",
+    msg: "error:0A00010B:SSL routines::wrong version number",
+    hint: "На этом порту обычный HTTP, а обратились по https. Порт 80 — без шифрования, 443 — с ним."};
+  /* сервер выбирает сертификат по имени из SNI */
+  const certName = listener.certOf ? listener.certOf(hostname) : listener.cert;
+  const cert = N.certs[certName] || N.certs[hostname];
+  if(!cert) return {error: "nocert", msg: "SSL certificate problem: unable to get local issuer certificate",
+    hint: "Сервер не отдал сертификата для этого имени."};
+
+  const names = [].concat(cert.cn || [], cert.san || []);
+  const matches = names.some(n => n === hostname ||
+    (String(n).indexOf("*.") === 0 && hostname.split(".").slice(1).join(".") === String(n).slice(2)));
+  if(!matches && !opts.insecure) return {error: "hostname", cert,
+    msg: "SSL: no alternative certificate subject name matches target host name '" + hostname + "'",
+    hint: "Сертификат выдан на другое имя (" + names.join(", ") + "). Обычно это означает, что вы попали не на тот сервер, либо на сервере не настроен SNI."};
+  if(cert.notAfter !== undefined && cert.notAfter < N.now && !opts.insecure) return {error: "expired", cert,
+    msg: "SSL certificate problem: certificate has expired",
+    hint: "Срок действия истёк. Проверьте дату на своей машине тоже: расхождение часов даёт ту же ошибку."};
+  if(cert.selfSigned && !opts.insecure) return {error: "untrusted", cert,
+    msg: "SSL certificate problem: self-signed certificate",
+    hint: "Издатель неизвестен. Такое бывает на внутренних стендах: либо добавляют корневой сертификат в доверенные, либо (только для отладки) идут с ключом -k."};
+  return {ok: true, cert, ms: 40};
+}
+const certLines = (cert, hostname) => [
+  "*  subject: CN=" + (cert.cn || hostname),
+  "*  start date: " + (cert.notBefore || "2026-01-01"),
+  "*  expire date: " + (cert.notAfterText || "2027-01-01"),
+  "*  subjectAltName: " + [].concat(cert.san || cert.cn || hostname).join(", "),
+  "*  issuer: " + (cert.issuer || (cert.selfSigned ? "самоподписанный" : "Example Root CA"))
+];
+
+
+/* ============================================================
+   HTTP: сервер, маршруты, перенаправления, прокси, CORS
+   ============================================================ */
+const STATUS = {
+  200:"OK", 201:"Created", 204:"No Content", 301:"Moved Permanently", 302:"Found",
+  304:"Not Modified", 307:"Temporary Redirect", 308:"Permanent Redirect",
+  400:"Bad Request", 401:"Unauthorized", 403:"Forbidden", 404:"Not Found",
+  405:"Method Not Allowed", 409:"Conflict", 413:"Payload Too Large",
+  415:"Unsupported Media Type", 429:"Too Many Requests",
+  500:"Internal Server Error", 502:"Bad Gateway", 503:"Service Unavailable", 504:"Gateway Timeout"
+};
+
+const lower = h => { const o = {}; for(const k in (h || {})) o[String(k).toLowerCase()] = h[k]; return o; };
+const hdr = (h, k) => lower(h)[String(k).toLowerCase()];
+
+/* Обслужить запрос сервером. Возвращает {status, headers, body, ms} */
+function serve(N, srvName, req){
+  const S = N.servers[srvName];
+  if(!S) return {status: 502, headers: {}, body: "no upstream", ms: 5};
+  /* сервер с upstream — это обратный прокси: он не обслуживает сам, а пересылает */
+  if(S.upstream) return viaProxy(N, srvName, req, {scheme: req.scheme || "https", host: req.host || ""});
+  const H = lower(req.headers);
+  let ms = (S.slowMs || 0) + 10;
+
+  if(S.down) return {status: 503, headers: {"content-type":"text/plain"}, body: "service unavailable", ms};
+
+  const path = req.path.split("?")[0];
+  let route = null;
+  for(const r of (S.routes || [])){
+    if(r.path === path){ route = r; break; }
+    if(r.prefix && path.indexOf(r.prefix) === 0){ route = r; break; }
+  }
+  if(!route) return {status: 404, headers: {"content-type":"text/plain"}, body: "not found", ms};
+
+  /* HEAD обслуживается везде, где разрешён GET, — только без тела */
+  const effMethod = req.method === "HEAD" ? "GET" : req.method;
+  if(route.methods && route.methods.indexOf(effMethod) < 0)
+    return {status: 405, headers: {"content-type":"text/plain", "allow": route.methods.join(", ")},
+            body: "method not allowed", ms};
+
+  if(route.auth){
+    const a = H["authorization"];
+    if(!a) return {status: 401, headers: {"www-authenticate": "Bearer", "content-type":"text/plain"},
+                   body: "unauthorized", ms};
+    if(route.token && a !== "Bearer " + route.token)
+      return {status: 403, headers: {"content-type":"text/plain"}, body: "forbidden", ms};
+  }
+  if(route.needsType && H["content-type"] !== route.needsType)
+    return {status: 415, headers: {"content-type":"text/plain"},
+            body: "ожидался content-type: " + route.needsType, ms};
+
+  if(route.status >= 300 && route.status < 400)
+    return {status: route.status, headers: {"location": route.location, "content-type":"text/html"},
+            body: "", ms};
+
+  const headers = Object.assign({
+    "server": S.serverName || "nginx/1.25",
+    "date": "Mon, 27 Aug 2026 10:00:00 GMT",
+    "content-type": route.type || (route.json !== undefined ? "application/json" : "text/plain")
+  }, route.headers || {});
+  const body = route.json !== undefined ? JSON.stringify(route.json) : (route.body === undefined ? "" : route.body);
+  headers["content-length"] = String(body.length);
+  if(route.etag) headers["etag"] = route.etag;
+  if(route.cache) headers["cache-control"] = route.cache;
+
+  /* условный запрос */
+  if(route.etag && H["if-none-match"] === route.etag)
+    return {status: 304, headers: {"etag": route.etag, "cache-control": route.cache || ""}, body: "", ms};
+
+  return {status: route.status || 200, headers, body, ms};
+}
+
+/* Прохождение через прокси: он добавляет свои заголовки и может ответить сам */
+function viaProxy(N, proxyName, req, target){
+  const P = N.servers[proxyName];
+  if(!P) return {status: 502, headers: {}, body: "bad gateway", ms: 5};
+  const up = P.upstream;
+  const node = up ? N.nodes[up.ip] : null;
+  const added = Object.assign({}, req.headers, {
+    "X-Forwarded-For": "203.0.113.7",
+    "X-Forwarded-Proto": target.scheme,
+    "X-Forwarded-Host": target.host
+  });
+  for(const s of (P.strips || [])) delete added[s];
+  if(!node || node.down || !node.ports[up.port])
+    return {status: 502, headers: {"server": P.serverName || "nginx/1.25", "content-type":"text/html"},
+            body: "502 Bad Gateway", ms: 15, proxied: true, added};
+  const r = serve(N, node.ports[up.port].server, Object.assign({}, req, {headers: added}));
+  if(P.timeoutS !== undefined && r.ms / 1000 > P.timeoutS)
+    return {status: 504, headers: {"server": P.serverName || "nginx/1.25", "content-type":"text/html"},
+            body: "504 Gateway Time-out", ms: P.timeoutS * 1000, proxied: true, added};
+  r.headers = Object.assign({"server": P.serverName || "nginx/1.25"}, r.headers);
+  r.proxied = true; r.added = added;
+  r.ms += 8;
+  return r;
+}
+
+/* ── разбор адреса ─────────────────────────────────────── */
+function parseUrl(raw){
+  let s = String(raw).trim();
+  if(!/^https?:\/\//.test(s)) s = "http://" + s;
+  const m = /^(https?):\/\/([^\/:?#]+)(?::(\d+))?([^?#]*)(\?[^#]*)?/.exec(s);
+  if(!m) nerr("не разобрать адрес: " + raw);
+  const scheme = m[1], host = m[2];
+  const port = m[3] ? parseInt(m[3], 10) : (scheme === "https" ? 443 : 80);
+  const path = (m[4] || "/") + (m[5] || "");
+  return {scheme, host, port, path: path || "/", url: scheme + "://" + host + (m[3] ? ":" + port : "") + (path || "/")};
+}
+
+/* ── CORS: правила применяет ТОЛЬКО браузер ────────────── */
+const SIMPLE_HEADERS = ["accept", "accept-language", "content-language", "content-type"];
+const SIMPLE_TYPES = ["text/plain", "application/x-www-form-urlencoded", "multipart/form-data"];
+function needsPreflight(method, headers){
+  if(["GET", "HEAD", "POST"].indexOf(method) < 0) return true;
+  const H = lower(headers);
+  for(const k in H){
+    if(SIMPLE_HEADERS.indexOf(k) < 0) return true;
+    if(k === "content-type" && SIMPLE_TYPES.indexOf(String(H[k]).split(";")[0].trim()) < 0) return true;
+  }
+  return false;
+}
+function corsCheck(res, origin, method, headers, credentials){
+  const H = lower(res.headers);
+  const allow = H["access-control-allow-origin"];
+  if(!allow)
+    return {blocked: true,
+      why: "В ответе нет заголовка Access-Control-Allow-Origin.",
+      console: "Access to fetch at ... from origin '" + origin +
+        "' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."};
+  if(allow !== "*" && allow !== origin)
+    return {blocked: true,
+      why: "Заголовок Access-Control-Allow-Origin разрешает «" + allow + "», а страница пришла с «" + origin + "».",
+      console: "The 'Access-Control-Allow-Origin' header has a value '" + allow +
+        "' that is not equal to the supplied origin."};
+  if(credentials && allow === "*")
+    return {blocked: true,
+      why: "С учётными данными подстановка «*» запрещена — нужно точное имя источника.",
+      console: "The value of the 'Access-Control-Allow-Origin' header must not be the wildcard '*' when the request's credentials mode is 'include'."};
+  if(credentials && String(H["access-control-allow-credentials"]) !== "true")
+    return {blocked: true,
+      why: "Нет заголовка Access-Control-Allow-Credentials: true.",
+      console: "The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true'."};
+  return {blocked: false};
+}
+function preflightCheck(res, method, headers){
+  const H = lower(res.headers);
+  const okM = String(H["access-control-allow-methods"] || "").split(",").map(x => x.trim().toUpperCase());
+  if(okM.indexOf(method) < 0 && okM.indexOf("*") < 0)
+    return {blocked: true,
+      why: "Предварительный запрос не разрешил метод " + method + " (разрешены: " + (okM.join(", ") || "ничего") + ").",
+      console: "Method " + method + " is not allowed by Access-Control-Allow-Headers in preflight response."};
+  const okH = String(H["access-control-allow-headers"] || "").toLowerCase().split(",").map(x => x.trim());
+  for(const k in lower(headers)){
+    if(SIMPLE_HEADERS.indexOf(k) >= 0) continue;
+    if(okH.indexOf(k) < 0 && okH.indexOf("*") < 0)
+      return {blocked: true,
+        why: "Предварительный запрос не разрешил заголовок «" + k + "».",
+        console: "Request header field " + k + " is not allowed by Access-Control-Allow-Headers in preflight response."};
+  }
+  return {blocked: false};
+}
+
+/* ============================================================
+   curl: весь путь запроса по шагам
+   ============================================================ */
+/* Один обмен без учёта перенаправлений.
+   Возвращает {v:[строки -v], res} либо {v, err:{code, msg, hint}} */
+function exchange(N, u, o){
+  const v = [];
+  const timeout = o.maxTime === undefined ? 30 : o.maxTime;
+  const ctimeout = o.connectTimeout === undefined ? timeout : o.connectTimeout;
+
+  /* через прокси соединяются с прокси, а не с целевым узлом */
+  const proxy = o.noProxy ? null : (o.proxy || N.proxyEnv);
+  const connectHost = proxy ? parseUrl(proxy).host : u.host;
+  const connectPort = proxy ? parseUrl(proxy).port : u.port;
+  if(proxy) v.push("* Uses proxy env variable / -x → " + proxy);
+
+  const r = resolve(N, connectHost, {override: o.resolveMap});
+  if(r.error) return {v, err: {code: 6, msg: r.msg, hint: r.hint}};
+  for(const step of r.chain) v.push("* Resolved " + step);
+  v.push("*   Trying " + r.ip + ":" + connectPort + "...");
+
+  const c = connect(N, r.ip, connectPort, ctimeout);
+  if(c.error){
+    const timedOut = c.error === "timeout" || c.error === "unreach";
+    return {v, err: {code: timedOut ? 28 : 7, msg: c.msg, hint: c.hint,
+                     ms: Math.min(c.ms, ctimeout * 1000)}};
+  }
+  v.push("* Connected to " + connectHost + " (" + r.ip + ") port " + connectPort);
+  let ms = c.ms;
+
+  if(u.scheme === "https" && !proxy){
+    const t = tlsHandshake(N, r.ip, connectPort, u.host, {insecure: o.insecure});
+    if(t.error) return {v, err: {code: t.error === "notls" ? 35 : 60, msg: t.msg, hint: t.hint,
+                                 cert: t.cert, host: u.host}};
+    v.push("* TLS handshake, SNI: " + u.host);
+    v.push("* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384");
+    for(const l of certLines(t.cert, u.host)) v.push(l);
+    if(o.insecure) v.push("* WARNING: проверка сертификата отключена ключом -k");
+    ms += t.ms;
+  }
+
+  /* запрос */
+  const method = o.method || (o.data !== undefined ? "POST" : (o.head ? "HEAD" : "GET"));
+  const headers = Object.assign({
+    "Host": u.host,
+    "User-Agent": o.agent || "curl/8.6.0",
+    "Accept": "*/*"
+  }, o.headers || {});
+  if(o.data !== undefined){
+    if(!hdr(headers, "content-type")) headers["Content-Type"] = "application/x-www-form-urlencoded";
+    headers["Content-Length"] = String(o.data.length);
+  }
+  v.push("> " + method + " " + (proxy ? u.url : u.path) + " HTTP/1.1");
+  for(const k in headers) v.push("> " + k + ": " + mask(k, headers[k]));
+  v.push(">");
+
+  const req = {method, path: u.path, headers, body: o.data, scheme: u.scheme, host: u.host};
+  let res;
+  if(proxy){
+    const pnode = N.nodes[r.ip].ports[connectPort];
+    res = viaProxy(N, pnode.server, req, u);
+  } else {
+    res = serve(N, serverFor(N.nodes[r.ip].ports[connectPort], u.host), req);
+  }
+  ms += res.ms;
+  if(ms > timeout * 1000)
+    return {v, err: {code: 28, msg: "Operation timed out after " + timeout * 1000 +
+      " milliseconds with 0 bytes received",
+      hint: "Сервер отвечает дольше, чем позволяет --max-time. Соединение установилось — значит, дело не в сети, а в самой обработке."},
+      ms: timeout * 1000};
+
+  v.push("< HTTP/1.1 " + res.status + " " + (STATUS[res.status] || ""));
+  for(const k in res.headers) v.push("< " + k + ": " + res.headers[k]);
+  v.push("<");
+  return {v, res, ms, req, ip: r.ip};
+}
+/* На одном адресе может отвечать несколько сайтов — выбор по заголовку Host */
+function serverFor(listener, host){
+  if(listener.byHost && listener.byHost[host]) return listener.byHost[host];
+  return listener.server;
+}
+
+/* значение заголовка авторизации в журнал не пишут целиком */
+function mask(k, val){
+  if(String(k).toLowerCase() !== "authorization") return val;
+  const s = String(val), sp = s.indexOf(" ");
+  return sp > 0 ? s.slice(0, sp + 1) + s.slice(sp + 1, sp + 4) + "…" : s.slice(0, 3) + "…";
+}
+
+/* Полный запрос с перенаправлениями */
+function request(N, rawUrl, o){
+  o = o || {};
+  const out = [], hops = [];
+  let u = parseUrl(rawUrl);
+  let total = 0;
+  for(let hop = 0; hop <= (o.follow ? 20 : 0); hop++){
+    const r = exchange(N, u, o);
+    for(const l of r.v) out.push(l);
+    total += r.ms || 0;
+    if(r.err) return {v: out, err: r.err, ms: total, hops};
+    hops.push({url: u.url, status: r.res.status, location: r.res.headers.location});
+    const loc = hdr(r.res.headers, "location");
+    if(o.follow && r.res.status >= 300 && r.res.status < 400 && loc){
+      if(hops.filter(h => h.url === absolute(u, loc)).length >= 2)
+        return {v: out, err: {code: 47, msg: "Maximum (20) redirects followed",
+          hint: "Перенаправления зациклились: адреса повторяются. Смотрите цепочку выше."},
+          ms: total, hops, res: r.res};
+      out.push("* Issue another request to this URL: '" + absolute(u, loc) + "'");
+      u = parseUrl(absolute(u, loc));
+      continue;
+    }
+    if(o.follow && hop === 20)
+      return {v: out, err: {code: 47, msg: "Maximum (20) redirects followed"}, ms: total, hops, res: r.res};
+    return {v: out, res: r.res, ms: total, hops, req: r.req, ip: r.ip};
+  }
+  return {v: out, err: {code: 47, msg: "Maximum (20) redirects followed"}, ms: total, hops};
+}
+function absolute(u, loc){
+  if(/^https?:\/\//.test(loc)) return loc;
+  if(loc[0] === "/") return u.scheme + "://" + u.host + (u.port !== 80 && u.port !== 443 ? ":" + u.port : "") + loc;
+  return u.scheme + "://" + u.host + "/" + loc;
+}
+
+/* ── командная строка curl ─────────────────────────────── */
+function cmdCurl(N, a){
+  const url = a.args[0];
+  if(!url) nerr("curl: try 'curl --help' for more information",
+    "Нужен адрес: curl https://api.example.com/health");
+  const o = {
+    method: a.opts.X || a.opts.request,
+    headers: {}, follow: !!(a.flags.L || a.flags.location),
+    head: !!(a.flags.I || a.flags.head),
+    insecure: !!(a.flags.k || a.flags.insecure),
+    data: a.opts.d !== undefined ? a.opts.d : a.opts.data,
+    proxy: a.opts.x || a.opts.proxy,
+    noProxy: a.opts.noproxy !== undefined || a.flags.noproxy,
+    maxTime: a.opts["max-time"] !== undefined ? +a.opts["max-time"] : undefined,
+    connectTimeout: a.opts["connect-timeout"] !== undefined ? +a.opts["connect-timeout"] : undefined,
+    resolveMap: {}
+  };
+  for(const h of [].concat(a.opts.H || a.opts.header || [])){
+    const i = String(h).indexOf(":");
+    if(i < 0) nerr("заголовок задают как «Имя: значение», а не «" + h + "»");
+    o.headers[String(h).slice(0, i).trim()] = String(h).slice(i + 1).trim();
+  }
+  for(const rs of [].concat(a.opts.resolve || [])){
+    const p = String(rs).split(":");
+    if(p.length < 3) nerr("--resolve задают как имя:порт:адрес");
+    o.resolveMap[p[0]] = p[2];
+  }
+
+  const r = request(N, url, o);
+  const out = [];
+  const verbose = a.flags.v || a.flags.verbose;
+  if(verbose) for(const l of r.v) out.push(l);
+
+  if(r.err){
+    out.push("curl: (" + r.err.code + ") " + r.err.msg);
+    return {out, err2: r.err.hint, code: r.err.code, warn: true};
+  }
+  const res = r.res;
+  if(o.head || a.flags.i || a.flags.include){
+    if(!verbose){
+      out.push("HTTP/1.1 " + res.status + " " + (STATUS[res.status] || ""));
+      for(const k in res.headers) out.push(k + ": " + res.headers[k]);
+      out.push("");
+    }
+  }
+  if(!o.head && res.body) for(const l of String(res.body).split("\n")) out.push(l);
+  if(a.opts.w !== undefined || a.opts["write-out"] !== undefined){
+    /* формат вывода, как у настоящего curl */
+    const fmt = String(a.opts.w !== undefined ? a.opts.w : a.opts["write-out"]);
+    out.push(fmt.replace(/%\{time_total\}/g, (r.ms / 1000).toFixed(3))
+                .replace(/%\{http_code\}/g, String(res.status))
+                .replace(/%\{time_connect\}/g, "0.020")
+                .replace(/\\n/g, ""));
+  }
+  N.log.push({url, status: res.status, ms: r.ms});
+  return {out, res, warn: res.status >= 400};
+}
+
+/* ============================================================
+   Остальные инструменты
+   ============================================================ */
+function cmdDig(N, a){
+  const name = a.args[0];
+  if(!name) nerr("dig: укажите имя", "Например: dig api.example.com");
+  const want = (a.args[1] || "A").toUpperCase();
+  const out = ["; <<>> DiG 9.18 <<>> " + name + (want !== "A" ? " " + want : ""),
+               ";; QUESTION SECTION:", ";" + name + ".\t\tIN\t" + want, ""];
+  const rr = N.dns[name];
+  if(!rr || !rr.length){
+    out.push(";; ->>HEADER<<- status: NXDOMAIN");
+    out.push(";; ANSWER SECTION: (пусто)");
+    out.push("");
+    out.push(";; SERVER: " + N.resolver + "#53");
+    return {out, warn: true};
+  }
+  out.push(";; ANSWER SECTION:");
+  const seen = [];
+  let cur = name;
+  for(let i = 0; i < 6; i++){
+    const list = N.dns[cur] || [];
+    for(const r of list) out.push(cur + ".\t" + (r.ttl || 300) + "\tIN\t" + r.type + "\t" + r.value);
+    const cn = list.filter(r => r.type === "CNAME")[0];
+    if(!cn || seen.indexOf(cn.value) >= 0) break;
+    seen.push(cn.value); cur = cn.value;
+  }
+  out.push("");
+  out.push(";; SERVER: " + N.resolver + "#53");
+  if(a.flags.short || a.opts["+short"]) return {out: out.filter(l => /\tIN\t/.test(l)).map(l => l.split("\t").pop())};
+  return {out};
+}
+
+function cmdPing(N, a){
+  const host = a.args[0];
+  if(!host) nerr("ping: укажите узел");
+  const r = resolve(N, host, {});
+  if(r.error) return {out: ["ping: " + r.msg], err2: r.hint, warn: true};
+  const node = N.nodes[r.ip];
+  const out = ["PING " + host + " (" + r.ip + ") 56(84) bytes of data."];
+  if(!node || node.down || node.noIcmp){
+    out.push("");
+    out.push("--- " + host + " ping statistics ---");
+    out.push("4 packets transmitted, 0 received, 100% packet loss");
+    out.push("");
+    out.push("Ответов нет. Это ещё не значит, что узел недоступен: ICMP часто закрыт,");
+    out.push("а служба при этом отвечает. Проверять доступность порта надо через nc.");
+    return {out, warn: true};
+  }
+  const lat = N.latency[r.ip] || 20;
+  for(let i = 1; i <= 4; i++)
+    out.push("64 bytes from " + r.ip + ": icmp_seq=" + i + " ttl=56 time=" + (lat + i * 0.3).toFixed(1) + " ms");
+  out.push("");
+  out.push("--- " + host + " ping statistics ---");
+  out.push("4 packets transmitted, 4 received, 0% packet loss");
+  return {out};
+}
+
+function cmdNc(N, a){
+  const host = a.args[0], port = parseInt(a.args[1], 10);
+  if(!host || !port) nerr("nc: укажите узел и порт", "Например: nc -zv api.example.com 443");
+  const r = resolve(N, host, {});
+  if(r.error) return {out: ["nc: " + r.msg], err2: r.hint, warn: true};
+  const c = connect(N, r.ip, port, a.opts.w ? +a.opts.w : 5);
+  if(c.error) return {out: ["nc: connect to " + host + " (" + r.ip + ") port " + port +
+    " failed: " + (c.error === "refused" ? "Connection refused" : "Connection timed out")],
+    err2: c.hint, warn: true};
+  return {out: ["Connection to " + host + " (" + r.ip + ") " + port + " port [tcp/*] succeeded!"]};
+}
+
+function cmdOpenssl(N, a){
+  if(a.args[0] !== "s_client") nerr("поддерживается только openssl s_client",
+    "Например: openssl s_client -connect api.example.com:443");
+  const target = a.opts.connect;
+  if(!target) nerr("укажите -connect имя:порт");
+  const [host, portRaw] = String(target).split(":");
+  const port = parseInt(portRaw || "443", 10);
+  const sni = a.opts.servername || host;
+  const r = resolve(N, host, {});
+  if(r.error) return {out: ["connect: " + r.msg], err2: r.hint, warn: true};
+  const c = connect(N, r.ip, port, 5);
+  if(c.error) return {out: ["connect: " + c.msg], err2: c.hint, warn: true};
+  const t = tlsHandshake(N, r.ip, port, sni, {insecure: true});
+  if(t.error && t.error === "notls")
+    return {out: ["CONNECTED(00000003)", t.msg], err2: t.hint, warn: true};
+  const cert = t.cert || {};
+  const out = ["CONNECTED(00000003)", "SNI: " + sni, "---",
+    "Certificate chain",
+    " 0 s:CN=" + (cert.cn || host),
+    "   i:" + (cert.issuer || (cert.selfSigned ? "CN=" + (cert.cn || host) + " (самоподписанный)" : "C=RU, O=Example, CN=Example Root CA")),
+    "---",
+    "subjectAltName: " + [].concat(cert.san || cert.cn || host).join(", "),
+    "notAfter: " + (cert.notAfterText || "Jan  1 00:00:00 2027 GMT"),
+    "---"];
+  const check = tlsHandshake(N, r.ip, port, sni, {});
+  out.push(check.error
+    ? "Verify return code: 21 (unable to verify the first certificate) — " + check.msg
+    : "Verify return code: 0 (ok)");
+  return {out, warn: !!check.error};
+}
+
+/* ── браузер: то же соединение плюс правила источника ──── */
+function cmdBrowser(N, a){
+  const url = a.args[0];
+  if(!url) nerr("browser: укажите адрес", "Например: browser https://api.example.com/orders");
+  const u = parseUrl(url);
+  const origin = N.origin;
+  const method = (a.opts.X || a.opts.request || "GET").toUpperCase();
+  const headers = {};
+  for(const h of [].concat(a.opts.H || a.opts.header || [])){
+    const i = String(h).indexOf(":");
+    if(i >= 0) headers[String(h).slice(0, i).trim()] = String(h).slice(i + 1).trim();
+  }
+  const creds = !!(a.flags.credentials || a.flags.withCredentials);
+  const out = ["Страница: " + origin, "Запрос:  " + method + " " + u.url];
+  const sameOrigin = parseUrl(origin).host === u.host && parseUrl(origin).scheme === u.scheme;
+  if(sameOrigin){
+    const r = request(N, url, {method, headers, follow: true});
+    if(r.err){ out.push("net::ERR — " + r.err.msg); return {out, err2: r.err.hint, warn: true}; }
+    out.push("Источник тот же — правила CORS не применяются.");
+    out.push("< " + r.res.status + " " + (STATUS[r.res.status] || ""));
+    if(r.res.body) out.push(String(r.res.body));
+    return {out};
+  }
+  out.push("Источник другой — включаются правила CORS.");
+
+  if(needsPreflight(method, headers)){
+    out.push("");
+    out.push("1) Предварительный запрос:");
+    const pre = request(N, url, {method: "OPTIONS", headers: {
+      "Origin": origin, "Access-Control-Request-Method": method,
+      "Access-Control-Request-Headers": Object.keys(headers).join(", ")}});
+    if(pre.err){ out.push("   net::ERR — " + pre.err.msg); return {out, err2: pre.err.hint, warn: true}; }
+    out.push("   < " + pre.res.status + " " + (STATUS[pre.res.status] || ""));
+    for(const k in pre.res.headers) if(/^access-control/i.test(k)) out.push("   < " + k + ": " + pre.res.headers[k]);
+    const c1 = corsCheck(pre.res, origin, method, headers, creds);
+    const c2 = c1.blocked ? c1 : preflightCheck(pre.res, method, headers);
+    if(c2.blocked){
+      out.push("");
+      out.push("ЗАБЛОКИРОВАНО браузером: " + c2.why);
+      out.push("Консоль: " + c2.console);
+      out.push("");
+      out.push("Обратите внимание: curl тот же запрос выполнит без единого возражения —");
+      out.push("правила CORS соблюдает браузер, а не сервер.");
+      return {out, warn: true, cors: true};
+    }
+    out.push("   предварительный запрос разрешён");
+    out.push("");
+    out.push("2) Основной запрос:");
+  }
+  const r = request(N, url, {method, headers: Object.assign({Origin: origin}, headers), follow: true});
+  if(r.err){ out.push("net::ERR — " + r.err.msg); return {out, err2: r.err.hint, warn: true}; }
+  out.push("   < " + r.res.status + " " + (STATUS[r.res.status] || ""));
+  const acao = hdr(r.res.headers, "access-control-allow-origin");
+  if(acao !== undefined) out.push("   < access-control-allow-origin: " + acao);
+  const c = corsCheck(r.res, origin, method, headers, creds);
+  if(c.blocked){
+    out.push("");
+    out.push("ЗАБЛОКИРОВАНО браузером: " + c.why);
+    out.push("Консоль: " + c.console);
+    out.push("");
+    out.push("Сам ответ сервер прислал — браузер просто не отдал его коду страницы.");
+    return {out, warn: true, cors: true};
+  }
+  if(r.res.body) out.push("   " + String(r.res.body));
+  return {out};
+}
+
+function cmdHosts(N, a){
+  const out = ["127.0.0.1\tlocalhost"];
+  for(const n in N.hostsFile) out.push(N.hostsFile[n] + "\t" + n);
+  if(Object.keys(N.hostsFile).length === 0) out.push("# своих записей нет");
+  return {out};
+}
+
+/* ============================================================
+   Файлы машины и вывод о причине
+   ============================================================ */
+const DEFAULT_HOSTS = "# IP-адрес\tимя\n127.0.0.1\tlocalhost\n";
+
+function syncHosts(N){
+  N.hostsFile = {};
+  for(const raw of String(N.files["/etc/hosts"] || "").split("\n")){
+    const line = raw.replace(/#.*$/, "").trim();
+    if(!line) continue;
+    const p = line.split(/\s+/);
+    if(p.length < 2) continue;
+    for(const name of p.slice(1)) if(name !== "localhost") N.hostsFile[name] = p[0];
+  }
+}
+
+/* Слои, между которыми и приходится выбирать при разборе */
+const LAYERS = {
+  dns:     "имя не разрешается или разрешается не туда",
+  tcp:     "не устанавливается соединение с портом",
+  tls:     "не проходит проверка сертификата",
+  http:    "соединение есть, но сервер отвечает ошибкой",
+  proxy:   "запрос ломается на промежуточном узле",
+  cors:    "браузер не отдаёт ответ коду страницы",
+  timeout: "ответ приходит дольше отведённого времени",
+  none:    "сеть в порядке, причина в другом"
+};
+
+function cmdVerdict(N, a){
+  const w = String(a.args[0] || "").toLowerCase();
+  if(!w) return {out: ["Укажите слой: " + Object.keys(LAYERS).join(", ")]
+    .concat(Object.keys(LAYERS).map(k => "  " + k.padEnd(9) + " — " + LAYERS[k]))};
+  if(!LAYERS[w]) nerr("нет такого слоя: " + w,
+    "Возможные: " + Object.keys(LAYERS).join(", ") + ".");
+  N.verdict = w;
+  const used = Array.from(new Set(N.log.map(x => x.tool))).filter(Boolean);
+  return {out: ["Вывод записан: " + w + " — " + LAYERS[w],
+                used.length ? "До этого проверяли: " + used.join(", ")
+                            : "До этого ничего не проверяли — вывод пока не на чем основывать."]};
+}
+
+/* ============================================================
+   Разбор командной строки и диспетчер
+   ============================================================ */
+function tokenize(line){
+  const out = []; let cur = "", q = null, has = false;
+  for(let i = 0; i < line.length; i++){
+    const c = line[i];
+    if(q){ if(c === q) q = null; else cur += c; continue; }
+    if(c === '"' || c === "'"){ q = c; has = true; continue; }
+    if(/\s/.test(c)){ if(cur || has){ out.push(cur); cur = ""; has = false; } continue; }
+    cur += c;
+  }
+  if(q) nerr("незакрытая кавычка");
+  if(cur || has) out.push(cur);
+  return out;
+}
+const MULTI = {H:1, header:1, resolve:1};
+const VAL = {X:1, request:1, H:1, header:1, d:1, data:1, x:1, proxy:1, resolve:1, o:1,
+             "max-time":1, "connect-timeout":1, connect:1, servername:1, w:1, "write-out":1,
+             A:1, u:1, e:1, noproxy:1};
+function parseArgs(tokens){
+  const flags = {}, opts = {}, args = [];
+  for(let i = 0; i < tokens.length; i++){
+    const t = tokens[i];
+    if(t.indexOf("--") === 0){
+      const body = t.slice(2), eq = body.indexOf("=");
+      if(eq > 0){ put(opts, body.slice(0, eq), body.slice(eq + 1)); continue; }
+      if(VAL[body] && tokens[i + 1] !== undefined){ put(opts, body, tokens[++i]); continue; }
+      flags[body] = true; continue;
+    }
+    if(t[0] === "-" && t.length > 1 && !/^-\d/.test(t)){
+      const long = t.slice(1);
+      /* openssl пишет длинные ключи с одним дефисом: -connect, -servername */
+      if(["connect","servername","showcerts","brief"].indexOf(long) >= 0){
+        if(VAL[long] && tokens[i + 1] !== undefined) put(opts, long, tokens[++i]);
+        else flags[long] = true;
+        continue;
+      }
+      const letters = t.slice(1);
+      if(VAL[letters[0]] && letters.length > 1 && !VAL[letters]){ put(opts, letters[0], letters.slice(1)); continue; }
+      for(let k = 0; k < letters.length; k++){
+        const c = letters[k];
+        if(VAL[c] && k === letters.length - 1 && tokens[i + 1] !== undefined) put(opts, c, tokens[++i]);
+        else flags[c] = true;
+      }
+      continue;
+    }
+    args.push(t);
+  }
+  return {flags, opts, args};
+}
+function put(o, k, v){
+  if(MULTI[k]) o[k] = [].concat(o[k] === undefined ? [] : o[k], v);
+  else o[k] = v;
+}
+
+const TOOLS = {
+  curl: cmdCurl, dig: cmdDig, nslookup: cmdDig, ping: cmdPing,
+  nc: cmdNc, openssl: cmdOpenssl, browser: cmdBrowser, verdict: cmdVerdict
+};
+
+function runNet(N, raw){
+  const line = String(raw).trim();
+  if(!line) return {out: []};
+  let tokens;
+  try{ tokens = tokenize(line); }
+  catch(e){ return {out: [], err: e.message, hint: e.hint || ""}; }
+
+  try{
+    if(tokens[0] === "clear") return {out: [], clear: true};
+    if(tokens[0] === "cat" && /hosts$/.test(tokens[1] || ""))
+      return {out: String(N.files["/etc/hosts"] || "").split("\n").filter(l => l !== "")};
+    if(tokens[0] === "cat") nerr("cat: доступен только /etc/hosts");
+    if(tokens[0] === "ls") return {out: Object.keys(N.files || {}).sort()};
+    if(tokens[0] === "env")
+      return {out: N.proxyEnv ? ["https_proxy=" + N.proxyEnv, "http_proxy=" + N.proxyEnv]
+                              : ["(переменных прокси не задано)"]};
+    if(tokens[0] === "help" || tokens[0] === "?")
+      return {out: ["Инструменты: curl, dig, ping, nc, openssl s_client, browser.",
+                    "Ещё: cat /etc/hosts, env, clear."]};
+
+    const fn = TOOLS[tokens[0]];
+    if(!fn) return {out: [], err: "команда «" + tokens[0] + "» здесь не живёт",
+                    hint: "Доступны curl, dig, ping, nc, openssl, browser, cat /etc/hosts, env."};
+    const a = parseArgs(tokens.slice(1));
+    N.now += 1;
+    syncHosts(N);
+    if(tokens[0] !== "verdict") N.log.push({tool: tokens[0], line});
+    return fn(N, a) || {out: []};
+  }catch(e){
+    if(e instanceof NetErr) return {out: [], err: e.message, hint: e.hint || ""};
+    return {out: [], err: "внутренняя ошибка: " + (e && e.message || e)};
+  }
+}
+
+/* сценарий — это сеть с заданными именами, узлами и серверами */
+function newScenario(opts){
+  const N = newNet(opts);
+  N.files = Object.assign({"/etc/hosts": DEFAULT_HOSTS}, (opts || {}).files);
+  if((opts || {}).hostsFile)
+    for(const n in opts.hostsFile) N.files["/etc/hosts"] += opts.hostsFile[n] + "\t" + n + "\n";
+  syncHosts(N);
+  return N;
+}
+
+
+/* ============================================================
+   Содержание
+   ============================================================ */
+const ran     = (st, re) => st.log.some(e => re.test(e.cmd));
+const okRan   = (st, re) => st.log.some(e => !e.err && re.test(e.cmd));
+const logHas  = (st, re) => st.log.some(e => (e.out || []).some(l => re.test(l)));
+const verdict = st => st.N.verdict;
+const used    = (st, tool) => st.log.some(e => new RegExp("^\\s*" + tool + "\\b").test(e.cmd));
+const hostsHas = (st, name, ip) => st.N.hostsFile[name] === ip;
+const okStatus = (st, code) => st.log.some(e => (e.out || []).some(l =>
+  new RegExp("(HTTP/1\\.1|<)\\s*" + code + "\\b").test(l)));
+
+const MODULES = [
+
+/* ------------------------------------------------ 1 */
+{
+n:1, id:"path", title:"Путь запроса", sub:"Что происходит между строкой и ответом",
+lede:"Один вызов проходит четыре независимых слоя. Каждый ломается по-своему и лечится по-разному — и половина навыка отладки в том, чтобы понять, на каком именно застряло.",
+theory:`
+<h2>Четыре шага</h2>
+<div class="tw"><table>
+<tr><th>Шаг</th><th>Что происходит</th><th>Как выглядит поломка</th></tr>
+<tr><td>1. Разрешение имени</td><td>имя превращается в адрес</td><td><code>Could not resolve host</code></td></tr>
+<tr><td>2. Соединение</td><td>устанавливается связь с портом</td><td><code>Connection refused</code> или <code>timed out</code></td></tr>
+<tr><td>3. Шифрование</td><td>проверяется сертификат</td><td><code>SSL certificate problem</code></td></tr>
+<tr><td>4. Обмен</td><td>уходит запрос, приходит ответ</td><td>код ответа 4xx или 5xx</td></tr>
+</table></div>
+<p>Порядок жёсткий: пока не разрешилось имя, не будет соединения; пока нет соединения, не будет рукопожатия. Поэтому и разбирать удобнее по порядку — первая же непройденная ступень и есть ответ.</p>
+
+<figure class="fig"><svg viewBox="0 0 640 118" role="img" aria-label="Слои запроса">
+<rect x="8" y="30" width="140" height="52" rx="3" fill="none" stroke="currentColor"/>
+<rect x="164" y="30" width="140" height="52" rx="3" fill="none" stroke="currentColor"/>
+<rect x="320" y="30" width="140" height="52" rx="3" fill="none" stroke="currentColor"/>
+<rect x="476" y="30" width="156" height="52" rx="3" fill="none" stroke="currentColor"/>
+<text x="78" y="22" text-anchor="middle" font-size="10.5" fill="currentColor">1 · имя</text>
+<text x="234" y="22" text-anchor="middle" font-size="10.5" fill="currentColor">2 · соединение</text>
+<text x="390" y="22" text-anchor="middle" font-size="10.5" fill="currentColor">3 · шифрование</text>
+<text x="554" y="22" text-anchor="middle" font-size="10.5" fill="currentColor">4 · обмен</text>
+<text x="78" y="52" text-anchor="middle" font-size="11" fill="currentColor">DNS</text>
+<text x="78" y="70" text-anchor="middle" font-size="10" fill="currentColor">имя → адрес</text>
+<text x="234" y="52" text-anchor="middle" font-size="11" fill="currentColor">TCP</text>
+<text x="234" y="70" text-anchor="middle" font-size="10" fill="currentColor">адрес:порт</text>
+<text x="390" y="52" text-anchor="middle" font-size="11" fill="currentColor">TLS</text>
+<text x="390" y="70" text-anchor="middle" font-size="10" fill="currentColor">сертификат</text>
+<text x="554" y="52" text-anchor="middle" font-size="11" fill="currentColor">HTTP</text>
+<text x="554" y="70" text-anchor="middle" font-size="10" fill="currentColor">запрос и ответ</text>
+<line x1="150" y1="56" x2="162" y2="56" stroke="currentColor" marker-end="url(#ar)"/>
+<line x1="306" y1="56" x2="318" y2="56" stroke="currentColor" marker-end="url(#ar)"/>
+<line x1="462" y1="56" x2="474" y2="56" stroke="currentColor" marker-end="url(#ar)"/>
+<text x="320" y="104" text-anchor="middle" font-size="10" fill="currentColor">первая непройденная ступень и есть причина</text>
+<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+<path d="M0,0 L6,3 L0,6 z" fill="currentColor"/></marker></defs>
+</svg><figcaption>Слои проходятся строго по порядку, поэтому и разбирать их удобно снизу вверх.</figcaption></figure>
+
+<h2>Инструмент, который показывает всё сразу</h2>
+<pre><code>$ <span class="k">curl -v https://api.example.com/health</span>
+<span class="c">*   Trying 203.0.113.10:443...</span>          <span class="c2">← имя разрешилось</span>
+<span class="c">* Connected to api.example.com (203.0.113.10) port 443</span>   <span class="c2">← соединение есть</span>
+<span class="c">* SSL connection using TLSv1.3</span>            <span class="c2">← сертификат принят</span>
+<span class="g">&gt; GET /health HTTP/1.1</span>                    <span class="c2">← ушёл запрос</span>
+<span class="g">&gt; Host: api.example.com</span>
+<span class="q">&lt; HTTP/1.1 200 OK</span>                         <span class="c2">← пришёл ответ</span></code></pre>
+<div class="tw"><table>
+<tr><th>Символ</th><th>Что означает</th></tr>
+<tr><td><code>*</code></td><td>что делает сам curl: разрешение, соединение, рукопожатие</td></tr>
+<tr><td><code>&gt;</code></td><td>что отправлено серверу</td></tr>
+<tr><td><code>&lt;</code></td><td>что получено от сервера</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Внизу настоящие инструменты</b><p>Терминал понимает <code>curl</code>, <code>dig</code>, <code>ping</code>, <code>nc</code>, <code>openssl s_client</code> и отдельно <code>browser</code> — он ходит по тому же адресу, но с правилами страницы. Наберите <code>curl -v https://api.example.com/health</code> и сравните вывод со схемой выше.</p></div>
+
+<h2>Почему слой важно определить сразу</h2>
+<div class="tw"><table>
+<tr><th>Слой</th><th>К кому идти</th></tr>
+<tr><td>Имя</td><td>к тем, кто ведёт DNS; иногда достаточно поправить у себя</td></tr>
+<tr><td>Соединение</td><td>к сети и межсетевым экранам, либо служба не запущена</td></tr>
+<tr><td>Сертификат</td><td>к тем, кто выпускает сертификаты; часто просто истёк срок</td></tr>
+<tr><td>Ответ</td><td>к разработчикам приложения — сеть тут ни при чём</td></tr>
+</table></div>
+<p>Сообщение «сервис недоступен» без указания слоя стоит команде часов. Сообщение «имя разрешается, порт 443 открыт, сертификат истёк вчера» закрывает вопрос за минуту.</p>
+`,
+quiz:[
+ {q:"В каком порядке проходятся слои запроса?",
+  opts:["Соединение, имя, шифрование, обмен","Имя, соединение, шифрование, обмен","Шифрование, имя, соединение, обмен","Порядок произвольный"],
+  a:1, why:"Порядок жёсткий: без разрешённого имени нет соединения, без соединения нет рукопожатия."},
+ {q:"Что означает строка, начинающаяся с <code>&lt;</code>, в выводе <code>curl -v</code>?",
+  opts:["Что отправлено серверу","Что получено от сервера","Действие самого curl","Ошибку"],
+  a:1, why:"<code>&gt;</code> — отправленное, <code>*</code> — то, что делает сам curl."},
+ {q:"Ошибка <code>Could not resolve host</code> — какой это слой?",
+  opts:["Соединение","Имя","Сертификат","Ответ сервера"],
+  a:1, why:"До соединения дело не дошло: адрес неизвестен, соединяться не с чем."},
+ {q:"Почему полезно назвать слой в сообщении о проблеме?",
+  opts:["Так принято","Разные слои чинят разные люди — это экономит часы","Для отчётности","Для логов"],
+  a:1, why:"«Имя разрешается, порт открыт, сертификат истёк вчера» закрывает вопрос за минуту."},
+ {q:"Код ответа 500 — на каком слое проблема?",
+  opts:["Имя","Соединение","Обмен: сеть отработала, ошибка в приложении","Сертификат"],
+  a:2, why:"Раз пришёл код ответа, значит все нижние слои пройдены успешно."},
+ {q:"Что делает ключ <code>-v</code> у curl?",
+  opts:["Ускоряет запрос","Показывает каждый шаг: разрешение, соединение, рукопожатие, заголовки","Проверяет сертификат","Повторяет запрос"],
+  a:1, why:"Это первый ключ, который стоит добавить, когда что-то не работает."}
+],
+labs:[
+ {id:"1a", title:"Пройти путь целиком",
+  brief:"<p>Разберите успешный запрос по слоям.</p><ul><li>выполните <code>curl -v https://api.example.com/health</code>;</li><li>найдите в выводе строку про разрешение имени, строку про соединение, строку про сертификат и код ответа;</li><li>убедитесь отдельно, что имя разрешается — <code>dig api.example.com</code>, и что порт открыт — <code>nc -zv api.example.com 443</code>.</li></ul>",
+  hint:"Три команды: curl -v, dig, nc -zv.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10", ttl:300}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"api.example.com"}}}},
+    certs: {"api.example.com": {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Запрос выполнен с подробным выводом", test:st=>okRan(st,/curl\s+.*-v/)},
+   {label:"Имя проверено отдельно", test:st=>used(st, "dig") || used(st, "nslookup")},
+   {label:"Порт проверен отдельно", test:st=>used(st, "nc")},
+   {label:"Ответ получен успешно", test:st=>logHas(st, /200 OK/)},
+   {label:"В выводе видно рукопожатие", test:st=>logHas(st, /SSL connection using/)}
+  ]},
+ {id:"1b", title:"Назвать слой",
+  brief:"<p>Запрос к <code>api.example.com</code> не проходит. Определите, на каком слое он застревает, и зафиксируйте вывод командой <code>verdict</code>.</p><p>Возможные слои: <code>dns</code>, <code>tcp</code>, <code>tls</code>, <code>http</code>, <code>proxy</code>, <code>cors</code>, <code>timeout</code>. Список с пояснениями покажет <code>verdict</code> без аргументов.</p><p>Вывод должен опираться на проверки, а не на догадку: сначала посмотрите, докуда доходит запрос.</p>",
+  hint:"curl -v покажет, на каком шаге всё остановилось. Сверьте с dig и nc.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10", ttl:300}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"other"}}}},
+    certs: {other: {cn:"internal.example.com", san:["internal.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Запрос выполнялся", test:st=>used(st, "curl")},
+   {label:"Имя проверено — оно в порядке", test:st=>used(st, "dig") || logHas(st, /Trying 203\.0\.113\.10/)},
+   {label:"Соединение проверено — оно тоже в порядке", test:st=>used(st, "nc") || logHas(st, /Connected to/)},
+   {label:"Ошибка сертификата увидена", test:st=>logHas(st, /certificate subject name|SSL certificate problem/)},
+   {label:"Вывод записан правильно", test:st=>verdict(st) === "tls"}
+  ]}
+],
+iv:[
+ {q:"Приложение не может достучаться до сервиса. Как будете разбираться?",
+  probe:"Открывающий вопрос. Ждут порядок действий по слоям, а не перечисление утилит.",
+  a:"Я иду снизу вверх по слоям, потому что они проходятся строго по порядку и первая непройденная ступень и есть ответ. Сначала имя: разрешается ли оно вообще и в тот ли адрес — это <code>dig</code>, и полезно сравнить с тем, что ожидается. Потом соединение: открыт ли порт на этом адресе — <code>nc</code> или просто <code>curl -v</code>, который покажет и то, и другое. Отдельно замечу, что <code>ping</code> здесь плохой инструмент: ICMP часто закрыт, и отсутствие ответа ничего не доказывает. Дальше, если это https, — сертификат: срок, имя, издатель. И только когда всё это пройдено, разговор переходит к самому обмену: код ответа, заголовки, тело. Практическая польза в том, что каждый слой чинят разные люди, поэтому сообщение «имя разрешается, порт открыт, сертификат истёк вчера» экономит часы по сравнению с «сервис недоступен».",
+  more:["Почему ping — плохой способ проверки?","Что показывает curl -v построчно?"]}
+]
+},
+
+/* ------------------------------------------------ 2 */
+{
+n:2, id:"dns", title:"Имена", sub:"Как имя превращается в адрес",
+lede:"DNS — первый слой и первый подозреваемый. Особенно потому, что ошибки здесь любят быть непостоянными: у вас работает, у коллеги нет, а в CI по-третьему.",
+theory:`
+<h2>Виды записей</h2>
+<div class="tw"><table>
+<tr><th>Запись</th><th>Что означает</th></tr>
+<tr><td><code>A</code></td><td>имя → адрес IPv4</td></tr>
+<tr><td><code>AAAA</code></td><td>имя → адрес IPv6</td></tr>
+<tr><td><code>CNAME</code></td><td>имя → <b>другое имя</b>, разрешение продолжается дальше</td></tr>
+<tr><td><code>MX</code></td><td>куда слать почту</td></tr>
+<tr><td><code>TXT</code></td><td>произвольный текст: подтверждения владения, политики почты</td></tr>
+</table></div>
+<pre><code>$ <span class="k">dig api.example.com</span>
+;; ANSWER SECTION:
+api.example.com.  300  IN  A  203.0.113.10</code></pre>
+<p>Число перед <code>IN</code> — это TTL, срок жизни записи в кеше. Именно из-за него правка в DNS доезжает не мгновенно, и именно поэтому перед плановым переездом TTL заранее уменьшают.</p>
+
+<h2>Цепочка CNAME</h2>
+<pre><code>www.example.com.   CNAME  api.example.com.
+api.example.com.   A      203.0.113.10</code></pre>
+<div class="note trap"><b class="hd">Где ломается цепочка</b><p>Если <code>CNAME</code> указывает на имя, которого нет, ошибка будет выглядеть как «не разрешается <code>www.example.com</code>» — хотя проблема на шаг дальше. Поэтому <code>dig</code> и показывает всю цепочку: смотреть надо на последнее звено, а не на первое.</p></div>
+
+<h2>Порядок, в котором ищут адрес</h2>
+<div class="tw"><table>
+<tr><th>Источник</th><th>Кто главнее</th></tr>
+<tr><td><code>/etc/hosts</code></td><td>сильнее всего — DNS даже не спрашивают</td></tr>
+<tr><td>Кеш резолвера</td><td>пока не истёк TTL</td></tr>
+<tr><td>DNS-сервер</td><td>источник истины</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Отсюда классическое «у меня работает»</b><p>Строчка в <code>/etc/hosts</code>, добавленная полгода назад для отладки, переживает и переезд сервиса, и смену адресов. У вас всё ходит куда надо, у коллеги — нет, а виноват вроде бы сервис. Первое, что стоит проверить при странном поведении имени, — <code>cat /etc/hosts</code>.</p></div>
+
+<h2>Полезные приёмы</h2>
+<div class="tw"><table>
+<tr><th>Команда</th><th>Зачем</th></tr>
+<tr><td><code>dig имя</code></td><td>что отвечает DNS на самом деле</td></tr>
+<tr><td><code>dig имя CNAME</code></td><td>посмотреть конкретный тип записи</td></tr>
+<tr><td><code>cat /etc/hosts</code></td><td>нет ли локального переопределения</td></tr>
+<tr><td><code>curl --resolve имя:порт:адрес …</code></td><td>сходить на нужный адрес, сохранив имя в запросе и в SNI</td></tr>
+</table></div>
+<p>Последний приём стоит запомнить: он позволяет проверить конкретный сервер за балансировщиком, не трогая ни DNS, ни <code>/etc/hosts</code>, и при этом сертификат и заголовок <code>Host</code> остаются правильными — в отличие от обращения прямо по адресу.</p>
+
+<h2>Несколько адресов у одного имени</h2>
+<p>Одному имени может соответствовать несколько записей <code>A</code> — так делают простейшую балансировку. Следствие: два запроса подряд могут попасть на разные машины, и «то работает, то нет» иногда объясняется именно этим, а вовсе не случайностью.</p>
+`,
+quiz:[
+ {q:"Что означает число перед <code>IN</code> в ответе <code>dig</code>?",
+  opts:["Номер записи","TTL — сколько запись живёт в кеше","Приоритет","Порт"],
+  a:1, why:"Из-за него правка доезжает не мгновенно; перед плановым переездом TTL заранее уменьшают."},
+ {q:"Чем <code>CNAME</code> отличается от <code>A</code>?",
+  opts:["Ничем","<code>CNAME</code> указывает на другое имя — разрешение продолжается дальше","<code>CNAME</code> быстрее","<code>CNAME</code> только для почты"],
+  a:1, why:"Поэтому ошибка может быть на шаг дальше, чем кажется: смотреть надо на последнее звено цепочки."},
+ {q:"Что сильнее — <code>/etc/hosts</code> или DNS?",
+  opts:["DNS","<code>/etc/hosts</code>: DNS даже не спрашивают","Зависит от системы","Они равны"],
+  a:1, why:"Отсюда классическое «у меня работает»: забытая строчка переживает переезд сервиса."},
+ {q:"Зачем нужен <code>curl --resolve</code>?",
+  opts:["Ускорить запрос","Сходить на конкретный адрес, сохранив правильные имя в SNI и заголовок Host","Обойти сертификат","Проверить DNS"],
+  a:1, why:"В отличие от обращения прямо по адресу, сертификат и виртуальный хост остаются правильными."},
+ {q:"У имени две записи <code>A</code>. Что это значит?",
+  opts:["Ошибка настройки","Простейшая балансировка: запросы попадают на разные машины","Резервная копия","Так нельзя"],
+  a:1, why:"Иногда именно этим объясняется «то работает, то нет» — а не случайностью."},
+ {q:"Имя не разрешается. Первое, что проверить?",
+  opts:["Сертификат","Ответ <code>dig</code> и локальный <code>/etc/hosts</code>","Порт","Прокси"],
+  a:1, why:"До соединения дело не дошло — проверять порты и сертификаты пока бессмысленно."}
+],
+labs:[
+ {id:"2a", title:"Разорванная цепочка",
+  brief:"<p>Имя <code>www.example.com</code> не разрешается. Разберитесь, где именно рвётся цепочка:</p><ul><li>посмотрите, что отвечает DNS на <code>www.example.com</code>;</li><li>проверьте имя, на которое он ссылается;</li><li>зафиксируйте вывод командой <code>verdict</code>.</li></ul>",
+  hint:"dig www.example.com покажет CNAME. Затем dig на то имя, куда он ведёт.",
+  setup: () => newScenario({
+    dns: {
+      "www.example.com": [{type:"CNAME", value:"lb-old.example.com"}],
+      "api.example.com": [{type:"A", value:"203.0.113.10"}]
+    },
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com","www.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [{path:"/", body:"главная"}]}}
+  }),
+  checks:[
+   {label:"Запрос показал неудачу", test:st=>logHas(st, /Could not resolve host/)},
+   {label:"Цепочка просмотрена через <code>dig</code>", test:st=>okRan(st,/dig\s+www\.example\.com/)},
+   {label:"Проверено имя, на которое ведёт CNAME", test:st=>okRan(st,/dig\s+lb-old\.example\.com/)},
+   {label:"Видно, что его нет в DNS", test:st=>logHas(st, /NXDOMAIN/)},
+   {label:"Вывод записан как <code>dns</code>", test:st=>verdict(st) === "dns"}
+  ]},
+ {id:"2b", title:"Обойти сломанное имя",
+  brief:"<p>Сервис переехал, а запись в DNS ещё не обновилась: имя <code>api.example.com</code> ведёт на старый адрес, где ничего нет. Новый адрес известен — <code>203.0.113.20</code>.</p><ul><li>убедитесь, что по имени сейчас не работает;</li><li>проверьте, что новый адрес отвечает, — например через <code>curl --resolve</code>;</li><li>пропишите соответствие в <code>/etc/hosts</code> (вкладка «Машина» внизу) и добейтесь, чтобы обычный <code>curl https://api.example.com/health</code> заработал.</li></ul>",
+  hint:"Строка файла: адрес, пробел, имя. Например «203.0.113.20\tapi.example.com».",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {
+      "203.0.113.10": {down: true, ports: {}},
+      "203.0.113.20": {ports: {443: {server:"api", tls:true, cert:"c"}}}
+    },
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Неработающее имя проверено", test:st=>used(st, "curl")},
+   {label:"Новый адрес проверен через <code>--resolve</code>", test:st=>okRan(st,/--resolve/)},
+   {label:"Соответствие прописано в <code>/etc/hosts</code>", test:st=>hostsHas(st, "api.example.com", "203.0.113.20")},
+   {label:"Обычный запрос по имени работает", test:st=>st.log.some(e =>
+     /curl\s+(?!.*--resolve)[^|]*https:\/\/api\.example\.com\/health/.test(e.cmd) &&
+     (e.out || []).some(l => /^ok$/.test(l)))}
+  ]}
+],
+iv:[
+ {q:"«У меня работает, а у коллеги нет». С чего начнёте?",
+  probe:"Практический вопрос. Ждут упоминания локальных переопределений и кеша.",
+  a:"Сначала сравню, во что у нас разрешается имя: <code>dig</code> на обеих машинах. Расхождение бывает по трём причинам. Первая и самая частая — забытая строчка в <code>/etc/hosts</code>, добавленная когда-то для отладки: она сильнее DNS, переживает переезд сервиса и делает ровно ту картину, где у одного всё ходит, а у другого нет. Вторая — кеш резолвера: запись обновили, но TTL ещё не истёк, и часть машин видит старый адрес; лечится ожиданием или сбросом кеша, а предупреждается уменьшением TTL заранее. Третья — разные DNS-серверы: в офисной сети и в VPN могут отвечать разные, и внутреннее имя видно только из одной из них. Если имена разрешаются одинаково, дальше сравниваю доступность порта и сертификат — но в моей практике до этого доходит редко.",
+  more:["Зачем уменьшать TTL перед переездом?","Что делает curl --resolve?"]}
+]
+},
+
+/* ------------------------------------------------ 3 */
+{
+n:3, id:"tcp", title:"Соединение", sub:"Порты, отказ и тишина",
+lede:"Два самых частых сообщения этого слоя означают противоположные вещи, и различать их надо мгновенно: одно говорит «служба не запущена», другое — «до неё не доходят пакеты».",
+theory:`
+<h2>Отказ против тишины</h2>
+<div class="tw"><table>
+<tr><th></th><th><code>Connection refused</code></th><th><code>Connection timed out</code></th></tr>
+<tr><td>Что произошло</td><td>узел ответил «на этом порту никого нет»</td><td>ответа не пришло вовсе</td></tr>
+<tr><td>Значит</td><td>машина <b>жива</b>, служба не слушает</td><td>пакеты не доходят или теряются</td></tr>
+<tr><td>Обычная причина</td><td>служба упала, слушает другой порт или только localhost</td><td>межсетевой экран с политикой DROP, маршрут, выключенная машина</td></tr>
+<tr><td>Как быстро</td><td>мгновенно</td><td>после таймаута — секунды или десятки секунд</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Скорость ответа — сама по себе улика</b><p>Мгновенная ошибка почти всегда означает отказ, долгое ожидание — потерю пакетов. Это различие видно ещё до чтения текста и экономит время.</p></div>
+
+<h2>Порты</h2>
+<div class="tw"><table>
+<tr><th>Порт</th><th>Обычно</th></tr>
+<tr><td>80</td><td>HTTP без шифрования</td></tr>
+<tr><td>443</td><td>HTTPS</td></tr>
+<tr><td>5432 / 3306</td><td>PostgreSQL / MySQL</td></tr>
+<tr><td>6379</td><td>Redis</td></tr>
+<tr><td>30000–32767</td><td>внешние порты узлов в Kubernetes</td></tr>
+</table></div>
+<p>Схема в адресе определяет порт по умолчанию: <code>http://</code> — 80, <code>https://</code> — 443. Явный порт в адресе перебивает это, и обращение по <code>https://…:80</code> даёт характерную ошибку рукопожатия — на том порту говорят без шифрования.</p>
+
+<h2>Проверка порта</h2>
+<pre><code>$ <span class="k">nc -zv api.example.com 443</span>
+Connection to api.example.com (203.0.113.10) 443 port [tcp/*] succeeded!</code></pre>
+<div class="note trap"><b class="hd">А вот <code>ping</code> ничего не доказывает</b><p>Он проверяет ICMP — отдельный протокол, который в облаках и за межсетевыми экранами закрывают по умолчанию. Молчащий <code>ping</code> при полностью рабочем сервисе — обычное дело, и наоборот: узел может отвечать на <code>ping</code>, а нужный порт быть закрыт. Проверять доступность службы надо на её порту.</p></div>
+
+<h2>Слушает не тот адрес</h2>
+<p>Отдельный случай отказа: служба запущена, но привязана к <code>127.0.0.1</code> вместо <code>0.0.0.0</code>. Тогда изнутри машины всё работает, а снаружи — <code>Connection refused</code>. Классика для контейнеров и для приложений, поднятых с настройками по умолчанию.</p>
+
+<h2>Таймауты у curl</h2>
+<div class="tw"><table>
+<tr><th>Ключ</th><th>Что ограничивает</th></tr>
+<tr><td><code>--connect-timeout N</code></td><td>только установку соединения</td></tr>
+<tr><td><code>--max-time N</code></td><td>весь запрос целиком, включая ответ</td></tr>
+</table></div>
+<p>Разделять их полезно: короткий таймаут соединения быстро отсекает недоступный узел, а на медленный, но живой ответ можно дать больше времени.</p>
+`,
+quiz:[
+ {q:"<code>Connection refused</code> — что это значит?",
+  opts:["Пакеты не доходят","Узел жив и ответил отказом: на этом порту никто не слушает","Сертификат неверен","Имя не разрешилось"],
+  a:1, why:"Обычные причины: служба упала, слушает другой порт или только localhost."},
+ {q:"<code>Connection timed out</code> при подключении — о чём говорит?",
+  opts:["Служба не запущена","Ответа не пришло вовсе: пакеты теряются или отбрасываются","Неверный путь","Ошибка DNS"],
+  a:1, why:"Так ведёт себя межсетевой экран с политикой DROP, а также выключенная машина."},
+ {q:"Что можно понять по скорости появления ошибки?",
+  opts:["Ничего","Мгновенная — почти всегда отказ, долгая — потеря пакетов","Скорость сети","Загрузку сервера"],
+  a:1, why:"Это различие видно ещё до чтения текста ошибки."},
+ {q:"Почему <code>ping</code> — плохой способ проверить доступность сервиса?",
+  opts:["Он медленный","Он проверяет ICMP, который часто закрыт; и наоборот — узел может пинговаться, а порт быть закрыт","Он требует прав","Он устарел"],
+  a:1, why:"Проверять доступность службы надо на её порту — например через <code>nc</code>."},
+ {q:"Служба работает изнутри машины, но снаружи <code>Connection refused</code>. Вероятная причина?",
+  opts:["Сертификат","Служба слушает 127.0.0.1 вместо 0.0.0.0","DNS","Прокси"],
+  a:1, why:"Классика для контейнеров и приложений, поднятых с настройками по умолчанию."},
+ {q:"Чем <code>--connect-timeout</code> отличается от <code>--max-time</code>?",
+  opts:["Ничем","Первый ограничивает только установку соединения, второй — весь запрос","Первый в секундах","Второй только для https"],
+  a:1, why:"Полезно разделять: быстро отсечь недоступный узел, но дать время медленному ответу."}
+],
+labs:[
+ {id:"3a", title:"Отказ или тишина",
+  brief:"<p>Два сервиса не отвечают, но по разным причинам.</p><ul><li>проверьте <code>api.example.com</code> на порту 443 и <code>db.example.com</code> на порту 5432;</li><li>определите, где отказ, а где потеря пакетов, — обратите внимание и на текст, и на скорость;</li><li>зафиксируйте вывод по слою (обе поломки на одном и том же слое).</li></ul>",
+  hint:"nc -zv покажет обе картины. Для db поставьте небольшой таймаут: nc -zv -w 2 db.example.com 5432.",
+  setup: () => newScenario({
+    dns: {
+      "api.example.com": [{type:"A", value:"203.0.113.10"}],
+      "db.example.com": [{type:"A", value:"203.0.113.30"}]
+    },
+    nodes: {
+      "203.0.113.10": {ports: {80: {server:"api"}}},
+      "203.0.113.30": {ports: {5432: {server:"db"}}, drop: [5432]}
+    },
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}, db: {routes: []}}
+  }),
+  checks:[
+   {label:"Порт 443 проверен", test:st=>ran(st,/443/)},
+   {label:"Отказ увиден", test:st=>logHas(st, /Connection refused/)},
+   {label:"Порт 5432 проверен", test:st=>ran(st,/5432/)},
+   {label:"Потеря пакетов увидена", test:st=>logHas(st, /Connection timed out/)},
+   {label:"Вывод записан как <code>tcp</code>", test:st=>verdict(st) === "tcp"}
+  ]},
+ {id:"3b", title:"Пингуется, но не работает",
+  brief:"<p>Коллега пишет: «сервер жив, пингуется, значит дело в приложении». Проверьте это утверждение.</p><ul><li>выполните <code>ping api.example.com</code>;</li><li>проверьте порт 443 через <code>nc</code>;</li><li>попробуйте запрос через <code>curl</code>;</li><li>зафиксируйте вывод.</li></ul><p>Обратите внимание, какой именно порт открыт, а какой нет.</p>",
+  hint:"Порт 80 может быть открыт, а 443 — нет. Схема в адресе определяет порт.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {80: {server:"api"}}}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Узел пингуется", test:st=>used(st, "ping") && logHas(st, /0% packet loss/)},
+   {label:"Порт 443 при этом закрыт", test:st=>logHas(st, /Connection refused/)},
+   {label:"По http тот же сервис отвечает", test:st=>st.log.some(e =>
+     /curl[^|]*http:\/\/api\.example\.com/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Вывод записан как <code>tcp</code>", test:st=>verdict(st) === "tcp"}
+  ]}
+],
+iv:[
+ {q:"В чём разница между «connection refused» и «connection timed out»?",
+  probe:"Короткий вопрос с большой практической разницей. Задают часто.",
+  a:"«Refused» означает, что узел получил пакет и ответил отказом: он жив, но на этом порту никто не слушает. Причины — служба упала, слушает другой порт или привязана к <code>127.0.0.1</code> вместо всех адресов, что особенно часто в контейнерах. «Timed out» означает, что ответа не пришло вовсе: пакеты теряются, отбрасываются межсетевым экраном с политикой DROP, либо машина выключена, либо нет маршрута. Различать их важно, потому что чинят их разные люди: в первом случае разговор про службу, во втором — про сеть и правила доступа. Полезная деталь: разницу видно ещё до чтения текста — отказ приходит мгновенно, а таймаут после ожидания. И отдельно я бы предостерёг от <code>ping</code> как способа проверки: ICMP часто закрыт, поэтому молчащий пинг ничего не доказывает, а отвечающий не гарантирует, что нужный порт открыт.",
+  more:["Как проверить порт правильно?","Что если служба слушает только localhost?"]}
+]
+},
+
+/* ------------------------------------------------ 4 */
+{
+n:4, id:"tls", title:"Сертификаты", sub:"Три причины, по которым не доверяют",
+lede:"Ошибка сертификата выглядит одинаково страшно, а причин у неё ровно три — и каждая чинится по-своему. Отличать их надо уметь, потому что одна из них означает «вы не на том сервере».",
+theory:`
+<h2>Что проверяется при рукопожатии</h2>
+<div class="tw"><table>
+<tr><th>Проверка</th><th>Ошибка</th><th>Что делать</th></tr>
+<tr><td>Срок действия</td><td><code>certificate has expired</code></td><td>перевыпустить; проверить часы на своей машине</td></tr>
+<tr><td>Имя в сертификате</td><td><code>no alternative certificate subject name matches</code></td><td>убедиться, что попали на тот сервер и настроен SNI</td></tr>
+<tr><td>Издатель</td><td><code>self-signed certificate</code> или <code>unable to get local issuer</code></td><td>добавить корневой сертификат в доверенные</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Ошибка имени — самая содержательная</b><p>Она означает, что сервер отдал сертификат, выписанный на другое имя. Обычно это не «сломанный сертификат», а признак того, что запрос ушёл не туда: не на тот балансировщик, не в ту среду, на общий сервер без настроенного SNI. То есть проблема не в шифровании, а в маршруте.</p></div>
+
+<h2>SNI</h2>
+<p>На одном адресе может жить много сайтов. Чтобы сервер понял, чей сертификат отдавать, имя передаётся <b>в начале рукопожатия</b> — это и есть SNI. Отсюда практическое следствие: обращение по адресу вместо имени (<code>https://203.0.113.10/</code>) почти всегда даёт ошибку имени, потому что SNI пустой и сервер отдаёт сертификат по умолчанию.</p>
+<pre><code><span class="c"># неправильно: имя потеряно</span>
+curl https://203.0.113.10/health
+
+<span class="c"># правильно: адрес задан, имя сохранено</span>
+curl --resolve api.example.com:443:203.0.113.10 https://api.example.com/health</code></pre>
+
+<h2>Посмотреть сертификат</h2>
+<pre><code>$ <span class="k">openssl s_client -connect api.example.com:443</span>
+Certificate chain
+ 0 s:CN=api.example.com
+   i:C=RU, O=Example, CN=Example Root CA
+subjectAltName: api.example.com, www.example.com
+notAfter: Jan  1 00:00:00 2027 GMT
+Verify return code: 0 (ok)</code></pre>
+<p><code>s:</code> — кому выдан, <code>i:</code> — кем. <code>subjectAltName</code> — полный список имён, на которые сертификат действует; именно он, а не <code>CN</code>, сегодня определяет соответствие. Ключ <code>-servername</code> задаёт SNI отдельно — так проверяют, что сервер отдаёт разные сертификаты разным именам.</p>
+
+<h2>Ключ <code>-k</code></h2>
+<div class="note trap"><b class="hd">Отключает проверку, а не чинит</b><p><code>curl -k</code> (он же <code>--insecure</code>) пропускает проверку сертификата целиком. Для быстрой диагностики это полезно: если с ним запрос проходит, значит дело именно в доверии, а не в сети или приложении. Но в коде и в конвейере ему не место — вместе с проверкой отключается и защита от подмены сервера. То же относится к <code>verify=False</code> в клиентах и «принимать любые сертификаты» в тестовых обвязках: привычка быстро переезжает в бой.</p></div>
+
+<h2>Внутренние стенды</h2>
+<p>На внутренних стендах сертификаты часто выпускает собственный удостоверяющий центр. Правильное решение — добавить его корневой сертификат в доверенные на машинах и в образах раннеров; неправильное, но повсеместное — отключать проверку везде. Разница проявляется в тот день, когда кто-то подменит внутренний адрес.</p>
+`,
+quiz:[
+ {q:"Что означает <code>no alternative certificate subject name matches</code>?",
+  opts:["Сертификат просрочен","Сертификат выписан на другое имя — вероятно, запрос ушёл не туда","Издатель неизвестен","Нет шифрования"],
+  a:1, why:"Обычно это признак неверного маршрута: не тот балансировщик, не та среда, нет SNI."},
+ {q:"Зачем нужен SNI?",
+  opts:["Для ускорения","Чтобы сервер понял, чей сертификат отдавать, когда на адресе много сайтов","Для сжатия","Для проверки издателя"],
+  a:1, why:"Поэтому обращение по адресу вместо имени почти всегда даёт ошибку имени: SNI пустой."},
+ {q:"Что делает <code>curl -k</code>?",
+  opts:["Чинит сертификат","Отключает проверку сертификата целиком","Обновляет корневые сертификаты","Включает подробный вывод"],
+  a:1, why:"Для диагностики полезно, в коде и конвейере — нет: вместе с проверкой отключается защита от подмены."},
+ {q:"Какое поле сертификата сегодня определяет соответствие имени?",
+  opts:["<code>CN</code>","<code>subjectAltName</code>","<code>issuer</code>","<code>notAfter</code>"],
+  a:1, why:"<code>CN</code> оставлен для совместимости; браузеры и библиотеки смотрят на список альтернативных имён."},
+ {q:"Сертификат «истёк», хотя выпущен вчера. Что проверить?",
+  opts:["Издателя","Часы на своей машине","Порт","DNS"],
+  a:1, why:"Расхождение времени даёт ровно такую же ошибку, как настоящий просроченный сертификат."},
+ {q:"Как правильно поступить с сертификатом внутреннего центра?",
+  opts:["Отключить проверку везде","Добавить его корневой сертификат в доверенные на машинах и в образах","Использовать http","Игнорировать"],
+  a:1, why:"Отключение проверки «на время» переезжает в бой быстрее, чем кажется."}
+],
+labs:[
+ {id:"4a", title:"Три ошибки подряд",
+  brief:"<p>Три сервиса, три разные проблемы с сертификатом. Определите каждую:</p><ul><li><code>expired.example.com</code>;</li><li><code>wrongname.example.com</code>;</li><li><code>internal.example.com</code>.</li></ul><p>Для каждого выполните <code>curl -v</code> и прочитайте сообщение. Затем убедитесь, что дело именно в доверии: тот же запрос с <code>-k</code> должен пройти хотя бы для одного из них.</p><p>Зафиксируйте вывод по слою.</p>",
+  hint:"curl https://expired.example.com/health и так далее. Потом тот же адрес с ключом -k.",
+  setup: () => newScenario({
+    dns: {
+      "expired.example.com": [{type:"A", value:"203.0.113.11"}],
+      "wrongname.example.com": [{type:"A", value:"203.0.113.12"}],
+      "internal.example.com": [{type:"A", value:"203.0.113.13"}]
+    },
+    nodes: {
+      "203.0.113.11": {ports: {443: {server:"api", tls:true, cert:"c1"}}},
+      "203.0.113.12": {ports: {443: {server:"api", tls:true, cert:"c2"}}},
+      "203.0.113.13": {ports: {443: {server:"api", tls:true, cert:"c3"}}}
+    },
+    certs: {
+      c1: {cn:"expired.example.com", san:["expired.example.com"], notAfter: -1, notAfterText:"Feb  1 00:00:00 2026 GMT"},
+      c2: {cn:"other.example.com", san:["other.example.com"], notAfter: 999999},
+      c3: {cn:"internal.example.com", san:["internal.example.com"], notAfter: 999999, selfSigned: true}
+    },
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Просроченный сертификат найден", test:st=>logHas(st, /certificate has expired/)},
+   {label:"Несовпадение имени найдено", test:st=>logHas(st, /subject name matches/)},
+   {label:"Самоподписанный найден", test:st=>logHas(st, /self-signed certificate/)},
+   {label:"С ключом <code>-k</code> запрос проходит", test:st=>st.log.some(e =>
+     /curl[^|]*-k\b/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Вывод записан как <code>tls</code>", test:st=>verdict(st) === "tls"}
+  ]},
+ {id:"4b", title:"Не тот сервер",
+  brief:"<p>Запрос к <code>api.example.com</code> даёт ошибку имени в сертификате. Проверьте гипотезу, что дело не в сертификате, а в маршруте.</p><ul><li>посмотрите, во что разрешается имя;</li><li>посмотрите сертификат через <code>openssl s_client</code> — на какое имя он выписан;</li><li>известно, что нужный сервер живёт на <code>203.0.113.20</code>. Проверьте его через <code>curl --resolve</code>, не трогая DNS;</li><li>зафиксируйте вывод: проблема на слое имени, а не шифрования.</li></ul>",
+  hint:"dig покажет адрес, openssl — чужое имя в сертификате, --resolve позволит сходить на правильный адрес с правильным SNI.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {
+      "203.0.113.10": {ports: {443: {server:"other", tls:true, cert:"cOther"}}},
+      "203.0.113.20": {ports: {443: {server:"api", tls:true, cert:"cApi"}}}
+    },
+    certs: {
+      cOther: {cn:"legacy.example.com", san:["legacy.example.com"], notAfter: 999999},
+      cApi: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}
+    },
+    servers: {api: {routes: [{path:"/health", body:"ok"}]},
+              other: {routes: [{path:"/health", body:"старый сервис"}]}}
+  }),
+  checks:[
+   {label:"Ошибка имени увидена", test:st=>logHas(st, /subject name matches/)},
+   {label:"Сертификат осмотрен", test:st=>used(st, "openssl")},
+   {label:"Видно чужое имя в сертификате", test:st=>logHas(st, /legacy\.example\.com/)},
+   {label:"Правильный сервер проверен через <code>--resolve</code>", test:st=>st.log.some(e =>
+     /--resolve[^|]*203\.0\.113\.20/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Вывод записан как <code>dns</code>", test:st=>verdict(st) === "dns"}
+  ]}
+],
+iv:[
+ {q:"Какие бывают ошибки сертификата и что каждая означает?",
+  probe:"Проверяют, различаете ли вы причины или лечите всё ключом -k.",
+  a:"Три класса. Истёкший срок — самая простая: сертификат надо перевыпустить, но стоит заодно проверить часы на своей машине, потому что расхождение времени даёт ровно ту же ошибку. Неизвестный издатель — обычно внутренний удостоверяющий центр, чей корневой сертификат не добавлен в доверенные; правильное решение — добавить его на машины и в образы раннеров, а не отключать проверку. И самая содержательная — несовпадение имени: сервер отдал сертификат, выписанный на другое имя. Это почти никогда не «сломанный сертификат», а признак того, что запрос ушёл не туда: на другой балансировщик, в другую среду, или SNI не передался — например, если обращаться по адресу вместо имени. Ключ <code>-k</code> я использую только чтобы подтвердить гипотезу: если с ним проходит, значит дело именно в доверии. В коде и конвейере отключать проверку нельзя — вместе с ней отключается защита от подмены сервера.",
+  more:["Что такое SNI и когда он теряется?","Как правильно работать с внутренним CA?"]}
+]
+},
+
+/* ------------------------------------------------ 5 */
+{
+n:5, id:"http", title:"Запрос и ответ", sub:"Методы, коды, тело",
+lede:"Когда все нижние слои пройдены, начинается разговор двух программ. Здесь ошибки уже не сетевые — и код ответа обычно прямо говорит, кому идти чинить.",
+theory:`
+<h2>Из чего состоит обмен</h2>
+<pre><code><span class="g">&gt; POST /orders HTTP/1.1</span>          <span class="c">метод, путь, версия</span>
+<span class="g">&gt; Host: api.example.com</span>          <span class="c">заголовки запроса</span>
+<span class="g">&gt; Content-Type: application/json</span>
+<span class="g">&gt;</span>                               <span class="c">пустая строка — конец заголовков</span>
+<span class="g">&gt; {"item": 7}</span>                    <span class="c">тело</span>
+
+<span class="q">&lt; HTTP/1.1 201 Created</span>            <span class="c">код и его расшифровка</span>
+<span class="q">&lt; Location: /orders/42</span>            <span class="c">заголовки ответа</span>
+<span class="q">&lt; Content-Type: application/json</span></code></pre>
+
+<h2>Классы кодов</h2>
+<div class="tw"><table>
+<tr><th>Класс</th><th>Смысл</th><th>Кому чинить</th></tr>
+<tr><td><b>2xx</b></td><td>получилось</td><td>—</td></tr>
+<tr><td><b>3xx</b></td><td>ищи в другом месте</td><td>клиенту — перейти по адресу</td></tr>
+<tr><td><b>4xx</b></td><td>виноват запрос</td><td>тому, кто его формирует</td></tr>
+<tr><td><b>5xx</b></td><td>виноват сервер</td><td>тем, кто отвечает за сервис</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Граница 4xx и 5xx — это распределение ответственности</b><p>Именно поэтому спор «а чей это баг» часто решается взглядом на код. Ошибки бывают: сервер, не сумевший разобрать запрос, обязан ответить 400, а не 500. Пятисотка на кривой ввод — это тоже дефект, просто менее заметный.</p></div>
+
+<h2>Коды, которые встречаются чаще всего</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Что означает на практике</th></tr>
+<tr><td>200 / 201 / 204</td><td>успех; 201 — создано, 204 — успех без тела</td></tr>
+<tr><td>301 / 302 / 307 / 308</td><td>перенаправление, постоянное или временное</td></tr>
+<tr><td>304</td><td>не изменилось — можно взять из кеша</td></tr>
+<tr><td><b>400</b></td><td>запрос не разобран: неверный формат, отсутствует поле</td></tr>
+<tr><td><b>401</b></td><td>не представились — нет или негоден токен</td></tr>
+<tr><td><b>403</b></td><td>представились, но нельзя</td></tr>
+<tr><td><b>404</b></td><td>адреса нет; иногда так прячут 403</td></tr>
+<tr><td><b>405</b></td><td>метод не тот — смотрите заголовок <code>Allow</code></td></tr>
+<tr><td><b>415</b></td><td>не тот <code>Content-Type</code></td></tr>
+<tr><td><b>429</b></td><td>слишком часто; смотрите <code>Retry-After</code></td></tr>
+<tr><td><b>500</b></td><td>необработанное исключение внутри</td></tr>
+<tr><td><b>502 / 504</b></td><td>ответил не сервис, а промежуточный узел</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">401 и 403 путают постоянно</b><p>401 — «я не знаю, кто вы»: токена нет, он просрочен или неверен. 403 — «я знаю, кто вы, и вам нельзя». Разница определяет, куда смотреть: в первом случае — на получение токена, во втором — на права.</p></div>
+
+<h2>502 и 504 — особый случай</h2>
+<p>Эти два кода почти всегда приходят не от приложения, а от того, что стоит перед ним: обратного прокси, балансировщика, шлюза. 502 означает, что он не смог получить ответ вовсе, 504 — что ответ не пришёл вовремя. Смотреть логи приложения при 502 бывает бесполезно: запрос до него мог и не дойти. Об этом — отдельный раздел про промежуточные узлы.</p>
+
+<h2>Смотреть только заголовки</h2>
+<pre><code>curl -I https://api.example.com/health     <span class="c"># метод HEAD, только заголовки</span>
+curl -i https://api.example.com/health     <span class="c"># заголовки и тело</span></code></pre>
+`,
+quiz:[
+ {q:"Что означает класс 4xx?",
+  opts:["Ошибка сервера","Виноват запрос — чинить тому, кто его формирует","Перенаправление","Успех"],
+  a:1, why:"Граница между 4xx и 5xx — это распределение ответственности, поэтому спор «чей баг» часто решается взглядом на код."},
+ {q:"Чем 401 отличается от 403?",
+  opts:["Ничем","401 — «не знаю, кто вы», 403 — «знаю и вам нельзя»","401 для API, 403 для сайтов","403 временный"],
+  a:1, why:"В первом случае смотреть на получение токена, во втором — на права."},
+ {q:"Сервер вернул 500 на запрос с неверным полем. Это нормально?",
+  opts:["Да, любая ошибка это 500","Нет: неразобранный запрос — это 400, пятисотка здесь тоже дефект","Зависит от языка","Да, если залогировано"],
+  a:1, why:"Просто менее заметный дефект: ответственность перекладывается на клиента, хотя виноват сервер."},
+ {q:"Что означает 405 и где смотреть подробности?",
+  opts:["Нет доступа; в теле","Метод не тот; в заголовке <code>Allow</code>","Сервис недоступен; в логах","Слишком часто; в Retry-After"],
+  a:1, why:"Заголовок <code>Allow</code> перечисляет методы, которые адрес принимает."},
+ {q:"Откуда обычно приходят 502 и 504?",
+  opts:["Из приложения","От промежуточного узла: прокси, балансировщика, шлюза","Из базы данных","От браузера"],
+  a:1, why:"502 — ответа не получено вовсе, 504 — не пришёл вовремя. Логи приложения при 502 могут быть пустыми."},
+ {q:"Что делает <code>curl -I</code>?",
+  opts:["Включает подробный вывод","Запрашивает только заголовки методом HEAD","Игнорирует ошибки","Повторяет запрос"],
+  a:1, why:"Парный ему <code>-i</code> показывает и заголовки, и тело."}
+],
+labs:[
+ {id:"5a", title:"Разобрать коды",
+  brief:"<p>Пройдитесь по адресам сервиса и определите, что означает каждый ответ:</p><ul><li><code>/orders</code> без токена;</li><li><code>/orders</code> с токеном <code>Bearer wrong</code>;</li><li><code>/orders</code> с токеном <code>Bearer good</code>;</li><li><code>/orders</code> методом <code>DELETE</code>;</li><li><code>/nope</code>.</li></ul><p>Смотрите только заголовки: <code>curl -I</code>. Зафиксируйте вывод: сеть здесь ни при чём.</p>",
+  hint:"Заголовок задают так: -H \"Authorization: Bearer good\". Метод — ключом -X DELETE.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/orders", methods:["GET","POST"], auth:true, token:"good", json:[{id:1}]},
+      {path:"/health", body:"ok"}
+    ]}}
+  }),
+  checks:[
+   {label:"401 без токена получен", test:st=>okStatus(st, 401)},
+   {label:"403 с неверным токеном получен", test:st=>okStatus(st, 403)},
+   {label:"200 с верным токеном получен", test:st=>okStatus(st, 200)},
+   {label:"405 на неверном методе получен", test:st=>okStatus(st, 405)},
+   {label:"404 на несуществующем адресе получен", test:st=>okStatus(st, 404)},
+   {label:"Вывод записан как <code>http</code>", test:st=>verdict(st) === "http"}
+  ]},
+ {id:"5b", title:"Не тот тип содержимого",
+  brief:"<p>Отправка заказа возвращает ошибку, хотя тело выглядит правильным. Разберитесь и добейтесь успешного ответа <b>201</b>.</p><ul><li>отправьте <code>POST</code> на <code>/orders</code> с телом <code>{\"item\":7}</code>;</li><li>прочитайте, что говорит сервер;</li><li>добавьте недостающий заголовок и повторите.</li></ul>",
+  hint:'Тело передают ключом -d, заголовок — -H "Content-Type: application/json".',
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/orders", methods:["POST"], needsType:"application/json", status:201, body:"создано"}
+    ]}}
+  }),
+  checks:[
+   {label:"Первая попытка дала 415", test:st=>logHas(st, /415/)},
+   {label:"Тело передавалось", test:st=>ran(st,/-d\s|--data/)},
+   {label:"Заголовок типа добавлен", test:st=>ran(st,/[Cc]ontent-[Tt]ype:\s*application\/json/)},
+   {label:"Получен 201", test:st=>st.log.some(e => (e.out || []).some(l => /создано|201/.test(l)))}
+  ]}
+],
+iv:[
+ {q:"Чем 401 отличается от 403 и почему это важно?",
+  probe:"Простой вопрос, который любят задавать тестировщикам.",
+  a:"401 означает «вы не аутентифицированы»: учётных данных нет, они не распознаны или просрочены. По правилам вместе с ним должен приходить заголовок <code>WWW-Authenticate</code>, объясняющий, как представиться. 403 означает «вы распознаны, но этого делать нельзя» — вопрос прав, а не входа. Разница важна практически, потому что определяет, куда смотреть: в первом случае — на выдачу и срок жизни токена, во втором — на роли и права. Отдельно стоит помнить, что 403 иногда подменяют на 404, чтобы не раскрывать существование ресурса тому, у кого нет прав, — это осознанный приём, а не ошибка. И как тестировщик я всегда проверяю обе ветки отдельно: без токена, с просроченным токеном и с валидным токеном без нужных прав — это три разных случая, и путать их в тестах нельзя.",
+  more:["Что должно приходить вместе с 401?","Почему иногда возвращают 404 вместо 403?"]}
+]
+},
+
+/* ------------------------------------------------ 6 */
+{
+n:6, id:"headers", title:"Заголовки", sub:"Те, что решают исход",
+lede:"Заголовков десятки, но исход запроса чаще всего определяют пять-шесть. Их стоит знать наизусть — по ним видно, почему один и тот же запрос из разных мест ведёт себя по-разному.",
+theory:`
+<h2>Заголовки запроса</h2>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Что делает</th></tr>
+<tr><td><code>Host</code></td><td>какое имя запрашивают — по нему сервер выбирает сайт из многих на одном адресе</td></tr>
+<tr><td><code>Content-Type</code></td><td>в каком формате тело; неверный даёт 415</td></tr>
+<tr><td><code>Accept</code></td><td>в каком формате ждут ответ</td></tr>
+<tr><td><code>Authorization</code></td><td>кто вы: <code>Bearer …</code>, <code>Basic …</code></td></tr>
+<tr><td><code>Cookie</code></td><td>сессия и всё, что браузер хранит для сайта</td></tr>
+<tr><td><code>User-Agent</code></td><td>чем обращаются; некоторые сервисы отвечают по-разному</td></tr>
+<tr><td><code>Origin</code></td><td>откуда пришла страница — основа правил CORS</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Почему curl и браузер получают разное</b><p>Браузер отправляет то, чего нет у curl: <code>Cookie</code>, <code>Origin</code>, <code>Referer</code>, свой <code>User-Agent</code>, набор <code>Accept</code>. Поэтому «в браузере работает, в curl нет» и наоборот — не мистика, а разница в заголовках. Первый шаг при таком расхождении — сравнить их построчно.</p></div>
+
+<h2>Заголовки ответа</h2>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Что означает</th></tr>
+<tr><td><code>Content-Type</code></td><td>что именно прислали; <code>application/json</code> против <code>text/html</code></td></tr>
+<tr><td><code>Location</code></td><td>куда перейти при 3xx</td></tr>
+<tr><td><code>Set-Cookie</code></td><td>сервер просит сохранить куку</td></tr>
+<tr><td><code>Cache-Control</code>, <code>ETag</code></td><td>правила кеширования</td></tr>
+<tr><td><code>Allow</code></td><td>какие методы принимает адрес — приходит с 405</td></tr>
+<tr><td><code>Retry-After</code></td><td>через сколько повторять — приходит с 429 и 503</td></tr>
+<tr><td><code>Server</code>, <code>X-Powered-By</code></td><td>кто ответил; полезно, чтобы понять, дошёл ли запрос до приложения</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Заголовок <code>Server</code> как улика</b><p>Если в ответе стоит <code>nginx</code>, а приложение работает под другим сервером, значит ответ сформировал промежуточный узел, а не сервис. Это быстрый способ понять, дошёл ли запрос до приложения вообще.</p></div>
+
+<h2><code>Host</code> и виртуальные хосты</h2>
+<p>На одном адресе может отвечать множество сайтов, и выбирает сервер по заголовку <code>Host</code>. Отсюда следствие: обращение по адресу вместо имени часто попадает на сайт по умолчанию, а не туда, куда нужно, — и выглядит как «сервис вернул не то». Проверять конкретный сервер за балансировщиком правильно через <code>--resolve</code>, который сохраняет и <code>Host</code>, и SNI.</p>
+
+<h2>Как задавать заголовки</h2>
+<pre><code>curl -H <span class="s">"Authorization: Bearer eyJ…"</span> https://api.example.com/orders
+curl -H <span class="s">"Accept: application/json"</span> -H <span class="s">"X-Request-Id: 42"</span> …</code></pre>
+<p>Собственные заголовки принято называть с префиксом, по которому видно, чьи они: <code>X-Request-Id</code>, <code>X-Correlation-Id</code>. Сквозной идентификатор запроса — вещь, которая окупается на первом же разборе: по нему находят один запрос во всех журналах сразу.</p>
+`,
+quiz:[
+ {q:"Зачем нужен заголовок <code>Host</code>?",
+  opts:["Для статистики","По нему сервер выбирает сайт из многих на одном адресе","Для кеширования","Для авторизации"],
+  a:1, why:"Поэтому обращение по адресу вместо имени часто попадает на сайт по умолчанию."},
+ {q:"Почему браузер и curl получают разные ответы?",
+  opts:["Разные протоколы","Браузер шлёт то, чего нет у curl: Cookie, Origin, Referer, свой User-Agent","curl медленнее","Браузер кеширует"],
+  a:1, why:"Первый шаг при таком расхождении — сравнить заголовки построчно."},
+ {q:"Что подсказывает заголовок <code>Server</code> в ответе?",
+  opts:["Версию протокола","Кто сформировал ответ — приложение или промежуточный узел","Время ответа","Размер тела"],
+  a:1, why:"Быстрый способ понять, дошёл ли запрос до приложения вообще."},
+ {q:"С каким кодом приходит заголовок <code>Allow</code>?",
+  opts:["401","405","429","502"],
+  a:1, why:"Он перечисляет методы, которые адрес принимает. С 429 приходит <code>Retry-After</code>."},
+ {q:"Как правильно проверить конкретный сервер за балансировщиком?",
+  opts:["Обратиться по его адресу","Через <code>--resolve</code>: сохранятся и <code>Host</code>, и SNI","Через ping","Через прокси"],
+  a:1, why:"Обращение прямо по адресу теряет имя и попадает на сайт по умолчанию."},
+ {q:"Зачем передавать сквозной идентификатор запроса?",
+  opts:["Для безопасности","Чтобы найти один запрос во всех журналах сразу","Для кеширования","Это обязательно"],
+  a:1, why:"Окупается на первом же разборе инцидента."}
+],
+labs:[
+ {id:"6a", title:"Сравнить два обращения",
+  brief:"<p>Сервис отвечает по-разному в зависимости от заголовков. Выясните, какие именно нужны.</p><ul><li>обратитесь к <code>/orders</code> обычным <code>curl</code> — увидите отказ;</li><li>посмотрите подробный вывод и сравните с тем, что требует сервис;</li><li>добейтесь ответа 200, добавив нужные заголовки: авторизацию с токеном <code>good</code> и формат <code>application/json</code>.</li></ul>",
+  hint:'Два ключа -H подряд: авторизация и Accept. Проверить отправленное можно ключом -v — это строки со знаком «больше».',
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/orders", auth:true, token:"good", json:[{id:1, item:"кружка"}]}
+    ]}}
+  }),
+  checks:[
+   {label:"Первая попытка дала 401", test:st=>logHas(st, /401/)},
+   {label:"Подробный вывод смотрели", test:st=>okRan(st,/curl\s+.*-v/)},
+   {label:"Заголовок авторизации добавлен", test:st=>ran(st,/Authorization:\s*Bearer\s+good/)},
+   {label:"Ответ получен", test:st=>logHas(st, /кружка/)},
+   {label:"Токен в подробном выводе не показан целиком", test:st=>
+     logHas(st, /^> Authorization: Bearer goo…/) && !logHas(st, /^> Authorization: Bearer good$/)}
+  ]},
+ {id:"6b", title:"Имя решает",
+  brief:"<p>На адресе <code>203.0.113.10</code> живут два сайта: <code>api.example.com</code> и <code>legacy.example.com</code>. Сервер выбирает нужный по заголовку <code>Host</code>.</p><ul><li>обратитесь по имени <code>api.example.com</code> — получите ответ сервиса;</li><li>обратитесь по <b>адресу</b> <code>http://203.0.113.10/health</code> — увидите, что отвечает сайт по умолчанию;</li><li>добейтесь правильного ответа, обращаясь по адресу, но сохранив имя.</li></ul>",
+  hint:"Сохранить имя при обращении по адресу можно ключом --resolve.",
+  setup: () => {
+    const N = newScenario({
+      dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+      nodes: {"203.0.113.10": {ports: {80: {server:"vhost"}}}},
+      servers: {vhost: {routes: [{path:"/health", body:"сайт по умолчанию"}]}}
+    });
+    /* сервер выбирает набор маршрутов по заголовку Host */
+    N.servers.vhost.routes = [{path:"/health", body:"сайт по умолчанию"}];
+    N.servers.api = {routes: [{path:"/health", body:"ok"}]};
+    const origServe = null;
+    N.nodes["203.0.113.10"].ports[80] = {server: "vhost", byHost: {"api.example.com": "api"}};
+    return N;
+  },
+  checks:[
+   {label:"Обращение по имени работает", test:st=>st.log.some(e =>
+     /curl[^|]*api\.example\.com/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Обращение по адресу даёт сайт по умолчанию", test:st=>logHas(st, /сайт по умолчанию/)},
+   {label:"Использован <code>--resolve</code>", test:st=>okRan(st,/--resolve/)},
+   {label:"С ним ответ правильный", test:st=>st.log.some(e =>
+     /--resolve/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))}
+  ]}
+],
+iv:[
+ {q:"Один и тот же запрос работает в браузере и не работает из curl. Почему?",
+  probe:"Очень практический вопрос. Ждут разбор различий, а не догадки.",
+  a:"Почти всегда дело в заголовках, которые браузер отправляет автоматически, а curl — нет. Это <code>Cookie</code> с сессией, <code>Origin</code> и <code>Referer</code>, свой <code>User-Agent</code>, набор <code>Accept</code> и <code>Accept-Language</code>. Сервис может требовать сессию, различать клиентов по <code>User-Agent</code> или отдавать разные форматы по <code>Accept</code>. Поэтому первое, что я делаю, — открываю в браузере панель разработчика, копирую запрос как curl и сравниваю с тем, что отправляю сам: разница видна построчно. Бывает и обратная ситуация — в curl работает, а в браузере нет; там причина обычно другая, это правила CORS, которые соблюдает только браузер. Ещё один частый источник расхождений — обращение по адресу вместо имени: теряется заголовок <code>Host</code>, и сервер отдаёт сайт по умолчанию.",
+  more:["Что такое «скопировать как curl»?","Почему в браузере не работает, а в curl работает?"]}
+]
+},
+
+/* ------------------------------------------------ 7 */
+{
+n:7, id:"redirect", title:"Перенаправления", sub:"И кеширование ответов",
+lede:"Два механизма, из-за которых запрос ведёт себя «не так, как написано»: сервер отправляет в другое место либо отвечает, что ничего не изменилось.",
+theory:`
+<h2>Коды перенаправления</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Смысл</th><th>Метод при переходе</th></tr>
+<tr><td>301</td><td>переехало навсегда</td><td>может смениться на GET</td></tr>
+<tr><td>302</td><td>временно</td><td>может смениться на GET</td></tr>
+<tr><td>307</td><td>временно, строго</td><td><b>сохраняется</b></td></tr>
+<tr><td>308</td><td>навсегда, строго</td><td><b>сохраняется</b></td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Отсюда пропадающие POST</b><p>Исторически клиенты при 301 и 302 меняли метод на GET и теряли тело. Поэтому <code>POST</code> на адрес, который перенаправляет, может превратиться в <code>GET</code> без тела — и сервер ответит непонятной ошибкой. Коды 307 и 308 введены именно для того, чтобы метод сохранялся. Практический вывод: если API перенаправляет, это должно быть 307 или 308.</p></div>
+
+<h2>Куда ведёт перенаправление</h2>
+<pre><code>$ <span class="k">curl -I http://api.example.com/old</span>
+&lt; HTTP/1.1 301 Moved Permanently
+&lt; location: /new</code></pre>
+<p>По умолчанию curl <b>не переходит</b> — он показывает ответ как есть. Переход включается ключом <code>-L</code>. Это удобно: сначала посмотреть цепочку, потом пройти её.</p>
+<div class="note ok"><b class="hd">Цепочки и петли</b><p>Перенаправлений может быть несколько подряд. Если адреса начинают повторяться, получается петля, и curl останавливается на двадцатом переходе с сообщением <code>Maximum (20) redirects followed</code>. Обычная причина — правило «добавить слеш» и правило «убрать слеш», настроенные одновременно.</p></div>
+
+<h2>Кеширование</h2>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Что делает</th></tr>
+<tr><td><code>Cache-Control: max-age=60</code></td><td>ответ можно хранить 60 секунд</td></tr>
+<tr><td><code>Cache-Control: no-store</code></td><td>не хранить вовсе</td></tr>
+<tr><td><code>ETag: "v1"</code></td><td>метка версии содержимого</td></tr>
+<tr><td><code>If-None-Match: "v1"</code></td><td>запрос клиента: «пришли, только если изменилось»</td></tr>
+<tr><td><code>304 Not Modified</code></td><td>ответ сервера: «не изменилось, бери своё»</td></tr>
+</table></div>
+<pre><code>$ <span class="k">curl -I -H 'If-None-Match: "v1"' https://api.example.com/cached</span>
+&lt; HTTP/1.1 304 Not Modified</code></pre>
+<p>Ответ 304 приходит без тела — в этом и смысл: экономится трафик, а не время на запрос. Для тестировщика это означает, что проверять надо оба случая: с меткой и без.</p>
+
+<h2>Кеш как источник ложных выводов</h2>
+<div class="note warn"><b class="hd">«Исправили, а всё по-старому»</b><p>Между вами и сервисом может стоять несколько кешей: браузера, промежуточного прокси, сети доставки содержимого. Правка доехала до сервера, а вы видите прежний ответ. Признаки: <code>curl</code> показывает новое, а браузер старое; или помогает добавление случайного параметра к адресу. Проверять надо с отключённым кешем и смотреть на заголовки <code>Cache-Control</code> и <code>Age</code> в ответе.</p></div>
+`,
+quiz:[
+ {q:"Чем 307 отличается от 302?",
+  opts:["Ничем","При 307 метод и тело сохраняются, при 302 могут смениться на GET","307 постоянный","302 только для сайтов"],
+  a:1, why:"Поэтому POST на перенаправляющий адрес может превратиться в GET без тела."},
+ {q:"Переходит ли curl по перенаправлению по умолчанию?",
+  opts:["Да","Нет — нужен ключ <code>-L</code>","Только для 301","Только для https"],
+  a:1, why:"Удобно: сначала посмотреть цепочку, потом пройти её."},
+ {q:"Что означает <code>Maximum (20) redirects followed</code>?",
+  opts:["Сервер перегружен","Перенаправления зациклились","Слишком длинный адрес","Нет доступа"],
+  a:1, why:"Обычная причина — правила «добавить слеш» и «убрать слеш», настроенные одновременно."},
+ {q:"Что делает заголовок <code>If-None-Match</code>?",
+  opts:["Отключает кеш","Просит прислать ответ, только если содержимое изменилось","Задаёт срок хранения","Проверяет подпись"],
+  a:1, why:"Если не изменилось, сервер отвечает 304 без тела."},
+ {q:"Приходит ли тело вместе с 304?",
+  opts:["Да","Нет — в этом и смысл: экономится трафик","Только заголовки Content-Type","Зависит от сервера"],
+  a:1, why:"Тестировать поэтому нужно оба случая: с меткой версии и без."},
+ {q:"Исправление выкатили, а ответ прежний. Что заподозрить?",
+  opts:["DNS","Кеш: браузера, прокси или сети доставки","Сертификат","Порт"],
+  a:1, why:"Признак: curl показывает новое, а браузер старое. Смотреть на <code>Cache-Control</code> и <code>Age</code>."}
+],
+labs:[
+ {id:"7a", title:"Пройти цепочку",
+  brief:"<p>Адрес <code>/old</code> куда-то ведёт, но неизвестно куда.</p><ul><li>посмотрите ответ <b>без</b> перехода и найдите заголовок <code>location</code>;</li><li>пройдите цепочку целиком ключом <code>-L</code> и получите содержимое;</li><li>отдельно попробуйте <code>/loop</code> — там перенаправления зациклены.</li></ul>",
+  hint:"curl -I покажет 301 и location. curl -L пройдёт до конца.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/old", status:301, location:"/v2/old"},
+      {path:"/v2/old", status:302, location:"/v2/new"},
+      {path:"/v2/new", body:"новое место"},
+      {path:"/loop", status:302, location:"/loop2"},
+      {path:"/loop2", status:302, location:"/loop"}
+    ]}}
+  }),
+  checks:[
+   {label:"Ответ без перехода посмотрели", test:st=>logHas(st, /location: \/v2\/old/)},
+   {label:"Цепочка пройдена с <code>-L</code>", test:st=>okRan(st,/curl[^|]*-L\b/)},
+   {label:"Содержимое получено", test:st=>logHas(st, /новое место/)},
+   {label:"Петля обнаружена", test:st=>logHas(st, /Maximum \(20\) redirects/)}
+  ]},
+ {id:"7b", title:"Условный запрос",
+  brief:"<p>Проверьте кеширование адреса <code>/catalog</code>:</p><ul><li>запросите его и посмотрите заголовки — найдите <code>etag</code> и <code>cache-control</code>;</li><li>повторите запрос, передав ту же метку в <code>If-None-Match</code>;</li><li>убедитесь, что во второй раз пришёл 304 и тела нет.</li></ul>",
+  hint:"Заголовок с кавычками задают в одинарных: -H 'If-None-Match: \"v7\"'",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/catalog", json:[{id:1, name:"кружка"}], etag:'"v7"', cache:"max-age=300"}
+    ]}}
+  }),
+  checks:[
+   {label:"Заголовки первого ответа осмотрены", test:st=>logHas(st, /etag: "v7"/)},
+   {label:"Правило кеширования увидено", test:st=>logHas(st, /cache-control: max-age=300/)},
+   {label:"Условный запрос отправлен", test:st=>ran(st,/If-None-Match/i)},
+   {label:"Получен 304", test:st=>logHas(st, /304 Not Modified/)},
+   {label:"Тела в нём нет", test:st=>st.log.some(e =>
+     /If-None-Match/i.test(e.cmd) && !(e.out || []).some(l => /кружка/.test(l)))}
+  ]}
+],
+iv:[
+ {q:"Почему POST на адрес с перенаправлением может «потерять» тело?",
+  probe:"Тонкий вопрос, который отличает читавшего спецификацию от знающего по верхам.",
+  a:"Исторически клиенты при кодах 301 и 302 меняли метод на GET и отбрасывали тело — так сложилось из практики браузеров, и спецификация это допускает. Поэтому <code>POST</code> на адрес, который перенаправляет, приходит на конечный адрес уже как <code>GET</code> без данных, и сервер отвечает чем-то вроде 400 или 405, что выглядит совершенно необъяснимо. Именно для этого случая ввели коды 307 и 308: они означают то же самое — временно и постоянно, — но обязывают сохранить метод и тело. Практический вывод простой: если API перенаправляет, он должен отвечать 307 или 308, а не 302. А при отладке стоит смотреть на цепочку без ключа <code>-L</code>, чтобы увидеть каждый шаг и код на каждом из них.",
+  more:["Как посмотреть всю цепочку целиком?","Что делать, если перенаправления зациклились?"]}
+]
+},
+
+/* ------------------------------------------------ 8 */
+{
+n:8, id:"proxy", title:"Промежуточные узлы", sub:"Прокси, балансировщики, шлюзы",
+lede:"Между клиентом и приложением почти никогда нет пустоты. Понимание того, кто именно ответил, сокращает разбор вдвое — особенно когда логи приложения пусты.",
+theory:`
+<h2>Кто стоит на пути</h2>
+<div class="tw"><table>
+<tr><th>Узел</th><th>Что делает</th></tr>
+<tr><td>Обратный прокси</td><td>принимает запросы снаружи и передаёт приложению; часто он же завершает шифрование</td></tr>
+<tr><td>Балансировщик</td><td>распределяет запросы между несколькими экземплярами</td></tr>
+<tr><td>Корпоративный прокси</td><td>стоит между вашей машиной и интернетом; задаётся переменными окружения</td></tr>
+<tr><td>Сеть доставки содержимого</td><td>кеширует и отдаёт ближе к пользователю</td></tr>
+</table></div>
+
+<h2>Что видит приложение</h2>
+<p>Если запрос прошёл через прокси, приложение видит адрес прокси, а не клиента. Настоящий адрес передаётся заголовками:</p>
+<div class="tw"><table>
+<tr><th>Заголовок</th><th>Что несёт</th></tr>
+<tr><td><code>X-Forwarded-For</code></td><td>исходный адрес клиента</td></tr>
+<tr><td><code>X-Forwarded-Proto</code></td><td>исходная схема: <code>http</code> или <code>https</code></td></tr>
+<tr><td><code>X-Forwarded-Host</code></td><td>исходное имя из адреса</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Отсюда два частых дефекта</b><p>Первый: приложение строит ссылки по своей схеме и отдаёт <code>http://</code> вместо <code>https://</code>, потому что шифрование завершилось на прокси и до приложения дошёл обычный HTTP. Лечится учётом <code>X-Forwarded-Proto</code>.</p><p>Второй: ограничение по адресу клиента считает всех одним и тем же, потому что видит адрес прокси. Лечится учётом <code>X-Forwarded-For</code> — но только для доверенных прокси, иначе заголовок легко подделать.</p></div>
+
+<h2>502 и 504</h2>
+<div class="tw"><table>
+<tr><th>Код</th><th>Что произошло</th><th>Где смотреть</th></tr>
+<tr><td><b>502</b></td><td>прокси не смог получить ответ: приложение не отвечает или закрыло соединение</td><td>жив ли процесс, слушает ли порт</td></tr>
+<tr><td><b>504</b></td><td>ответ не пришёл вовремя: приложение думает дольше, чем ждёт прокси</td><td>долгие запросы, таймаут прокси</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Как понять, кто ответил</b><p>Смотрите заголовок <code>Server</code> и тело ошибки. Страница вида «502 Bad Gateway» с подписью nginx — это ответ прокси, а не приложения; в логах приложения такого запроса может не быть вовсе. Это самая частая причина фразы «в логах пусто, а пользователи видят ошибку».</p></div>
+
+<h2>Прокси на вашей машине</h2>
+<pre><code>$ <span class="k">env</span>
+https_proxy=http://proxy.corp:3128
+
+$ <span class="k">curl -x http://proxy.corp:3128 http://api.example.com/health</span></code></pre>
+<p>Корпоративный прокси задаётся переменными окружения, и клиенты подхватывают их автоматически. Отсюда классическое расхождение: в терминале работает, в приложении нет — потому что приложение переменные не читает. Или наоборот: локально всё ходит через прокси, а в контейнере переменных нет, и запросы уходят напрямую в никуда.</p>
+
+<h2>Что проверять</h2>
+<div class="tw"><table>
+<tr><th>Вопрос</th><th>Как ответить</th></tr>
+<tr><td>Есть ли прокси вообще?</td><td><code>env</code> — переменные <code>http_proxy</code>, <code>https_proxy</code>, <code>no_proxy</code></td></tr>
+<tr><td>Кто ответил?</td><td>заголовок <code>Server</code> и тело ошибки</td></tr>
+<tr><td>Дошёл ли запрос до приложения?</td><td>логи приложения по сквозному идентификатору</td></tr>
+<tr><td>Не режет ли прокси заголовки?</td><td>сравнить отправленное и полученное приложением</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Что означает 502?",
+  opts:["Приложение вернуло ошибку","Промежуточный узел не смог получить ответ от приложения","Слишком много запросов","Не найдено"],
+  a:1, why:"В логах приложения такого запроса может не быть вовсе — он мог до него не дойти."},
+ {q:"Чем 504 отличается от 502?",
+  opts:["Ничем","504 — ответ не пришёл вовремя; 502 — не пришёл вовсе","504 от приложения","502 временный"],
+  a:1, why:"При 504 смотреть надо на долгие запросы и таймаут прокси."},
+ {q:"Приложение отдаёт ссылки с <code>http://</code>, хотя сайт по <code>https</code>. Причина?",
+  opts:["Ошибка в коде ссылок","Шифрование завершилось на прокси, приложение не учитывает <code>X-Forwarded-Proto</code>","Неверный сертификат","Кеш"],
+  a:1, why:"До приложения дошёл обычный HTTP, и оно строит ссылки по своей схеме."},
+ {q:"Зачем нужен <code>X-Forwarded-For</code>?",
+  opts:["Для кеширования","Он несёт исходный адрес клиента, скрытый прокси","Для маршрутизации","Для авторизации"],
+  a:1, why:"Учитывать его можно только для доверенных прокси — иначе заголовок легко подделать."},
+ {q:"Как быстро понять, что ответил прокси, а не приложение?",
+  opts:["По времени ответа","По заголовку <code>Server</code> и виду страницы ошибки","По коду","Никак"],
+  a:1, why:"Это самая частая причина фразы «в логах пусто, а пользователи видят ошибку»."},
+ {q:"В терминале запрос проходит, а из приложения нет. Что заподозрить?",
+  opts:["DNS","Прокси из переменных окружения, который читает терминал и не читает приложение","Сертификат","Кеш"],
+  a:1, why:"Бывает и наоборот: локально через прокси, а в контейнере переменных нет."}
+],
+labs:[
+ {id:"8a", title:"Кто ответил",
+  brief:"<p>Запрос возвращает ошибку. Выясните, кто её сформировал — приложение или промежуточный узел.</p><ul><li>выполните запрос и посмотрите заголовки ответа;</li><li>обратите внимание на <code>Server</code> и на вид страницы;</li><li>проверьте отдельно, доступен ли сам сервис приложения на его порту;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:"curl -I через прокси покажет, кто ответил. Затем nc -zv на порт приложения.",
+  setup: () => newScenario({
+    dns: {
+      "shop.example.com": [{type:"A", value:"203.0.113.40"}],
+      "app-1.internal": [{type:"A", value:"10.0.1.5"}]
+    },
+    nodes: {
+      "203.0.113.40": {ports: {443: {server:"gw", tls:true, cert:"c"}}},
+      "10.0.1.5": {down: true, ports: {}}
+    },
+    certs: {c: {cn:"shop.example.com", san:["shop.example.com"], notAfter: 999999}},
+    servers: {gw: {serverName:"nginx/1.25", upstream:{ip:"10.0.1.5", port:8080}}}
+  }),
+  checks:[
+   {label:"Ошибка получена", test:st=>logHas(st, /502/)},
+   {label:"Видно, что ответил прокси", test:st=>logHas(st, /nginx/)},
+   {label:"Доступность приложения проверена", test:st=>ran(st,/(nc|curl)[^|]*(10\.0\.1\.5|app-1\.internal)/)},
+   {label:"Приложение действительно не отвечает", test:st=>logHas(st, /timed out|No route/)},
+   {label:"Вывод записан как <code>proxy</code>", test:st=>verdict(st) === "proxy"}
+  ]},
+ {id:"8b", title:"Забытый прокси",
+  brief:"<p>На машине задан корпоративный прокси, и все запросы идут через него. Прокси при этом сломан.</p><ul><li>посмотрите переменные окружения — <code>env</code>;</li><li>убедитесь, что запрос идёт через прокси: <code>curl -v</code> покажет это первой строкой;</li><li>проверьте, что сам сервис доступен напрямую, — обойдите прокси ключом <code>--noproxy &quot;*&quot;</code>;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:"curl --noproxy \"*\" http://api.example.com/health — запрос пойдёт напрямую, минуя переменную окружения.",
+  setup: () => newScenario({
+    proxyEnv: "http://proxy.corp:3128",
+    dns: {
+      "api.example.com": [{type:"A", value:"203.0.113.10"}],
+      "proxy.corp": [{type:"A", value:"10.0.0.8"}]
+    },
+    nodes: {
+      "203.0.113.10": {ports: {80: {server:"api"}}},
+      "10.0.0.8": {ports: {}}
+    },
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Переменные окружения проверены", test:st=>ran(st,/^\s*env\b/)},
+   {label:"Видно, что запрос идёт через прокси", test:st=>logHas(st, /Uses proxy/)},
+   {label:"Прокси не отвечает", test:st=>logHas(st, /Connection refused|timed out/)},
+   {label:"Сервис доступен напрямую, минуя прокси", test:st=>st.log.some(e =>
+     /--noproxy/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Вывод записан как <code>proxy</code>", test:st=>verdict(st) === "proxy"}
+  ]}
+],
+iv:[
+ {q:"Пользователи видят 502, а в логах приложения пусто. Что происходит?",
+  probe:"Практический вопрос эксплуатации. Ждут понимания, кто формирует ответ.",
+  a:"502 почти всегда формирует не приложение, а то, что стоит перед ним, — обратный прокси или балансировщик. Он означает, что промежуточный узел не смог получить ответ: приложение не запущено, упало, слушает не тот порт или закрыло соединение. Поэтому в логах приложения запроса и нет — он до него не дошёл. Проверяю я так: сначала смотрю заголовок <code>Server</code> и вид страницы ошибки, чтобы подтвердить, что отвечает прокси; потом проверяю доступность самого приложения на его внутреннем адресе и порту; потом смотрю логи прокси — там будет причина, вплоть до «connection refused к такому-то адресу». Родственный код 504 означает другое: приложение живо, но отвечает дольше, чем прокси готов ждать; там разговор про долгие запросы и настройку таймаутов, и вот тогда в логах приложения запрос как раз будет — просто незавершённый.",
+  more:["Чем 504 отличается от 502?","Зачем нужен X-Forwarded-For?"]}
+]
+},
+
+/* ------------------------------------------------ 9 */
+{
+n:9, id:"cors", title:"CORS", sub:"Почему curl работает, а браузер нет",
+lede:"Самая непонятая тема в вебе. Ключ к ней — одно утверждение: правила соблюдает браузер, а не сервер. Ответ приходит, браузер просто не отдаёт его коду страницы.",
+theory:`
+<h2>Что вообще происходит</h2>
+<p>Страница, загруженная с одного адреса, по умолчанию не может читать ответы с другого — это защита от того, чтобы чужой сайт делал запросы от вашего имени и читал результат. Разрешение выдаёт <b>сервер</b> заголовком, а проверяет его <b>браузер</b>.</p>
+<div class="note ok"><b class="hd">Отсюда главный признак</b><p>Если <code>curl</code> тот же запрос выполняет, а страница получает ошибку — это CORS. Никакой сетевой проблемы нет: запрос ушёл, ответ пришёл, браузер его не отдал. Проверить можно за десять секунд: внизу есть команда <code>browser</code>, которая ходит по тем же адресам, но с правилами страницы.</p></div>
+
+<h2>Простые запросы и предварительные</h2>
+<div class="tw"><table>
+<tr><th></th><th>Простой</th><th>С предварительным запросом</th></tr>
+<tr><td>Когда</td><td>GET, HEAD, POST с обычным типом содержимого</td><td>другой метод, свой заголовок, JSON в теле</td></tr>
+<tr><td>Что делает браузер</td><td>шлёт запрос, потом смотрит заголовок в ответе</td><td>сначала шлёт <code>OPTIONS</code>, и только при разрешении — сам запрос</td></tr>
+</table></div>
+<p>Предварительный запрос — источник недоумения «в журнале сервера два запроса вместо одного» и «запрос не дошёл до обработчика»: если <code>OPTIONS</code> не обработан, до основного запроса дело не дойдёт вовсе.</p>
+
+<h2>Заголовки, которыми разрешают</h2>
+<div class="tw"><table>
+<tr><th>Заголовок ответа</th><th>Что разрешает</th></tr>
+<tr><td><code>Access-Control-Allow-Origin</code></td><td>какому источнику читать ответ</td></tr>
+<tr><td><code>Access-Control-Allow-Methods</code></td><td>какие методы (в ответе на <code>OPTIONS</code>)</td></tr>
+<tr><td><code>Access-Control-Allow-Headers</code></td><td>какие свои заголовки</td></tr>
+<tr><td><code>Access-Control-Allow-Credentials</code></td><td>можно ли слать куки и учётные данные</td></tr>
+<tr><td><code>Access-Control-Max-Age</code></td><td>сколько хранить результат предварительного запроса</td></tr>
+</table></div>
+<div class="note trap"><b class="hd">Звёздочка и учётные данные несовместимы</b><p><code>Access-Control-Allow-Origin: *</code> запрещено использовать вместе с куками. Если запрос идёт с учётными данными, сервер обязан вернуть точное имя источника и вдобавок <code>Access-Control-Allow-Credentials: true</code>. Настроить «звёздочку и куки» нельзя — и это не ограничение реализации, а осознанное решение.</p></div>
+
+<h2>Как читать ошибку</h2>
+<pre><code>Access to fetch at 'https://api.example.com/orders' from origin
+'https://app.example.com' has been blocked by CORS policy:
+No 'Access-Control-Allow-Origin' header is present on the requested resource.</code></pre>
+<p>В сообщении всегда есть три вещи: куда шли, откуда пришла страница и чего именно не хватило. Последняя часть — это и есть задача разработчику сервиса, и формулируется она однозначно.</p>
+
+<h2>Чего делать не надо</h2>
+<div class="tw"><table>
+<tr><th>Приём</th><th>Почему плохо</th></tr>
+<tr><td>Поставить <code>*</code> в бою</td><td>читать ответы сможет любой сайт; для публичного API допустимо, для внутреннего — нет</td></tr>
+<tr><td>Пытаться «обойти» из кода страницы</td><td>невозможно: проверку делает браузер, а не ваш код</td></tr>
+<tr><td>Отключить проверку в браузере ключом запуска</td><td>работает только у вас и маскирует настоящую проблему</td></tr>
+<tr><td>Ставить прокси только ради обхода</td><td>иногда оправдано, но чаще проще договориться о заголовке</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Кто соблюдает правила CORS?",
+  opts:["Сервер","Браузер: он не отдаёт ответ коду страницы","Прокси","Операционная система"],
+  a:1, why:"Поэтому curl тот же запрос выполняет без возражений — сетевой проблемы нет."},
+ {q:"Что означает, что curl работает, а страница получает ошибку?",
+  opts:["Сеть сломана","Это CORS: ответ пришёл, но браузер его не отдал","Сертификат неверен","Сервер лежит"],
+  a:1, why:"Признак настолько надёжный, что проверку стоит делать первой."},
+ {q:"Когда браузер шлёт предварительный запрос <code>OPTIONS</code>?",
+  opts:["Всегда","Когда метод не простой, есть свой заголовок или JSON в теле","Только для POST","Только с куками"],
+  a:1, why:"Отсюда «два запроса вместо одного» в журнале сервера."},
+ {q:"Можно ли сочетать <code>Access-Control-Allow-Origin: *</code> с куками?",
+  opts:["Да","Нет: с учётными данными нужен точный источник и <code>Allow-Credentials: true</code>","Только для GET","Зависит от браузера"],
+  a:1, why:"Это осознанное решение спецификации, а не ограничение реализации."},
+ {q:"Что нельзя починить со стороны кода страницы?",
+  opts:["Заголовки запроса","Саму проверку CORS — её делает браузер","Метод","Тело"],
+  a:1, why:"Разрешение выдаёт сервер; из кода страницы его не обойти."},
+ {q:"Обработчик <code>OPTIONS</code> не настроен. Что произойдёт?",
+  opts:["Ничего","До основного запроса дело не дойдёт вовсе","Запрос пойдёт как обычно","Ответ будет 500"],
+  a:1, why:"Это объясняет «запрос не доходит до обработчика», хотя в curl всё работает."}
+],
+labs:[
+ {id:"9a", title:"Доказать, что дело в браузере",
+  brief:"<p>Разработчик утверждает, что сервис <code>api.example.com</code> недоступен: страница получает ошибку.</p><ul><li>выполните тот же запрос через <code>curl</code> — он должен пройти;</li><li>выполните его через <code>browser</code> — увидите блокировку;</li><li>прочитайте, чего именно не хватило в ответе;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:"browser https://api.example.com/orders — команда ходит по тому же адресу, но с правилами страницы.",
+  setup: () => newScenario({
+    origin: "https://app.example.com",
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}],
+          "app.example.com": [{type:"A", value:"203.0.113.20"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c1"}}},
+            "203.0.113.20": {ports: {443: {server:"web", tls:true, cert:"c2"}}}},
+    certs: {c1: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999},
+            c2: {cn:"app.example.com", san:["app.example.com"], notAfter: 999999}},
+    servers: {
+      api: {routes: [{path:"/orders", json:[{id:1}]}]},
+      web: {routes: [{path:"/", body:"страница"}]}
+    }
+  }),
+  checks:[
+   {label:"Через <code>curl</code> запрос проходит", test:st=>st.log.some(e =>
+     /^\s*curl\b/.test(e.cmd) && (e.out || []).some(l => /\{"id":1\}/.test(l)))},
+   {label:"Через <code>browser</code> блокируется", test:st=>logHas(st, /ЗАБЛОКИРОВАНО/)},
+   {label:"Причина прочитана", test:st=>logHas(st, /Access-Control-Allow-Origin/)},
+   {label:"Вывод записан как <code>cors</code>", test:st=>verdict(st) === "cors"}
+  ]},
+ {id:"9b", title:"Предварительный запрос",
+  brief:"<p>Страница шлёт запрос со своим заголовком <code>X-Request-Id</code>, и он не проходит, хотя обычный запрос к тому же адресу работает.</p><ul><li>убедитесь, что <code>browser</code> без своего заголовка проходит;</li><li>повторите с заголовком <code>X-Request-Id: 42</code> и посмотрите, что изменилось;</li><li>найдите в выводе предварительный запрос и то, чего он не разрешил;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:'browser -H "X-Request-Id: 42" https://api.example.com/orders',
+  setup: () => newScenario({
+    origin: "https://app.example.com",
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c1"}}}},
+    certs: {c1: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {
+      api: {routes: [
+        {path:"/orders", json:[{id:1}],
+         headers:{"access-control-allow-origin":"https://app.example.com",
+                  "access-control-allow-methods":"GET, POST",
+                  "access-control-allow-headers":"content-type"}}
+      ]}
+    }
+  }),
+  checks:[
+   {label:"Обычный запрос через браузер проходит", test:st=>st.log.some(e =>
+     /^\s*browser\b/.test(e.cmd) && !/-H/.test(e.cmd) && !(e.out || []).some(l => /ЗАБЛОКИРОВАНО/.test(l)))},
+   {label:"Со своим заголовком отправлялся", test:st=>ran(st,/browser[^|]*X-Request-Id/i)},
+   {label:"Предварительный запрос виден", test:st=>logHas(st, /Предварительный запрос/)},
+   {label:"Видно, какой заголовок не разрешён", test:st=>logHas(st, /не разрешил заголовок/)},
+   {label:"Вывод записан как <code>cors</code>", test:st=>verdict(st) === "cors"}
+  ]}
+],
+iv:[
+ {q:"Что такое CORS и почему в curl работает, а в браузере нет?",
+  probe:"Классический вопрос. Ответ «надо добавить заголовок» без объяснения механизма считается поверхностным.",
+  a:"Это правило браузера, а не сервера: страница, загруженная с одного источника, по умолчанию не может читать ответы с другого. Ключевое здесь в том, что запрос всё равно уходит и ответ всё равно приходит — браузер просто не отдаёт его коду страницы, если сервер не разрешил это заголовком <code>Access-Control-Allow-Origin</code>. Поэтому curl, который никаких правил источника не соблюдает, выполняет тот же запрос без возражений, и это отличный способ за десять секунд отделить CORS от настоящей сетевой проблемы. Отдельно есть предварительный запрос: если метод не из простых, есть свой заголовок или в теле JSON, браузер сначала шлёт <code>OPTIONS</code> и идёт дальше только при разрешении — отсюда «два запроса вместо одного» и «запрос не доходит до обработчика». Чинится это на сервере; из кода страницы обойти проверку нельзя, а отключение её ключом запуска браузера маскирует проблему, а не решает.",
+  more:["Когда шлётся предварительный запрос?","Почему нельзя сочетать звёздочку и куки?"]}
+]
+},
+
+/* ------------------------------------------------ 10 */
+{
+n:10, id:"curl", title:"curl", sub:"Ключи, которые стоит помнить",
+lede:"Один инструмент закрывает почти всю отладку HTTP. Ключей у него сотни, но в работе повторяются полтора десятка — их и разберём.",
+theory:`
+<h2>Основные</h2>
+<div class="tw"><table>
+<tr><th>Ключ</th><th>Что делает</th></tr>
+<tr><td><code>-v</code></td><td>показать все шаги: разрешение, соединение, рукопожатие, заголовки</td></tr>
+<tr><td><code>-I</code></td><td>только заголовки ответа (метод HEAD)</td></tr>
+<tr><td><code>-i</code></td><td>заголовки и тело</td></tr>
+<tr><td><code>-L</code></td><td>переходить по перенаправлениям</td></tr>
+<tr><td><code>-H "Имя: значение"</code></td><td>добавить заголовок; можно несколько раз</td></tr>
+<tr><td><code>-X МЕТОД</code></td><td>задать метод явно</td></tr>
+<tr><td><code>-d "тело"</code></td><td>отправить тело; метод сам станет POST</td></tr>
+<tr><td><code>-k</code></td><td>не проверять сертификат — <b>только для диагностики</b></td></tr>
+</table></div>
+
+<h2>Для точной диагностики</h2>
+<div class="tw"><table>
+<tr><th>Ключ</th><th>Зачем</th></tr>
+<tr><td><code>--resolve имя:порт:адрес</code></td><td>сходить на конкретный сервер, сохранив имя в <code>Host</code> и SNI</td></tr>
+<tr><td><code>-x http://прокси:порт</code></td><td>принудительно через прокси</td></tr>
+<tr><td><code>--connect-timeout N</code></td><td>ограничить только установку соединения</td></tr>
+<tr><td><code>--max-time N</code></td><td>ограничить весь запрос</td></tr>
+<tr><td><code>-w "%{time_total}"</code></td><td>напечатать измеренное время запроса</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Связка, которую стоит запомнить</b><p><code>curl -v --resolve имя:443:адрес https://имя/путь</code> — проверка конкретного сервера за балансировщиком с сохранением имени. Именно она отвечает на вопрос «а все ли экземпляры одинаково отвечают», когда «то работает, то нет».</p></div>
+
+<h2>Порядок отладки одной командой</h2>
+<pre><code><span class="c"># 1. что вообще происходит</span>
+curl -v https://api.example.com/health
+
+<span class="c"># 2. только заголовки, без тела</span>
+curl -I https://api.example.com/health
+
+<span class="c"># 3. с авторизацией и телом</span>
+curl -v -X POST -H <span class="s">"Authorization: Bearer …"</span> \
+     -H <span class="s">"Content-Type: application/json"</span> \
+     -d <span class="s">'{"item":7}'</span> https://api.example.com/orders
+
+<span class="c"># 4. конкретный сервер за балансировщиком</span>
+curl -v --resolve api.example.com:443:10.0.1.5 https://api.example.com/health</code></pre>
+
+<h2>Как читать подробный вывод</h2>
+<div class="tw"><table>
+<tr><th>Строка</th><th>Что подтверждает</th></tr>
+<tr><td><code>Trying 203.0.113.10:443</code></td><td>имя разрешилось, и вот во что</td></tr>
+<tr><td><code>Connected to … port 443</code></td><td>соединение установлено</td></tr>
+<tr><td><code>SSL connection using TLSv1.3</code></td><td>сертификат принят</td></tr>
+<tr><td><code>subjectAltName:</code></td><td>на какие имена выписан сертификат</td></tr>
+<tr><td>строки со знаком «больше»</td><td>что именно ушло на сервер</td></tr>
+<tr><td>строки со знаком «меньше»</td><td>что вернулось</td></tr>
+</table></div>
+<div class="note warn"><b class="hd">Осторожно с журналами</b><p>Подробный вывод содержит заголовки, в том числе <code>Authorization</code> и <code>Cookie</code>. Вставляя его в задачу или чат, значения токенов надо вырезать. Здесь curl помогает: он сокращает значение заголовка авторизации, но полагаться на это не стоит — куки он покажет целиком.</p></div>
+
+<h2>Родственные инструменты</h2>
+<div class="tw"><table>
+<tr><th>Инструмент</th><th>Когда</th></tr>
+<tr><td><code>dig</code></td><td>вопрос про имена</td></tr>
+<tr><td><code>nc -zv</code></td><td>вопрос про порт</td></tr>
+<tr><td><code>openssl s_client</code></td><td>вопрос про сертификат</td></tr>
+<tr><td>Панель разработчика в браузере</td><td>вопрос про то, что делает страница; там же «скопировать как curl»</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Что делает <code>-I</code>?",
+  opts:["Игнорирует ошибки","Запрашивает только заголовки методом HEAD","Включает подробный вывод","Повторяет запрос"],
+  a:1, why:"Показать и заголовки, и тело — это <code>-i</code>."},
+ {q:"Для чего нужен <code>--resolve</code>?",
+  opts:["Проверить DNS","Сходить на конкретный сервер, сохранив имя в Host и SNI","Ускорить запрос","Обойти прокси"],
+  a:1, why:"Именно эта связка отвечает на вопрос «все ли экземпляры за балансировщиком отвечают одинаково»."},
+ {q:"Как отправить тело запроса?",
+  opts:["<code>-b</code>","<code>-d</code> — метод сам станет POST","<code>-t</code>","<code>-p</code>"],
+  a:1, why:"Метод можно задать и явно через <code>-X</code>, если нужен, например, PUT."},
+ {q:"Что означает строка <code>Connected to … port 443</code>?",
+  opts:["Ответ получен","Соединение установлено — два нижних слоя пройдены","Сертификат принят","Запрос отправлен"],
+  a:1, why:"Про сертификат скажет следующая строка, про ответ — строки со знаком «меньше»."},
+ {q:"Чем опасно вставить вывод <code>curl -v</code> в задачу как есть?",
+  opts:["Он длинный","Там заголовки с токенами и куками","Он нечитаем","Ничем"],
+  a:1, why:"curl сокращает значение заголовка авторизации, но куки показывает целиком."},
+ {q:"Каким инструментом ответить на вопрос «на какие имена выписан сертификат»?",
+  opts:["<code>dig</code>","<code>openssl s_client</code>","<code>nc</code>","<code>ping</code>"],
+  a:1, why:"То же покажет и <code>curl -v</code> в строке <code>subjectAltName</code>."}
+],
+labs:[
+ {id:"10a", title:"Полный набор ключей",
+  brief:"<p>Проверьте создание заказа так, как это делают при разборе:</p><ul><li>отправьте <code>POST</code> на <code>/orders</code> с телом <code>{\"item\":7}</code>, заголовком типа <code>application/json</code> и авторизацией <code>Bearer good</code>;</li><li>включите подробный вывод;</li><li>убедитесь, что получен <b>201</b> и что в подробном выводе видно отправленные заголовки.</li></ul>",
+  hint:'curl -v -X POST -H "Content-Type: application/json" -H "Authorization: Bearer good" -d \'{"item":7}\' https://api.example.com/orders',
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [
+      {path:"/orders", methods:["POST"], auth:true, token:"good",
+       needsType:"application/json", status:201, body:"создано"}
+    ]}}
+  }),
+  checks:[
+   {label:"Подробный вывод включён", test:st=>okRan(st,/curl[^|]*-v\b/)},
+   {label:"Тело передано", test:st=>ran(st,/-d\s|--data/)},
+   {label:"Оба заголовка заданы", test:st=>ran(st,/Content-Type:\s*application\/json/i) && ran(st,/Authorization:\s*Bearer\s+good/)},
+   {label:"Получен 201", test:st=>logHas(st, /201 Created|создано/)},
+   {label:"Отправленные заголовки видны в выводе", test:st=>logHas(st, /^> Content-Type/)}
+  ]},
+ {id:"10b", title:"Не все одинаковые",
+  brief:"<p>За именем <code>api.example.com</code> стоят два экземпляра: <code>10.0.1.5</code> и <code>10.0.1.6</code>. Пользователи жалуются, что «иногда 500».</p><ul><li>проверьте каждый экземпляр отдельно, сохранив имя, — через <code>--resolve</code>;</li><li>найдите тот, который отвечает ошибкой;</li><li>зафиксируйте вывод: сеть в порядке, виноват один экземпляр приложения.</li></ul>",
+  hint:"curl --resolve api.example.com:443:10.0.1.5 https://api.example.com/health и то же для .6",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"10.0.1.5"}, {type:"A", value:"10.0.1.6"}]},
+    nodes: {
+      "10.0.1.5": {ports: {443: {server:"api-ok", tls:true, cert:"c"}}},
+      "10.0.1.6": {ports: {443: {server:"api-bad", tls:true, cert:"c"}}}
+    },
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {
+      "api-ok": {routes: [{path:"/health", body:"ok"}]},
+      "api-bad": {routes: [{path:"/health", status:500, body:"internal error"}]}
+    }
+  }),
+  checks:[
+   {label:"Первый экземпляр проверен", test:st=>ran(st,/--resolve[^|]*10\.0\.1\.5/)},
+   {label:"Второй экземпляр проверен", test:st=>ran(st,/--resolve[^|]*10\.0\.1\.6/)},
+   {label:"Ошибка найдена на одном из них", test:st=>logHas(st, /internal error|500/)},
+   {label:"Другой при этом отвечает нормально", test:st=>st.log.some(e =>
+     /10\.0\.1\.5/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Вывод записан как <code>http</code>", test:st=>verdict(st) === "http"}
+  ]}
+],
+iv:[
+ {q:"Какими ключами curl вы пользуетесь постоянно?",
+  probe:"Проверяют, работали ли вы руками. Ждут не список из справки, а рабочий набор.",
+  a:"Базовый набор небольшой. <code>-v</code> — первое, что я добавляю, когда что-то не работает: он показывает разрешение имени, соединение, рукопожатие и обе стороны обмена, то есть сразу говорит, на каком слое застряло. <code>-I</code>, когда нужны только заголовки, и <code>-i</code>, когда и заголовки, и тело. <code>-H</code> для авторизации и типа содержимого, <code>-d</code> для тела — он же сам переключает метод на POST, <code>-X</code> когда нужен другой метод. <code>-L</code>, чтобы пройти перенаправления, но сначала я обычно смотрю цепочку без него. Из более специальных — <code>--resolve</code>, чтобы сходить на конкретный экземпляр за балансировщиком, сохранив правильные <code>Host</code> и SNI: это лучший способ проверить гипотезу «отвечает не тот сервер». И разделённые таймауты: <code>--connect-timeout</code> отдельно от <code>--max-time</code>, чтобы быстро отсекать недоступный узел, но давать время медленному ответу.",
+  more:["Зачем разделять таймауты?","Как проверить один экземпляр из балансировки?"]}
+]
+},
+
+/* ------------------------------------------------ 11 */
+{
+n:11, id:"flaky", title:"Только в CI", sub:"Почему падает не у вас",
+lede:"Сетевые причины «падает только на сборке» повторяются от проекта к проекту. Их немного, и все проверяются за минуты — если знать, что искать.",
+theory:`
+<h2>Пять причин по убыванию частоты</h2>
+<div class="tw"><table>
+<tr><th>Причина</th><th>Как проявляется</th><th>Как проверить</th></tr>
+<tr><td>Другой DNS</td><td>внутреннее имя не разрешается или ведёт в другое место</td><td><code>dig</code> внутри той же среды</td></tr>
+<tr><td>Закрытый порт</td><td>соединение висит и обрывается по таймауту</td><td><code>nc -zv</code> оттуда же</td></tr>
+<tr><td>Нет корневого сертификата</td><td>ошибка доверия в чистом образе</td><td><code>curl</code> без <code>-k</code> и с ним</td></tr>
+<tr><td>Прокси в переменных</td><td>локально есть, в контейнере нет — или наоборот</td><td><code>env</code></td></tr>
+<tr><td>Медленнее машина</td><td>таймауты, которых не было на ноутбуке</td><td>измерить время ответа</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Общий принцип</b><p>Всё это — различия окружения, а не случайность. Поэтому первый вопрос при «падает только в CI» звучит так: чем среда сборки отличается от моей? Ответ почти всегда в списке выше.</p></div>
+
+<h2>Чистый образ</h2>
+<p>Раннер получает машину без ваших настроек: без записей в <code>/etc/hosts</code>, без добавленных корневых сертификатов, без VPN, без клиентских сертификатов, часто с другим набором DNS-серверов. Всё, что вы когда-то настроили у себя «на один раз», в CI отсутствует — и это чаще всего и есть причина.</p>
+
+<h2>Время</h2>
+<div class="note trap"><b class="hd">Раннер медленнее ноутбука</b><p>Тесты, где таймаут выставлен «с запасом» по локальным меркам, в CI начинают падать: сеть до сервиса длиннее, машина слабее, соседи по хосту создают нагрузку. Лечится не увеличением таймаута наугад, а ожиданием условия вместо ожидания времени — и разумным, явно заданным таймаутом на запрос.</p></div>
+
+<h2>Повторы и их цена</h2>
+<div class="tw"><table>
+<tr><th>Приём</th><th>Когда уместен</th></tr>
+<tr><td>Повтор запроса</td><td>только для безопасно повторяемых операций: чтение, идемпотентная запись</td></tr>
+<tr><td>Повтор с нарастающей паузой</td><td>когда сервис отвечает 429 или 503 с <code>Retry-After</code></td></tr>
+<tr><td>Повтор POST без ключа идемпотентности</td><td><b>опасно</b>: можно создать два заказа вместо одного</td></tr>
+</table></div>
+<p>Отсюда практика: повторять безопасно то, что не меняет состояние, а для создающих операций просить у сервиса ключ идемпотентности — тогда повтор с тем же ключом не создаст второй объект.</p>
+
+<h2>Что положить в сообщение о проблеме</h2>
+<div class="tw"><table>
+<tr><th>Что</th><th>Зачем</th></tr>
+<tr><td>Точный адрес и метод</td><td>чтобы воспроизвести</td></tr>
+<tr><td>На каком слое остановилось</td><td>чтобы понять, к кому идти</td></tr>
+<tr><td>Вывод <code>curl -v</code> без секретов</td><td>чтобы не переспрашивать</td></tr>
+<tr><td>Работает ли то же самое локально</td><td>чтобы сузить до различия сред</td></tr>
+<tr><td>Сквозной идентификатор запроса</td><td>чтобы найти его в журналах сервиса</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Самая частая сетевая причина «падает только в CI»?",
+  opts:["Медленная сеть","Другой DNS: имя не разрешается или ведёт в другое место","Нет памяти","Неверный код"],
+  a:1, why:"Раннер получает чистую машину с другим набором DNS-серверов и без ваших локальных настроек."},
+ {q:"Почему в CI возникает ошибка доверия к сертификату, которой нет локально?",
+  opts:["Другая версия curl","В чистом образе нет корневого сертификата внутреннего центра","Другой протокол","Сертификат просрочен"],
+  a:1, why:"Правильное решение — добавить его в образ, а не отключать проверку."},
+ {q:"Тест падает по таймауту только в CI. Что делать в первую очередь?",
+  opts:["Увеличить таймаут наугад","Измерить реальное время ответа и заменить ожидание времени ожиданием условия","Отключить тест","Повторить трижды"],
+  a:1, why:"Раннер медленнее: сеть длиннее, машина слабее, соседи по хосту создают нагрузку."},
+ {q:"Когда повтор запроса опасен?",
+  opts:["Никогда","Для создающих операций без ключа идемпотентности — можно создать два объекта","Для GET","Для HEAD"],
+  a:1, why:"Повторять безопасно то, что не меняет состояние; для создания нужен ключ идемпотентности."},
+ {q:"Что означает <code>Retry-After</code> в ответе?",
+  opts:["Срок жизни кеша","Через сколько имеет смысл повторить — приходит с 429 и 503","Таймаут соединения","Время ответа"],
+  a:1, why:"Это подсказка сервиса: повторять раньше бессмысленно."},
+ {q:"Чего не хватает в сообщении «сервис недоступен из CI»?",
+  opts:["Ничего","Слоя, на котором остановилось, и вывода curl -v","Времени","Имени автора"],
+  a:1, why:"Без этого разбор начинается с переспрашивания и теряет часы."}
+],
+labs:[
+ {id:"11a", title:"В чистом образе",
+  brief:"<p>Сборка падает на обращении к внутреннему сервису <code>internal.example.com</code>, локально всё работает. Вы находитесь в среде сборки.</p><ul><li>выполните запрос и прочитайте ошибку;</li><li>проверьте гипотезу про доверие: повторите с <code>-k</code>;</li><li>посмотрите сертификат — кто его выпустил;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:"Если с -k проходит, дело именно в доверии. openssl s_client покажет издателя.",
+  setup: () => newScenario({
+    dns: {"internal.example.com": [{type:"A", value:"10.0.2.7"}]},
+    nodes: {"10.0.2.7": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"internal.example.com", san:["internal.example.com"],
+                notAfter: 999999, selfSigned: true, issuer:"CN=Example Internal CA"}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Ошибка доверия увидена", test:st=>logHas(st, /self-signed|issuer/)},
+   {label:"Гипотеза проверена ключом <code>-k</code>", test:st=>st.log.some(e =>
+     /-k\b|--insecure/.test(e.cmd) && (e.out || []).some(l => /^ok$/.test(l)))},
+   {label:"Издатель сертификата осмотрен", test:st=>used(st, "openssl")},
+   {label:"Вывод записан как <code>tls</code>", test:st=>verdict(st) === "tls"}
+  ]},
+ {id:"11b", title:"Слишком медленно",
+  brief:"<p>Тест ходит к <code>api.example.com/report</code> с ограничением в 2 секунды и падает в CI. Проверьте, в чём дело.</p><ul><li>выполните запрос с <code>--max-time 2</code> — увидите таймаут;</li><li>выполните тот же запрос без ограничения и посмотрите, сколько он на самом деле идёт: добавьте <code>-w &quot;%{time_total}&quot;</code>;</li><li>убедитесь, что соединение при этом устанавливается мгновенно — значит, дело не в сети;</li><li>зафиксируйте вывод.</li></ul>",
+  hint:"curl -w «%{time_total}» напечатает время запроса в секундах. Быстрое соединение и долгий ответ означают, что думает приложение.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.10"}]},
+    nodes: {"203.0.113.10": {ports: {443: {server:"api", tls:true, cert:"c"}}}},
+    certs: {c: {cn:"api.example.com", san:["api.example.com"], notAfter: 999999}},
+    servers: {api: {slowMs: 6000, routes: [{path:"/report", body:"отчёт готов"}]}}
+  }),
+  checks:[
+   {label:"Таймаут воспроизведён", test:st=>logHas(st, /Operation timed out/)},
+   {label:"Запрос без ограничения проходит", test:st=>logHas(st, /отчёт готов/)},
+   {label:"Время измерено", test:st=>okRan(st,/curl[^|]*-w\b/) && logHas(st, /^\d+\.\d{3}$/)},
+   {label:"Соединение устанавливается быстро", test:st=>logHas(st, /Connected to/)},
+   {label:"Вывод записан как <code>timeout</code>", test:st=>verdict(st) === "timeout"}
+  ]}
+],
+iv:[
+ {q:"Тест ходит по сети и падает только в CI. Как разбираетесь?",
+  probe:"Профильный вопрос для автоматизатора. Ждут список различий сред, а не «перезапущу».",
+  a:"Я исхожу из того, что это не случайность, а различие окружений, и иду по короткому списку. Первое — имена: раннер обычно использует другие DNS-серверы, и внутреннее имя может не разрешаться или вести в другое место; проверяю <code>dig</code> прямо из среды сборки. Второе — доступность порта оттуда же через <code>nc</code>: сеть раннера может быть отделена от той, где живёт сервис. Третье — сертификаты: в чистом образе нет корневого сертификата внутреннего центра, который я когда-то добавил себе, отсюда ошибка доверия, которой локально нет. Четвёртое — прокси: переменные окружения есть на моей машине и отсутствуют в контейнере, или наоборот. Пятое — время: раннер медленнее, и таймауты, выставленные по локальным меркам, перестают хватать; лечится это не увеличением наугад, а измерением реального времени и ожиданием условия вместо ожидания секунд. В сообщение о проблеме я всегда кладу слой, на котором остановилось, и вывод <code>curl -v</code> без токенов.",
+  more:["Как проверить DNS изнутри раннера?","Когда повтор запроса опасен?"]}
+]
+},
+
+/* ------------------------------------------------ 12 */
+{
+n:12, id:"debug", title:"Разбор", sub:"Локализовать за пять минут",
+lede:"Собираем всё в одну процедуру. Смысл её в том, чтобы каждый шаг отсекал половину возможных причин, а не проверял догадку.",
+theory:`
+<h2>Порядок</h2>
+<div class="tw"><table>
+<tr><th>Шаг</th><th>Команда</th><th>Что отсекает</th></tr>
+<tr><td>1. Имя</td><td><code>dig имя</code> и <code>cat /etc/hosts</code></td><td>весь слой DNS</td></tr>
+<tr><td>2. Порт</td><td><code>nc -zv имя порт</code></td><td>сеть и правила доступа</td></tr>
+<tr><td>3. Сертификат</td><td><code>curl -v</code>, при сомнении <code>-k</code></td><td>доверие</td></tr>
+<tr><td>4. Обмен</td><td><code>curl -v</code> и чтение кода</td><td>остаётся приложение</td></tr>
+<tr><td>5. Кто ответил</td><td>заголовок <code>Server</code></td><td>отделяет прокси от приложения</td></tr>
+<tr><td>6. Браузер</td><td><code>browser</code> против <code>curl</code></td><td>отделяет CORS от всего остального</td></tr>
+</table></div>
+<div class="note ok"><b class="hd">Почему именно такой порядок</b><p>Слои проходятся снизу вверх, и каждый следующий имеет смысл проверять, только когда предыдущий пройден. Проверять сертификат, когда имя не разрешается, — потерянное время; читать логи приложения при 502 — тоже.</p></div>
+
+<h2>Быстрые правила</h2>
+<div class="tw"><table>
+<tr><th>Наблюдение</th><th>Вывод</th></tr>
+<tr><td>Мгновенная ошибка соединения</td><td>служба не слушает</td></tr>
+<tr><td>Долгое ожидание и таймаут</td><td>пакеты не доходят</td></tr>
+<tr><td>С <code>-k</code> работает</td><td>дело в доверии, а не в сети</td></tr>
+<tr><td>В <code>curl</code> работает, в браузере нет</td><td>CORS</td></tr>
+<tr><td>В браузере работает, в <code>curl</code> нет</td><td>заголовки: кука, источник, тип</td></tr>
+<tr><td>Ответ от nginx, а приложение на другом сервере</td><td>до приложения не дошло</td></tr>
+<tr><td>Один экземпляр отвечает, другой нет</td><td><code>--resolve</code> по каждому</td></tr>
+<tr><td>Работает у вас, не работает у коллеги</td><td><code>/etc/hosts</code>, кеш, прокси</td></tr>
+</table></div>
+
+<h2>Что писать в задаче</h2>
+<pre><code>Что: POST https://api.example.com/orders
+Слой: обмен (соединение и сертификат в порядке)
+Код: 500, тело пустое
+Заголовок Server: gunicorn — значит, ответило приложение
+Локально: воспроизводится
+Идентификатор запроса: X-Request-Id: 8f21c
+Вывод curl -v: приложен, токен вырезан</code></pre>
+<p>Такое сообщение закрывает половину вопросов заранее и адресует задачу нужным людям с первого раза. Сообщение «апи не работает» стоит команде часа переписки.</p>
+
+<h2>Чего избегать</h2>
+<div class="tw"><table>
+<tr><th>Ошибка</th><th>Почему</th></tr>
+<tr><td>Начинать с <code>ping</code></td><td>ICMP часто закрыт; ответ или его отсутствие ничего не доказывают</td></tr>
+<tr><td>Сразу лезть в логи приложения</td><td>при 502 и при ошибке соединения запрос до него не дошёл</td></tr>
+<tr><td>Ставить <code>-k</code> и забывать</td><td>маскирует проблему доверия и переезжает в код</td></tr>
+<tr><td>Проверять по адресу вместо имени</td><td>теряются <code>Host</code> и SNI — картина меняется</td></tr>
+<tr><td>Делать выводы по одному запросу</td><td>за именем может быть несколько экземпляров</td></tr>
+</table></div>
+`,
+quiz:[
+ {q:"Почему разбор идёт снизу вверх по слоям?",
+  opts:["Так быстрее печатать","Каждый следующий слой имеет смысл проверять, только когда предыдущий пройден","Так принято","Иначе не работает"],
+  a:1, why:"Проверять сертификат, когда имя не разрешается, — потерянное время."},
+ {q:"С <code>-k</code> запрос проходит, без него нет. Вывод?",
+  opts:["Сеть сломана","Дело в доверии к сертификату, а не в сети","Сервер лежит","Неверный путь"],
+  a:1, why:"Это способ подтвердить гипотезу, а не решение: в коде и конвейере ключу не место."},
+ {q:"В браузере работает, а в curl нет. Что смотреть?",
+  opts:["CORS","Заголовки: кука, источник, тип содержимого","Сертификат","DNS"],
+  a:1, why:"Обратная ситуация — работает в curl, но не в браузере — это как раз CORS."},
+ {q:"Почему не стоит начинать разбор с <code>ping</code>?",
+  opts:["Он медленный","ICMP часто закрыт: и ответ, и его отсутствие ничего не доказывают","Нужны права","Он устарел"],
+  a:1, why:"Проверять надо порт службы, а не отвечает ли узел на ICMP."},
+ {q:"Ответ пришёл от nginx, а приложение работает под другим сервером. Что это значит?",
+  opts:["Ошибка настройки nginx","До приложения запрос не дошёл — ответ сформировал промежуточный узел","Приложение упало","Кеш"],
+  a:1, why:"Поэтому при 502 логи приложения могут быть пустыми."},
+ {q:"Что обязательно указать в сообщении о проблеме?",
+  opts:["Время и настроение","Слой, на котором остановилось, и вывод curl -v без секретов","Только текст ошибки","Имя сервиса"],
+  a:1, why:"Это адресует задачу нужным людям с первого раза и экономит час переписки."}
+],
+labs:[
+ {id:"12a", title:"Разобрать вслепую",
+  brief:"<p>Итоговое задание. Сервис <code>shop.example.com</code> не работает — больше ничего не известно.</p><p>Пройдите процедуру по слоям: имя, порт, сертификат, обмен, кто ответил. Найдите слой, на котором всё останавливается, и зафиксируйте вывод командой <code>verdict</code>.</p><p>Подсказка о самой поломке здесь намеренно отсутствует: задание в том, чтобы дойти до неё порядком, а не догадкой.</p>",
+  hint:"dig → nc → curl -v. Смотрите, на каком шаге вывод обрывается.",
+  setup: () => newScenario({
+    dns: {"shop.example.com": [{type:"A", value:"203.0.113.50"}]},
+    nodes: {"203.0.113.50": {ports: {443: {server:"shop", tls:true, cert:"c"}}, drop: [443]}},
+    certs: {c: {cn:"shop.example.com", san:["shop.example.com"], notAfter: 999999}},
+    servers: {shop: {routes: [{path:"/", body:"магазин"}]}}
+  }),
+  checks:[
+   {label:"Имя проверено — оно разрешается", test:st=>used(st, "dig") || logHas(st, /Trying 203\.0\.113\.50/)},
+   {label:"Порт проверен", test:st=>used(st, "nc") || ran(st,/curl/)},
+   {label:"Видно, что соединение не устанавливается", test:st=>logHas(st, /timed out/)},
+   {label:"Дальше проверять нечего — до сертификата не дошло", test:st=>
+     logHas(st, /timed out/) && !logHas(st, /SSL connection using/)},
+   {label:"Вывод записан как <code>tcp</code>", test:st=>verdict(st) === "tcp"}
+  ]},
+ {id:"12b", title:"Две поломки подряд",
+  brief:"<p>Сервис <code>api.example.com</code> не работает, и причин здесь <b>две</b>: одна прячется за другой.</p><ul><li>найдите первую, определите слой;</li><li>обойдите её — в вашем распоряжении <code>/etc/hosts</code> и ключ <code>--resolve</code>;</li><li>найдите вторую, которая обнаружится после этого;</li><li>зафиксируйте вывод по <b>второй</b>, более глубокой причине.</li></ul><p>Правильный адрес сервиса — <code>203.0.113.60</code>.</p>",
+  hint:"Сначала имя ведёт не туда. Когда адрес исправлен, всплывёт следующий слой.",
+  setup: () => newScenario({
+    dns: {"api.example.com": [{type:"A", value:"203.0.113.99"}]},
+    nodes: {
+      "203.0.113.99": {down: true, ports: {}},
+      "203.0.113.60": {ports: {443: {server:"api", tls:true, cert:"c"}}}
+    },
+    certs: {c: {cn:"legacy.example.com", san:["legacy.example.com"], notAfter: 999999}},
+    servers: {api: {routes: [{path:"/health", body:"ok"}]}}
+  }),
+  checks:[
+   {label:"Первая причина найдена — имя ведёт в никуда", test:st=>logHas(st, /timed out|No route/)},
+   {label:"Обход применён", test:st=>ran(st,/--resolve[^|]*203\.0\.113\.60/) || hostsHas(st, "api.example.com", "203.0.113.60")},
+   {label:"Вторая причина обнаружилась", test:st=>logHas(st, /subject name matches/)},
+   {label:"Видно чужое имя в сертификате", test:st=>logHas(st, /legacy/) || used(st, "openssl")},
+   {label:"Вывод записан как <code>tls</code>", test:st=>verdict(st) === "tls"}
+  ]}
+],
+iv:[
+ {q:"Как вы локализуете сетевую проблему?",
+  probe:"Итоговый вопрос. Ждут процедуру, в которой каждый шаг отсекает половину причин.",
+  a:"Я иду по слоям снизу вверх, потому что они проходятся строго по порядку и каждый шаг отсекает целый класс причин. Имя: разрешается ли оно и в тот ли адрес — <code>dig</code>, плюс обязательно <code>/etc/hosts</code>, потому что забытая локальная запись объясняет половину случаев «у меня работает». Порт: <code>nc</code> на нужный порт, и здесь я обращаю внимание на скорость ответа — мгновенный отказ означает, что служба не слушает, долгое ожидание означает, что пакеты не доходят. Сертификат, если это https: срок, имя, издатель; ключ <code>-k</code> использую как проверку гипотезы — прошло с ним, значит дело в доверии. Дальше уже обмен: код ответа и заголовок <code>Server</code>, который сразу говорит, ответило приложение или промежуточный узел. И отдельная развилка для веба: если curl работает, а страница нет, это CORS, и никакой сетевой проблемы там нет. В задачу я пишу слой, код, кто ответил и вывод <code>curl -v</code> без токенов — так она попадает к нужным людям с первого раза.",
+  more:["Почему не начинать с ping?","Что писать в сообщении о проблеме?"]}
+]
+}
+
+];
+
+/* ============================================================
+   Приложение
+   ============================================================ */
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const n = document.createElement(t); if(c) n.className = c; if(h !== undefined) n.innerHTML = h; return n; };
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const KEY = "net.v1";
+const Q = String.fromCharCode(34);   /* кавычка для сборки разметки */
+
+/* ── прогресс ─────────────────────────────────────────── */
+let P = {mod:0, quiz:{}, labs:{}};
+try{ const s = localStorage.getItem(KEY); if(s) P = Object.assign(P, JSON.parse(s)); }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){} };
+
+/* ── состояние: сеть и журнал команд ──────────────────── */
+const ST = {N: null, log: [], lab: null};
+
+const SANDBOX = () => newScenario({
+  origin: "https://app.example.com",
+  dns: {
+    "api.example.com": [{type:"A", value:"203.0.113.10", ttl:300}],
+    "www.example.com": [{type:"CNAME", value:"api.example.com"}],
+    "app.example.com": [{type:"A", value:"203.0.113.20"}]
+  },
+  nodes: {
+    "203.0.113.10": {ports: {80: {server:"api"}, 443: {server:"api", tls:true, cert:"c1"}}},
+    "203.0.113.20": {ports: {443: {server:"web", tls:true, cert:"c2"}}}
+  },
+  certs: {
+    c1: {cn:"api.example.com", san:["api.example.com","www.example.com"], notAfter: 999999},
+    c2: {cn:"app.example.com", san:["app.example.com"], notAfter: 999999}
+  },
+  servers: {
+    api: {routes: [
+      {path:"/health", body:"ok"},
+      {path:"/orders", json:[{id:1, item:"кружка"}],
+       headers:{"access-control-allow-origin":"https://app.example.com"}},
+      {path:"/private", auth:true, token:"good", json:{secret:"тайна"}},
+      {path:"/old", status:301, location:"/health"},
+      {path:"/cached", body:"данные", etag:'"v1"', cache:"max-age=60"}
+    ]},
+    web: {routes: [{path:"/", body:"страница приложения"}]}
+  }
+});
+
+function loadScenario(lab){
+  ST.lab = lab || null;
+  ST.log.length = 0;
+  ST.N = lab ? lab.setup() : SANDBOX();
+  outBox.innerHTML = "";
+  openFile = null;
+  print(lab ? "сценарий задания " + lab.id + " загружен"
+            : "учебная сеть: api.example.com и app.example.com — карта справа", "h");
+  refreshRail();
+  fillPicker();
+  scoreLabs();
+}
+
+/* ── детерминированное перемешивание вариантов ────────── */
+function fnv(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function shuffled(q){
+  const seed = fnv(q.q);
+  const idx = q.opts.map((_,i)=>i);
+  let s = seed || 1;
+  for(let i = idx.length - 1; i > 0; i--){
+    s = (Math.imul(s, 1103515245) + 12345) >>> 0;
+    const j = (s >>> 15) % (i + 1);
+    const t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+  }
+  return idx;
+}
+
+/* ── шапка и навигация ────────────────────────────────── */
+const nav = $("#nav");
+MODULES.forEach((m, i) => {
+  const b = el("button", "", '<span class="num">' + m.n + '</span><span>' + m.title + '</span><span class="dot"></span>');
+  b.type = "button";
+  b.addEventListener("click", () => go(i));
+  nav.appendChild(b);
+});
+
+function modDone(m){
+  return m.quiz.every((_, i) => (P.quiz[m.id + ":" + i] || {}).ok) && m.labs.every(x => P.labs[x.id]);
+}
+function meter(){
+  let done = 0, all = 0;
+  MODULES.forEach(m => {
+    m.quiz.forEach((_, i) => { all++; if((P.quiz[m.id + ":" + i] || {}).ok) done++; });
+    m.labs.forEach(x => { all++; if(P.labs[x.id]) done++; });
+  });
+  $("#mtxt").textContent = done + " / " + all;
+  $("#mbar").style.width = (all ? Math.round(done / all * 100) : 0) + "%";
+  [].forEach.call(nav.children, (b, i) => b.classList.toggle("done", modDone(MODULES[i])));
+}
+
+let cur = 0, tab = "theory";
+function go(i){
+  cur = i; P.mod = i; save();
+  const m = MODULES[i];
+  [].forEach.call(nav.children, (b, k) => b.setAttribute("aria-current", k === i ? "true" : "false"));
+  $("#msub").textContent = "Раздел " + m.n + " · " + m.sub;
+  $("#mttl").textContent = m.title;
+  $("#mlede").textContent = m.lede;
+  $("#cq").textContent = m.quiz.length;
+  $("#cl").textContent = m.labs.length;
+  $("#ci").textContent = (m.iv || []).length;
+  renderTheory(m); renderQuiz(m); renderLabs(m); renderIv(m); renderChips(m);
+  meter();
+  const active = nav.children[i];
+  if(active && active.scrollIntoView) active.scrollIntoView({block:"nearest", inline:"nearest"});
+  window.scrollTo({top:0, behavior:"auto"});
+}
+
+$("#tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if(!b) return;
+  tab = b.dataset.tab;
+  [].forEach.call($("#tabs").children, x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+  ["theory","quiz","labs","iv"].forEach(t => $("#pane-" + t).hidden = (t !== tab));
+});
+
+function renderTheory(m){ $("#pane-theory").innerHTML = m.theory; }
+
+/* ── вопросы ──────────────────────────────────────────── */
+function renderQuiz(m){
+  const pane = $("#pane-quiz"); pane.innerHTML = "";
+  const sum = el("div", "qsum");
+  pane.appendChild(sum);
+  m.quiz.forEach((q, qi) => {
+    const key = m.id + ":" + qi;
+    const order = shuffled(q);
+    const card = el("div", "qc");
+    card.appendChild(el("div", "qq", '<span class="qn">' + (qi + 1) + '</span><span class="qt">' + q.q + '</span>'));
+    const opts = el("div", "qo");
+    card.appendChild(opts);
+    const why = el("div", "qw", '<span class="lbl">Почему</span>' + q.why);
+    why.hidden = true;
+    card.appendChild(why);
+    const btns = [];
+    order.forEach((orig, pos) => {
+      const b = el("button", "", '<span class="ltr">' + "ABCD"[pos] + '</span><span>' + q.opts[orig] + '</span>');
+      b.type = "button"; b.dataset.orig = orig;
+      b.addEventListener("click", () => answer(orig));
+      opts.appendChild(b); btns.push(b);
+    });
+    function paint(chosen){
+      btns.forEach(b => {
+        const o = +b.dataset.orig;
+        b.disabled = true;
+        b.classList.toggle("good", o === q.a);
+        b.classList.toggle("bad", o === chosen && o !== q.a);
+      });
+      why.hidden = false;
+      card.classList.add(chosen === q.a ? "right" : "wrong");
+    }
+    function answer(chosen){
+      if(P.quiz[key]) return;
+      P.quiz[key] = {ok: chosen === q.a, pick: chosen};
+      save(); paint(chosen); tally(); meter();
+    }
+    if(P.quiz[key]) paint(P.quiz[key].pick);
+    pane.appendChild(card);
+  });
+  function tally(){
+    let done = 0, ok = 0;
+    m.quiz.forEach((_, i) => { const r = P.quiz[m.id + ":" + i]; if(r){ done++; if(r.ok) ok++; } });
+    sum.innerHTML = "отвечено <b>" + done + "</b> из <b>" + m.quiz.length + "</b> · верно <b>" + ok + "</b>";
+  }
+  tally();
+}
+
+/* ── задания ──────────────────────────────────────────── */
+const labNodes = [];
+function renderLabs(m){
+  const pane = $("#pane-labs"); pane.innerHTML = ""; labNodes.length = 0;
+  m.labs.forEach(lab => {
+    const card = el("div", "lab");
+    const head = el("div", "labh",
+      '<span class="id">' + lab.id + '</span><span class="nm">' + lab.title + '</span><span class="st"></span>');
+    const body = el("div", "labb", lab.brief);
+    const list = el("ul", "chk");
+    lab.checks.forEach(c => list.appendChild(el("li", "", '<span class="bx">✓</span><span>' + c.label + '</span>')));
+    body.appendChild(list);
+
+    const act = el("div", "labact");
+    const load = el("button", "btn pri", "Загрузить сценарий"); load.type = "button";
+    load.addEventListener("click", () => {
+      loadScenario(lab);
+      showTool("term");
+      $("#cmd").focus();
+      document.querySelector(".dock").scrollIntoView({block:"nearest"});
+    });
+    const hb = el("button", "btn", "Подсказка"); hb.type = "button";
+    const hint = el("div", "hintbox", lab.hint); hint.hidden = true;
+    hb.addEventListener("click", () => { hint.hidden = !hint.hidden; });
+    act.appendChild(load); act.appendChild(hb);
+
+    const done = el("div", "lab-done", '<span>✓</span><span>задание выполнено</span>');
+    done.hidden = true;
+    card.appendChild(head); card.appendChild(body); card.appendChild(act); card.appendChild(hint); card.appendChild(done);
+    pane.appendChild(card);
+    labNodes.push({lab, card, head, list, done});
+  });
+  scoreLabs();
+}
+
+function evalCheck(c){ try{ return !!c.test(ST); }catch(e){ return false; } }
+
+function scoreLabs(){
+  let changed = false;
+  MODULES.forEach(m => m.labs.forEach(lab => {
+    if(P.labs[lab.id]){ lab.__hits = lab.checks.map(() => true); return; }
+    /* проверки смотрят на репозиторий, поэтому считаем только для загруженного сценария */
+    const hits = (ST.lab && ST.lab.id === lab.id) ? lab.checks.map(evalCheck) : lab.checks.map(() => false);
+    if(hits.length && hits.every(Boolean)){ P.labs[lab.id] = true; changed = true; }
+    lab.__hits = hits;
+  }));
+  if(changed) save();
+  labNodes.forEach(n => {
+    const hits = n.lab.__hits || [];
+    const got = hits.filter(Boolean).length;
+    [].forEach.call(n.list.children, (li, i) => li.classList.toggle("hit", !!hits[i]));
+    const active = ST.lab && ST.lab.id === n.lab.id;
+    n.head.querySelector(".st").textContent = P.labs[n.lab.id] || active
+      ? got + " / " + n.lab.checks.length : "сценарий не загружен";
+    const ok = got === n.lab.checks.length;
+    n.card.classList.toggle("done", ok);
+    n.done.hidden = !ok;
+  });
+  meter();
+}
+
+/* ── собеседование ────────────────────────────────────── */
+function renderIv(m){
+  const pane = $("#pane-iv"); pane.innerHTML = "";
+  (m.iv || []).forEach((c, i) => {
+    const card = el("div", "ivc");
+    const q = el("div", "ivq",
+      '<span class="qn">' + (i + 1) + '</span><span class="qt">' + c.q + '</span><span class="tog">показать</span>');
+    const body = el("div", "ivb");
+    body.appendChild(el("div", "ivp", "<b>Что проверяют</b>" + c.probe));
+    body.appendChild(el("div", "iva", c.a));
+    if(c.more && c.more.length)
+      body.appendChild(el("div", "ivm", "<b>Уточняющие вопросы, которые последуют</b><ul>" +
+        c.more.map(x => "<li>" + x + "</li>").join("") + "</ul>"));
+    body.hidden = true;
+    q.addEventListener("click", () => {
+      body.hidden = !body.hidden;
+      q.querySelector(".tog").textContent = body.hidden ? "показать" : "скрыть";
+    });
+    card.appendChild(q); card.appendChild(body);
+    pane.appendChild(card);
+  });
+}
+
+/* ── карта сети ───────────────────────────────────────── */
+function refreshRail(){
+  const N = ST.N;
+  $("#rctx").textContent = Object.keys(N.dns).length + " имён";
+  $("#prompt").textContent = "dev@laptop $";
+
+  const box = $("#map"); box.innerHTML = "";
+  box.appendChild(el("div", "hd2", "<span>Имена</span>"));
+  const names = Object.keys(N.dns).sort();
+  if(!names.length) box.appendChild(el("div", "rempty", "записей нет"));
+  for(const n of names){
+    const rr = N.dns[n];
+    for(const r of rr)
+      box.appendChild(el("div", "nrow",
+        "<span class=" + Q + "nm" + Q + ">" + esc(n) + "</span>" +
+        "<span class=" + Q + "arrow" + Q + ">" + r.type + "</span>" +
+        "<span class=" + Q + "ip" + Q + ">" + esc(r.value) + "</span>"));
+  }
+  const local = Object.keys(N.hostsFile || {});
+  if(local.length){
+    box.appendChild(el("div", "hd2", "<span>/etc/hosts</span>"));
+    for(const n of local)
+      box.appendChild(el("div", "nrow",
+        "<span class=" + Q + "nm" + Q + ">" + esc(n) + "</span>" +
+        "<span class=" + Q + "arrow" + Q + ">→</span>" +
+        "<span class=" + Q + "ip" + Q + ">" + esc(N.hostsFile[n]) + "</span>"));
+  }
+
+  box.appendChild(el("div", "hd2", "<span>Узлы</span>"));
+  const ips = Object.keys(N.nodes).sort();
+  if(!ips.length) box.appendChild(el("div", "rempty", "узлов нет"));
+  for(const ip of ips){
+    const node = N.nodes[ip];
+    box.appendChild(el("div", "nrow",
+      "<span class=" + Q + "ip" + Q + ">" + esc(ip) + "</span>" +
+      (node.down ? "<span class=" + Q + "tag shut" + Q + ">не отвечает</span>" : "")));
+    const ports = Object.keys(node.ports || {});
+    if(!ports.length && !node.down)
+      box.appendChild(el("div", "nrow kid", "<span class=" + Q + "tag shut" + Q + ">портов нет</span>"));
+    for(const p of ports){
+      const dropped = (node.drop || []).indexOf(+p) >= 0;
+      const l = node.ports[p];
+      box.appendChild(el("div", "nrow kid",
+        "<span class=" + Q + "nm" + Q + ">:" + p + "</span>" +
+        "<span class=" + Q + "arrow" + Q + ">" + esc(l.server || "?") + "</span>" +
+        (l.tls ? "<span class=" + Q + "tag" + Q + ">tls</span>" : "") +
+        (dropped ? "<span class=" + Q + "tag drop" + Q + ">пакеты теряются</span>"
+                 : node.down ? "" : "<span class=" + Q + "tag open" + Q + ">открыт</span>")));
+    }
+  }
+
+  const certs = Object.keys(N.certs || {});
+  if(certs.length){
+    box.appendChild(el("div", "hd2", "<span>Сертификаты</span>"));
+    for(const c of certs){
+      const x = N.certs[c];
+      const bad = x.selfSigned ? "самоподписанный" : (x.notAfter !== undefined && x.notAfter < N.now) ? "истёк" : "";
+      box.appendChild(el("div", "nrow",
+        "<span class=" + Q + "nm" + Q + ">" + esc([].concat(x.san || x.cn || c).join(", ")) + "</span>" +
+        (bad ? "<span class=" + Q + "tag shut" + Q + ">" + bad + "</span>"
+             : "<span class=" + Q + "tag open" + Q + ">действителен</span>")));
+    }
+  }
+
+  const ex = $("#extra"); ex.innerHTML = "";
+  ex.appendChild(el("div", "hd2", "<span>Состояние</span>"));
+  ex.appendChild(el("div", "vbox",
+    "источник страницы: <b>" + esc(N.origin) + "</b><br>" +
+    "прокси: <b>" + (N.proxyEnv ? esc(N.proxyEnv) : "нет") + "</b><br>" +
+    "вывод: <b>" + (N.verdict ? esc(N.verdict) : "не записан") + "</b>"));
+}
+
+/* ── терминал ─────────────────────────────────────────── */
+const outBox = $("#out"), cmdBox = $("#cmd");
+let hist = [], histPos = -1, openFile = null;
+
+function print(text, cls){
+  const n = el("div", "l" + (cls ? " " + cls : ""), esc(text));
+  outBox.appendChild(n);
+  outBox.scrollTop = outBox.scrollHeight;
+}
+function printLine(text){
+  let cls = "";
+  if(/^\*/.test(text)) cls = "star";
+  else if(/^>/.test(text)) cls = "req";
+  else if(/^</.test(text)) cls = "res";
+  else if(/(curl: \(|ЗАБЛОКИРОВАНО|refused|timed out|NXDOMAIN|packet loss|problem|error:)/.test(text)) cls = "bad2";
+  else if(/(succeeded|Verify return code: 0|Вывод записан|правила CORS не применяются)/.test(text)) cls = "ok2";
+  else if(/(Обратите внимание|Ответов нет|пока не на чем)/.test(text)) cls = "warn2";
+  print(text, cls);
+}
+function status(t, kind){
+  const n = $("#dst");
+  n.textContent = t;
+  n.className = "st" + (kind ? " " + kind : "");
+}
+
+function exec(line){
+  const N = ST.N;
+  outBox.appendChild(el("div", "l cmd", '<span class="p">' + esc($("#prompt").textContent) + '</span> ' + esc(line)));
+  const r = runNet(N, line);
+  ST.log.push({cmd: line, out: (r.out || []).concat(r.err2 ? [r.err2] : []), err: r.err || null});
+  if(ST.log.length > 400) ST.log.splice(0, ST.log.length - 400);
+
+  if(r.clear){ outBox.innerHTML = ""; status(""); return; }
+  if(r.err){
+    print(r.err, "e");
+    if(r.hint) print(r.hint, "h");
+    status("ошибка", "err");
+  } else {
+    if(r.err2) r.out = (r.out || []).concat([""]);
+    (r.out || []).forEach(printLine);
+    if(!(r.out || []).length && !r.quiet) print("", "none");
+    if(r.err2) print(r.err2, "h");
+    status(r.warn ? "внимание" : "выполнено", r.warn ? "err" : "");
+  }
+  outBox.scrollTop = outBox.scrollHeight;
+  refreshRail();
+  if(openFile) syncEditor();
+  scoreLabs();
+}
+
+cmdBox.addEventListener("keydown", e => {
+  if(e.key === "Enter"){
+    const line = cmdBox.value.trim();
+    if(!line) return;
+    hist.unshift(line); histPos = -1;
+    cmdBox.value = "";
+    exec(line);
+    return;
+  }
+  if(e.key === "ArrowUp"){ e.preventDefault(); if(histPos < hist.length - 1){ histPos++; cmdBox.value = hist[histPos]; } return; }
+  if(e.key === "ArrowDown"){ e.preventDefault(); if(histPos > 0){ histPos--; cmdBox.value = hist[histPos]; } else { histPos = -1; cmdBox.value = ""; } return; }
+  if(e.key === "Tab"){ e.preventDefault(); complete(); }
+});
+
+const SUBS = ["curl","dig","ping","nc","openssl","browser","verdict","cat","env","clear","help"];
+const LAYERS_L = ["dns","tcp","tls","http","proxy","cors","timeout","none"];
+function complete(){
+  const v = cmdBox.value;
+  const parts = v.split(/\s+/);
+  const last = parts[parts.length - 1];
+  let pool = [];
+  if(parts.length === 1) pool = SUBS;
+  else if(parts[0] === "verdict") pool = LAYERS_L;
+  else if(parts[0] === "cat") pool = Object.keys(ST.N.files || {});
+  else pool = Object.keys(ST.N.dns || {}).concat(
+    Object.keys(ST.N.dns || {}).map(n => "https://" + n + "/"),
+    Object.keys(ST.N.nodes || {}));
+  const hit = pool.filter(x => x.indexOf(last) === 0);
+  if(hit.length === 1){ parts[parts.length - 1] = hit[0]; cmdBox.value = parts.join(" ") + " "; }
+  else if(hit.length > 1){ print(hit.join("  "), "h"); }
+}
+
+$("#clear").addEventListener("click", () => { outBox.innerHTML = ""; status(""); });
+$("#reset").addEventListener("click", () => { loadScenario(ST.lab); status("сценарий перезагружен"); });
+
+/* ── редактор файла ───────────────────────────────────── */
+function fillPicker(){
+  const sel = $("#fpick"), names = Object.keys(ST.N.files || {}).sort();
+  sel.innerHTML = "";
+  if(!names.length){ sel.appendChild(el("option", "", "— файлов нет")); sel.disabled = true; return; }
+  sel.disabled = false;
+  names.forEach(n => { const o = el("option", "", esc(n)); o.value = n; if(n === openFile) o.selected = true; sel.appendChild(o); });
+}
+function openInEditor(p){
+  openFile = p;
+  $("#fname").textContent = ST.N.files[p] === undefined ? "новый файл" : "правится вручную";
+  $("#ftext").value = ST.N.files[p] === undefined ? "" : ST.N.files[p];
+  fillPicker();
+  showTool("file");
+  refreshRail();
+}
+$("#fpick").addEventListener("change", e => openInEditor(e.target.value));
+function syncEditor(){ fillPicker(); }
+$("#fsave").addEventListener("click", () => {
+  if(openFile === null){ status("файл не выбран", "err"); return; }
+  ST.N.files[openFile] = $("#ftext").value;
+  syncHosts(ST.N);
+  status("сохранён " + openFile);
+  refreshRail();
+  scoreLabs();
+});
+
+/* ── вкладки нижней панели ────────────────────────────── */
+function showTool(which){
+  ["term","file"].forEach(t => $("#t-" + t).hidden = (t !== which));
+  [].forEach.call($("#dtabs").children, b => b.setAttribute("aria-selected", b.dataset.d === which ? "true" : "false"));
+}
+$("#dtabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-d]"); if(!b) return;
+  showTool(b.dataset.d);
+  if(b.dataset.d === "term") cmdBox.focus();
+  if(b.dataset.d === "file"){
+    fillPicker();
+    if(openFile === null || ST.N.files[openFile] === undefined){
+      const first = Object.keys(ST.N.files || {}).sort()[0];
+      if(first) openInEditor(first);
+    }
+  }
+});
+
+/* ── примеры под каждый раздел ────────────────────────── */
+const CHIPS = {
+  path: ["curl -v https://api.example.com/health", "dig api.example.com", "nc -zv api.example.com 443", "verdict"],
+  dns: ["dig api.example.com", "dig www.example.com", "cat /etc/hosts",
+        "curl --resolve api.example.com:443:203.0.113.10 https://api.example.com/health"],
+  tcp: ["nc -zv api.example.com 443", "nc -zv api.example.com 8080", "ping api.example.com",
+        "curl --connect-timeout 2 https://api.example.com/health"],
+  tls: ["curl -v https://api.example.com/health", "openssl s_client -connect api.example.com:443",
+        "curl -k https://api.example.com/health"],
+  http: ["curl -I https://api.example.com/health", "curl -i https://api.example.com/private",
+         "curl -I -X DELETE https://api.example.com/health", "curl -I https://api.example.com/nope"],
+  headers: ['curl -v -H "Authorization: Bearer good" https://api.example.com/private',
+            "curl -v https://api.example.com/health", "curl -I https://api.example.com/orders"],
+  redirect: ["curl -I https://api.example.com/old", "curl -L https://api.example.com/old",
+             "curl -I https://api.example.com/cached"],
+  proxy: ["env", "curl -v https://api.example.com/health", "curl -I https://api.example.com/health"],
+  cors: ["curl https://api.example.com/orders", "browser https://api.example.com/orders",
+         "browser https://app.example.com/", 'browser -H "X-Token: 1" https://api.example.com/orders'],
+  curl: ["curl -v https://api.example.com/health", 'curl -w "%{time_total}" https://api.example.com/health',
+         "curl -I https://api.example.com/health", "curl -L https://api.example.com/old"],
+  flaky: ["curl --max-time 2 https://api.example.com/health", "env", "cat /etc/hosts",
+          "openssl s_client -connect api.example.com:443"],
+  debug: ["dig api.example.com", "nc -zv api.example.com 443", "curl -v https://api.example.com/health",
+          "browser https://api.example.com/orders", "verdict"]
+};
+function renderChips(m){
+  const box = $("#chips"); box.innerHTML = "";
+  (CHIPS[m.id] || []).forEach(c => {
+    const b = el("button", "", esc(c));
+    b.type = "button"; b.title = "подставить в терминал";
+    b.addEventListener("click", () => { cmdBox.value = c; showTool("term"); cmdBox.focus(); });
+    box.appendChild(b);
+  });
+}
+
+/* ── тема и сброс ─────────────────────────────────────── */
+$("#theme").addEventListener("click", () => {
+  const r = document.documentElement;
+  const now = r.getAttribute("data-theme");
+  const dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.setAttribute("data-theme", dark ? "light" : "dark");
+  try{ localStorage.setItem(KEY + ".theme", dark ? "light" : "dark"); }catch(e){}
+});
+try{ const t = localStorage.getItem(KEY + ".theme"); if(t) document.documentElement.setAttribute("data-theme", t); }catch(e){}
+
+$("#wipe").addEventListener("click", () => {
+  P = {mod:0, quiz:{}, labs:{}};
+  MODULES.forEach(m => m.labs.forEach(l => { delete l.__hits; }));
+  save();
+  loadScenario(null);
+  go(cur);
+  status("прогресс сброшен");
+});
+
+/* ── высота нижней панели ─────────────────────────────── */
+function dockH(){
+  const d = document.querySelector(".dock");
+  if(d) document.documentElement.style.setProperty("--dockh", d.offsetHeight + "px");
+}
+if(window.ResizeObserver){ const ro = new ResizeObserver(dockH); ro.observe(document.querySelector(".dock")); }
+window.addEventListener("resize", dockH);
+dockH();
+
+/* ── старт ────────────────────────────────────────────── */
+loadScenario(null);
+go(Math.min(Math.max(P.mod | 0, 0), MODULES.length - 1));
+status("готов");
+})();
+</script>
+</body>
+</html>

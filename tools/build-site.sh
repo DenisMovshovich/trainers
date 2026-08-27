@@ -22,6 +22,7 @@ kafka|kafka|kafka-offline.html
 testing|testing|testing-offline.html
 csharp|csharp|csharp-offline.html
 git|git|git-offline.html
+k8s|k8s|k8s-offline.html
 dotnet|dotnet|dotnet-offline.html
 anatomy|anatomy|anatomy-offline.html
 "

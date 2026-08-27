@@ -1,0 +1,87 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">k<i>8</i>s</span>
+      <span class="tag">Оркестрация контейнеров</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 100</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Кластер</span><span class="n" id="rctx"></span></div>
+    <div class="rbox grow" id="objs"></div>
+    <div class="rbox" id="nodes"></div>
+    <p class="hint"><b>↑ ↓</b> — история команд, <b>Tab</b> — дополнение. Манифесты правятся во вкладке «Манифест», а <code>cat файл.yaml</code> покажет любой из них.</p>
+    <button class="btn" id="reset" type="button">Сбросить сценарий</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Терминал">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Терминал</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="term" aria-selected="true">Команды</button>
+        <button role="tab" data-d="file" aria-selected="false">Манифест</button>
+      </div>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn" id="clear" type="button">Очистить</button>
+    </div>
+
+    <div class="tool" id="t-term">
+      <div class="term">
+        <div class="tout" id="out"></div>
+        <div class="tin">
+          <span class="p" id="prompt">ns/default $</span>
+          <input id="cmd" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+            aria-label="Команда" placeholder="kubectl get pods">
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="tool fed" id="t-file" hidden>
+      <div class="fbar">
+        <label class="fl" for="fpick">Файл</label>
+        <select id="fpick" aria-label="Какой манифест открыть"></select>
+        <span class="sp"></span>
+        <span class="fname" id="fname">правится вручную</span>
+        <button class="btn pri" id="fsave" type="button">Сохранить</button>
+      </div>
+      <textarea id="ftext" spellcheck="false" aria-label="Содержимое манифеста"></textarea>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>Kubernetes</b> — интерактивный курс оркестрации: 12 разделов теории, 72 вопроса, 28 заданий со 117 автоматическими проверками и 15 разборов вопросов с собеседований. Команды выполняет встроенный кластер на JavaScript: разбор YAML, цикл согласования с контроллерами Deployment, ReplicaSet и Job, планировщик с учётом запросов, меток, ограничителей и допусков, kubelet с пробами и перезапусками, подбор конечных точек Service по меткам и плавные обновления с откатом.</p>
+  <p>Реализация учебная и намеренно упрощена: нет сети и политик, RBAC, автомасштабирования, StatefulSet, DaemonSet и Ingress, а реестр образов — небольшой фиксированный список. Поведение воспроизводит настоящий Kubernetes там, где на этом учатся: удалённый под возвращается, селектор обязан совпадать с метками шаблона, опечатка в селекторе Service оставляет его без конечных точек, неготовый под не получает трафика, сломанная выкатка замирает и не роняет старые поды, а под, которому не хватило ресурсов, объясняет причину в событиях. Прогресс хранится в браузере.</p>
+</footer>

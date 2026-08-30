@@ -15,6 +15,7 @@ OFF=../network-offline.html
   cat 40_content_a.js 41_content_b.js 42_content_c.js 43_content_d.js 44_content_e.js
   echo
   cat 50_app.js            # заканчивается </script>
+  cat ../../tools/ui/90_ui.js   # общий слой интерфейса
 } > "$OUT"
 
 {

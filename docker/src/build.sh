@@ -8,7 +8,7 @@ set -e
 cd "$(dirname "$0")"
 
 cat 10_head.html 20_body.html 30_engine.js 31_engine2.js 32_engine3.js \
-    33_engine4.js 40_viz.js 50_content_a.js 51_content_b.js 52_content_c.js 60_app.js \
+    33_engine4.js 40_viz.js 50_content_a.js 51_content_b.js 52_content_c.js 60_app.js ../../tools/ui/90_ui.js \
     > ../docker.html
 
 python3 - <<'PY'

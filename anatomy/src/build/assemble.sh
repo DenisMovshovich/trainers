@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 { cat 10_head.html 20_body.html; echo '<script>'; echo '"use strict";';
-  cat 30_model.js 40_notes.js 50_decode.js 60_views.js 70_app.js; } > ../../anatomy.html
+  cat 30_model.js 40_notes.js 50_decode.js 60_views.js 70_app.js ../../../tools/ui/90_ui.js; } > ../../anatomy.html
 python3 - <<'PY'
 src=open("../../anatomy.html",encoding="utf-8").read()
 i=src.index("</style>")+len("</style>")

@@ -8,7 +8,7 @@ set -e
 cd "$(dirname "$0")"
 
 cat 10_head.html 20_body.html 30_data_a.js 31_data_b.js 32_data_c.js 33_data_d.js \
-    34_data_e.js 35_data_f.js 36_data_g.js 37_data_iv.js 40_app.js 45_widgets.js 50_ui.js \
+    34_data_e.js 35_data_f.js 36_data_g.js 37_data_iv.js 40_app.js 45_widgets.js 50_ui.js ../../tools/ui/90_ui.js \
   > ../dotnet.html
 
 python3 - <<'PY'

@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 cat 10_head.html 20_body.html 30_server.js 40_client.js \
-    50_content_a.js 51_content_b.js 52_content_c.js 60_app.js > ../rest.html
+    50_content_a.js 51_content_b.js 52_content_c.js 60_app.js ../../tools/ui/90_ui.js > ../rest.html
 python3 - <<'PY'
 src=open("../rest.html",encoding="utf-8").read()
 i=src.index("</style>")+len("</style>")

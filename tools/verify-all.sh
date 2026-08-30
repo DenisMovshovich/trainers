@@ -30,7 +30,12 @@ for d in docker rest bash sql kafka testing network csharp git k8s cicd dotnet a
 done
 
 printf "\n\033[1m═══ сайт\033[0m\n"
-./tools/build-site.sh | sed 's/^/  /' || fail=1
+./tools/build-site.sh | sed 's/^/  /'
+[ "${PIPESTATUS[0]}" = 0 ] || fail=1
+
+printf "\n\033[1m═══ интерфейс\033[0m\n"
+node tools/ui/check-ui.mjs 2>&1 | sed 's/^/  /'
+[ "${PIPESTATUS[0]}" = 0 ] || fail=1
 
 printf "\n%s\n" "$([ $fail = 0 ] && echo 'ИТОГ: всё прошло' || echo 'ИТОГ: были ошибки — см. выше')"
 exit $fail

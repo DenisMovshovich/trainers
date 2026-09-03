@@ -13,7 +13,7 @@ try {
 const EXE = process.env.CHROMIUM_PATH || undefined;
 const rel = p => new URL(p, import.meta.url).href;
 
-const SLUGS = ["docker","rest","bash","sql","kafka","network","testing","git","k8s","cicd","csharp","dotnet","anatomy"];
+const SLUGS = ["docker","rest","bash","sql","kafka","network","ubuntu","testing","git","k8s","cicd","csharp","dotnet","anatomy"];
 const WIDE = [1540, 1000], NARROW = [390, 844];
 
 let b;

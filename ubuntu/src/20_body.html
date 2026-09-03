@@ -1,0 +1,88 @@
+<header class="top">
+  <div class="tbar">
+    <div class="brand">
+      <span class="mark">ubunt<i>u</i></span>
+      <span class="tag">Server</span>
+    </div>
+    <span class="tspace"></span>
+    <div class="meter" title="Пройдено вопросов и заданий">
+      <span id="mtxt">0 / 96</span>
+      <span class="bar"><i id="mbar"></i></span>
+    </div>
+    <button class="tbtn" id="theme" type="button">Тема</button>
+    <button class="tbtn" id="wipe" type="button">Сбросить прогресс</button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Разделы"></nav>
+</header>
+
+<div class="wrap">
+  <main class="col">
+    <div class="lede">
+      <p class="sub" id="msub"></p>
+      <h1 id="mttl"></h1>
+      <p id="mlede"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="theory" aria-selected="true">Теория</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Проверка<span class="cnt" id="cq"></span></button>
+      <button role="tab" data-tab="labs" aria-selected="false">Практика<span class="cnt" id="cl"></span></button>
+      <button role="tab" data-tab="iv" aria-selected="false">Собеседование<span class="cnt" id="ci"></span></button>
+    </div>
+    <section class="theory" id="pane-theory"></section>
+    <section class="quiz" id="pane-quiz" hidden></section>
+    <section class="labs" id="pane-labs" hidden></section>
+    <section class="ivs" id="pane-iv" hidden></section>
+  </main>
+
+  <aside class="rail">
+    <div class="rh"><span class="lbl">Машина</span><span class="n" id="rctx"></span></div>
+    <div class="rbox grow" id="rsvc"></div>
+    <div class="rbox" id="rports"></div>
+    <div class="rbox" id="rres"></div>
+    <p class="hint"><b>↑ ↓</b> — история команд, <b>Tab</b> — дополнение. Файлы правятся во вкладке «Файл» внизу.</p>
+    <button class="btn" id="reset" type="button">Сбросить сценарий</button>
+  </aside>
+</div>
+
+<section class="dock" aria-label="Терминал">
+  <div class="dockin">
+    <div class="dockbar">
+      <span class="ttl">Терминал</span>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" data-d="term" aria-selected="true">Команды</button>
+        <button role="tab" data-d="file" aria-selected="false">Файл</button>
+      </div>
+      <span class="sp"></span>
+      <span class="st" id="dst"></span>
+      <button class="btn" id="clear" type="button">Очистить</button>
+    </div>
+
+    <div class="tool" id="t-term">
+      <div class="term">
+        <div class="tout" id="out"></div>
+        <div class="tin">
+          <span class="p" id="prompt">root@web-01:~#</span>
+          <input id="cmd" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+            aria-label="Команда" placeholder="ls -l /etc">
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="tool fed" id="t-file" hidden>
+      <div class="fbar">
+        <label class="fl" for="fpick">Файл</label>
+        <select id="fpick" aria-label="Какой файл открыть"></select>
+        <span class="sp"></span>
+        <span class="fname" id="fname">файл не выбран</span>
+        <button class="btn pri" id="fsave" type="button">Сохранить</button>
+      </div>
+      <textarea id="ftext" spellcheck="false" aria-label="Содержимое файла"></textarea>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p><b>Ubuntu Server</b> — интерактивный курс администрирования: 12 разделов теории, 72 вопроса, 24 задания со 162 автоматическими проверками и 24 разбора вопросов с собеседований. Команды выполняет встроенная модель системы на JavaScript: файловая система с настоящими правами и особыми битами, учётные записи и группы, sudo с правилами из <code>/etc/sudoers.d</code>, systemd с unit-файлами и журналом, apt и dpkg с репозиторием и зависимостями, процессы и сигналы, разделы и <code>fstab</code>, netplan, ufw, sshd с проверкой прав на ключи и cron.</p>
+  <p>Модель учебная и намеренно упрощена: нет ядра и модулей, SELinux и AppArmor, контейнеров, LVM, RAID и настоящей сети между машинами; время идёт по шагам, а не по часам. Поведение воспроизводит настоящую Ubuntu там, где это важно для обучения: перенаправление выполняется до повышения прав, поэтому <code>sudo echo &gt; /etc/файл</code> отказывает; удаление зависит от прав на каталог, а не на файл; <code>systemctl start</code> не видит unit-файл до <code>daemon-reload</code>; занятый порт валит запуск службы; sshd отказывается от ключа со слишком открытыми правами; <code>ufw enable</code> без правила на 22-й порт отрезает доступ. Прогресс хранится в браузере.</p>
+</footer>

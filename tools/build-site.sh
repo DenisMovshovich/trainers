@@ -25,6 +25,7 @@ git|git|git-offline.html
 k8s|k8s|k8s-offline.html
 cicd|cicd|cicd-offline.html
 network|network|network-offline.html
+ubuntu|ubuntu|ubuntu-offline.html
 dotnet|dotnet|dotnet-offline.html
 anatomy|anatomy|anatomy-offline.html
 "
